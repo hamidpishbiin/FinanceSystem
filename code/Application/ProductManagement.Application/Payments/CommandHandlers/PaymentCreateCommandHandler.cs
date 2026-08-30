@@ -24,7 +24,7 @@ public class PaymentCreateCommandHandler : PaymentCommandHandler<CreatePaymentCo
             command.IdempotencyKey,
             (PaymentPurpose)command.Purpose,
             (PaymentChannel)command.Channel,
-            new Money(command.AmountRial),
+            new Money(command.AmountRial, Currency.Rial),
             command.SourceAccountId,
             command.DestinationAccountId,
             command.OriginServiceId,
