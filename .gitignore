@@ -89,3 +89,4 @@ _[Ss]cripts
 /src/Bama/Properties/PublishProfiles
 /src/Decafe.Server.RestAPI/dc-logs
 .tmp
+CLAUDE.local.md
