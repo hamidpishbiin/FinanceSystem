@@ -5,20 +5,20 @@ namespace ProductManagement.Domain.Payments;
 
 public record Money
 {
-	public decimal Amount { get; init; }
+	public decimal Value { get; init; }
 	public Currency Currency { get; init; }
 
-	public Money(decimal amount, Currency currency = Currency.Rial)
+	public Money(decimal value, Currency currency)
 	{
-		Guard<NegativeMoneyAmountException>.IsTrue(amount < 0);
+		Guard<NegativeMoneyAmountException>.IsTrue(value < 0);
         Guard<InvalidCurrencyException>.IsFalse(Enum.IsDefined(currency));
 
-        Amount = amount;
+        Value = value;
         Currency = currency;
     }
 
     public override string ToString()
     {
-        return $"{Amount} {Currency}";
+        return $"{Value} {Currency}";
     }
 }
