@@ -1,6 +1,6 @@
 namespace ProductManagement.Domain.BankPaymentDetails;
 
-public class BankPaymentDetails : EntityBase<long>, IAggregateRoot
+public class BankPaymentDetail : EntityBase<long>, IAggregateRoot
 {
 
     public IEventPublisher Publisher { get; set; }

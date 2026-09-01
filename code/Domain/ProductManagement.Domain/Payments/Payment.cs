@@ -1,3 +1,4 @@
+using ProductManagement.Domain.Accounts;
 using ProductManagement.Domain.Contract.Payments;
 using ProductManagement.Domain.Payments.Enums;
 using ProductManagement.Domain.Payments.Exceptions;
@@ -9,15 +10,15 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
 
     public IEventPublisher Publisher { get; set; }
 
-    public string IdempotencyKey { get; private set; } = string.Empty;
+    public string IdempotencyKey { get; private set; }
     public PaymentPurpose Purpose { get; private set; }
     public PaymentChannel Channel { get; private set; }
     public decimal AmountRial { get; private set; }
     public long SourceAccountId { get; private set; }
     public long DestinationAccountId { get; private set; }
-    public string OriginServiceId { get; private set; } = string.Empty;
-    public string ExternalReferenceId { get; private set; } = string.Empty;
-    public string ExternalTag { get; private set; } = string.Empty;
+    public string OriginServiceId { get; private set; }
+    public string ExternalReferenceId { get; private set; }
+    public string ExternalTag { get; private set; }
     public long? BankPaymentDetailId { get; private set; }
 
     private Payment()

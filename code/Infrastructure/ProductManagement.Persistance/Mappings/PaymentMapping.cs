@@ -1,3 +1,5 @@
+using ProductManagement.Domain.Accounts;
+using ProductManagement.Domain.BankPaymentDetails;
 using ProductManagement.Domain.Payments;
 
 namespace ProductManagement.Persistance.Mappings;
@@ -41,14 +43,10 @@ public class PaymentMapping() : EntityBaseMap<Payment, long>("Payments")
 
         builder
             .Property(p => p.SourceAccountId)
-            .IsRequired()
-            .HasMaxLength(50)
             .HasColumnName("SourceAccountId");
 
         builder
             .Property(p => p.DestinationAccountId)
-            .IsRequired()
-            .HasMaxLength(50)
             .HasColumnName("DestinationAccountId");
 
         builder
@@ -76,8 +74,28 @@ public class PaymentMapping() : EntityBaseMap<Payment, long>("Payments")
         builder
             .HasIndex(p => p.BankPaymentDetailId)
             .IsUnique()
-            .HasFilter("\"BankPaymentDetailId\" IS NOT NULL")
             .HasDatabaseName("UX_Payments_BankPaymentDetailId");
+
+        builder
+            .HasOne<BankPaymentDetail>()
+            .WithOne()
+            .HasForeignKey<Payment>(p => p.BankPaymentDetailId)
+            .OnDelete(DeleteBehavior.Restrict)
+            .HasConstraintName("FK_Payments_BankPaymentDetails_BankPaymentDetailId");
+
+        builder
+            .HasOne<Account>()
+            .WithMany()
+            .HasForeignKey(p => p.SourceAccountId)
+            .OnDelete(DeleteBehavior.Restrict)
+            .HasConstraintName("FK_Payments_Accounts_SourceAccountId");
+
+        builder
+            .HasOne<Account>()
+            .WithMany()
+            .HasForeignKey(p => p.DestinationAccountId)
+            .OnDelete(DeleteBehavior.Restrict)
+            .HasConstraintName("FK_Payments_Accounts_DestinationAccountId");
 
         builder.Ignore(p => p.Publisher);
     }
