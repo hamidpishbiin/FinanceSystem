@@ -38,7 +38,6 @@ public class PaymentMapping() : EntityBaseMap<Payment, long>("Payments")
 
         builder
             .Property(p => p.AmountRial)
-            .IsRequired()
             .HasColumnName("AmountRial");
 
         builder

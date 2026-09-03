@@ -1,6 +1,6 @@
 namespace ProductManagement.Domain.PaymentServiceProviders;
 
-public class PaymentServiceProvider : EntityBase<short>
+public class PaymentServiceProvider : EntityBase<Guid>
 {
     public PsPCode Code { get; set; }
     public string Name { get; set; }
@@ -11,5 +11,4 @@ public class PaymentServiceProvider : EntityBase<short>
     public string CredentialsRef { get; set; }
     public string BaseUrl { get; set; }
     public string CallbackUrl { get; set; }
-    public DateTimeOffset CreatedAtUtc { get; set; }
 }

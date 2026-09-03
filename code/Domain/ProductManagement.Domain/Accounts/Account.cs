@@ -8,5 +8,4 @@ public class Account : EntityBase<long>
     public decimal CachedBalanceRial { get; set; }
     public DateTimeOffset BalanceCalculatedAt { get; set; }
     public bool AllowNegativeBalance { get; set; }
-    public uint RowVersion { get; set; }
 }

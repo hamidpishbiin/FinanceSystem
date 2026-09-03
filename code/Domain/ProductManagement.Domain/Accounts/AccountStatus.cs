@@ -1,6 +1,6 @@
 namespace ProductManagement.Domain.Accounts;
 
-public enum AccountStatus
+public enum AccountStatus : byte
 {
     Active = 1,
     Frozen = 2,

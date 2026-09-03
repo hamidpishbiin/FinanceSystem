@@ -6,5 +6,4 @@ public class BankAccountDetail : EntityBase<long>
     public string Iban { get; set; }
     public string? MaskedPan { get; set; }
     public string? BankName { get; set; }
-    public string HolderName { get; set; }
 }
