@@ -25,7 +25,7 @@ namespace Shared.EF
             builder.Register(s =>
             {
                 var options = new DbContextOptionsBuilder<EFContext>()
-                    .UseSqlServer(connectionString);
+                    .UseNpgsql(connectionString);
                 options.AddEFLoggingOptions();
 
                 return new EFContext(options.Options, mappingAssembly);
@@ -34,7 +34,7 @@ namespace Shared.EF
             builder.Register(s =>
             {
                 var options = new DbContextOptionsBuilder<ReadOnlyContext>()
-                    .UseSqlServer(connectionString)
+                    .UseNpgsql(connectionString)
                     .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
                 
                 options.AddEFLoggingOptions();
