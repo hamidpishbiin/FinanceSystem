@@ -6,7 +6,7 @@
 
 
 
-This project is a Product Management platform built using:
+This project is a Finance System platform built using:
 
 
 

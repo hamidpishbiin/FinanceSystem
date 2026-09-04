@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\application\FinanceSystem.Application\FinanceSystem.Application.csproj" />
+    <ProjectReference Include="..\..\domain\FinanceSystem.Domain.Contract\FinanceSystem.Domain.Contract.csproj" />
+    <ProjectReference Include="..\..\domain\FinanceSystem.Domain.EventHandlers\FinanceSystem.Domain.EventHandlers.csproj" />
+    <ProjectReference Include="..\..\interface\FinanceSystem.Interface.Contracts\FinanceSystem.Interface.Contracts.csproj" />
+    <ProjectReference Include="..\..\interface\FinanceSystem.Interface.ReadModel\FinanceSystem.Interface.ReadModel.csproj" />
+    <ProjectReference Include="..\..\interface\FinanceSystem.Interface.WriteModel\FinanceSystem.Interface.WriteModel.csproj" />
+    <ProjectReference Include="..\..\shared\Shared.Bootstrap\Shared.Bootstrap.csproj" />
+    <ProjectReference Include="..\FinanceSystem.Persistance\FinanceSystem.Persistance.csproj" />
+    <ProjectReference Include="..\FinanceSystem.Security\FinanceSystem.Security.csproj" />
+    
+  </ItemGroup>
+
+</Project>

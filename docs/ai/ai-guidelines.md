@@ -126,7 +126,7 @@ RULE:
 
 Query services must be implemented inside:
 
-ProductManagement.Interface.ReadModel
+FinanceSystem.Interface.ReadModel
 
 
 
@@ -148,7 +148,7 @@ RULE:
 
 Write services must be implemented inside:
 
-ProductManagement.Interface.WriteModel
+FinanceSystem.Interface.WriteModel
 
 
 

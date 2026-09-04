@@ -122,7 +122,7 @@ All GET APIs must return DTOs.
 
 
 
-`ProductManagement.Interface.Contracts` contains:
+`FinanceSystem.Interface.Contracts` contains:
 
 
 
@@ -164,7 +164,7 @@ RULE:
 
 FacadeQuery implementations exist in:
 
-`ProductManagement.Interface.ReadModel`
+`FinanceSystem.Interface.ReadModel`
 
 
 
@@ -192,7 +192,7 @@ RULE:
 
 FacadeService implementations exist in:
 
-`ProductManagement.Interface.WriteModel`
+`FinanceSystem.Interface.WriteModel`
 
 
 

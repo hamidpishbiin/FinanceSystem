@@ -76,7 +76,7 @@ Implementations exist in:
 
 
 
-ProductManagement.Interface.ReadModel
+FinanceSystem.Interface.ReadModel
 
 
 
@@ -146,7 +146,7 @@ Implementations exist in:
 
 
 
-ProductManagement.Interface.WriteModel
+FinanceSystem.Interface.WriteModel
 
 
 

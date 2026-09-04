@@ -1,6 +1,5 @@
 ﻿using Autofac;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using Shared.Core;
 using System.Reflection;
 
