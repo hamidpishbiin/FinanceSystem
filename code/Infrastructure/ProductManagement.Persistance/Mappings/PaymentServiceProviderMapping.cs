@@ -17,9 +17,14 @@ public class PaymentServiceProviderMapping() : EntityBaseMap<PaymentServiceProvi
             .HasColumnName("Code");
 
         builder
+            .HasIndex(p => p.Code)
+            .IsUnique()
+            .HasDatabaseName("IX_PaymentServiceProviders_Code");
+
+        builder
             .Property(p => p.Name)
             .HasColumnName("Name")
-            .HasMaxLength(20);
+            .HasMaxLength(50);
 
         builder
             .Property(p => p.IsActive)
@@ -31,30 +36,25 @@ public class PaymentServiceProviderMapping() : EntityBaseMap<PaymentServiceProvi
 
         builder
             .Property(p => p.MerchantId)
-            .IsRequired()
             .HasColumnName("MerchantId")
-            .HasMaxLength(30);
+            .HasMaxLength(50);
 
         builder
             .Property(p => p.TerminalId)
-            .IsRequired()
             .HasColumnName("TerminalId")
-            .HasMaxLength(20);
+            .HasMaxLength(50);
 
         builder
             .Property(p => p.CredentialsRef)
-            .IsRequired()
             .HasColumnName("CredentialsRef")
-            .HasMaxLength(20);
+            .HasMaxLength(50);
 
         builder
             .Property(p => p.BaseUrl)
-            .IsRequired()
             .HasColumnName("BaseUrl");
 
         builder
             .Property(p => p.CallbackUrl)
-            .IsRequired()
             .HasColumnName("CallbackUrl");
     }
 }

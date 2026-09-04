@@ -4,7 +4,7 @@ public class BankPaymentDetail : EntityBase<long>, IAggregateRoot
 {
     public IEventPublisher Publisher { get; set; }
 
-    public short PspId { get; set; }
+    public Guid PspId { get; set; }
     public BankPaymentStatus Status { get; set; }
     public decimal RequestAmountRial { get; set; }
     public decimal RedirectedAmountRial { get; set; }
