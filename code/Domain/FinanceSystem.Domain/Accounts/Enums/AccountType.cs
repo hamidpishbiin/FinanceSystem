@@ -1,4 +1,4 @@
-namespace FinanceSystem.Domain.Accounts;
+namespace FinanceSystem.Domain.Accounts.Enums;
 
 public enum AccountType : byte
 {

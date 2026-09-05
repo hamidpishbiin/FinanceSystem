@@ -18,15 +18,11 @@ namespace FinanceSystem.Presentation
         IStringLocalizerService stringLocalizerService,
         ILoggerService logger)
     {
-        private readonly RequestDelegate _next = next;
-        private readonly IStringLocalizerService _stringLocalizerService = stringLocalizerService;
-        private readonly ILoggerService _logger = logger;
-
         public async Task InvokeAsync(HttpContext httpContext)
         {
             try
             {
-                await _next(httpContext);
+                await next(httpContext);
             }
             catch (BusinessException ex)
             {
@@ -45,19 +41,22 @@ namespace FinanceSystem.Presentation
 
             if (exception?.InnerException is BusinessException coreException)
             {
-                context.Response.StatusCode = (int)coreException.Code;
+                context.Response.StatusCode = (int)coreException.StatusCode;
                 return GenerateResponse(coreException.Code, GetExceptionMessage(coreException), context);
             }
+
             if (exception is BusinessException businessException)
             {
-                context.Response.StatusCode = (int)businessException.Code;
+                context.Response.StatusCode = (int)businessException.StatusCode;
                 return GenerateResponse(businessException.Code, GetExceptionMessage(businessException), context);
             }
-            _logger.Error(exception, exception.Message);
+
+            logger.Error(exception!, exception!.Message);
+
             return GenerateResponse((int)HttpStatusCode.InternalServerError, "InternalServerError", context);
         }
 
-        private Task GenerateResponse(int code, string message, HttpContext context)
+        private static Task GenerateResponse(int code, string message, HttpContext context)
         {
             return context.Response.WriteAsync(JsonResponse<ErrorDetails>.Failure(new ErrorDetails
             {
@@ -68,7 +67,7 @@ namespace FinanceSystem.Presentation
 
         private string GetExceptionMessage(BusinessException businessException)
         {
-            return string.Format(_stringLocalizerService.GetString($"_{businessException.Code}"));
+            return string.Format(stringLocalizerService.GetString($"_{businessException.Code}"));
         }
     }
 

@@ -1,4 +1,5 @@
 using FinanceSystem.Domain.Accounts;
+using FinanceSystem.Domain.Accounts.Enums;
 using FinanceSystem.Domain.Payments.Enums;
 
 namespace FinanceSystem.Domain.AccountTypeRules;

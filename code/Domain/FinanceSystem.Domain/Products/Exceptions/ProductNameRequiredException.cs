@@ -1,7 +1,6 @@
-
 namespace FinanceSystem.Domain.Products.Exceptions;
 
 public class ProductNameRequiredException : BusinessException
 {
-    public ProductNameRequiredException() : base(100) { }
+    protected override int DefaultCode => ProductExceptionCodes.ProductNameRequired;
 }

@@ -10,8 +10,8 @@ public record Money
 
 	public Money(decimal value, Currency currency)
 	{
-		Guard<NegativeMoneyAmountException>.IsTrue(value < 0);
-        Guard<InvalidCurrencyException>.IsFalse(Enum.IsDefined(currency));
+		Guard<InvalidMoneyAmountException>.IsTrue(value < 0);
+        Guard<InvalidMoneyCurrencyException>.IsFalse(Enum.IsDefined(currency));
 
         Value = value;
         Currency = currency;
