@@ -1,4 +1,6 @@
-namespace Shared.Core.Exceptions;
+using Shared.Core.Exceptions;
+
+namespace Shared.Domain.Exceptions;
 
 public class InvalidMoneyAmountException : BusinessException
 {

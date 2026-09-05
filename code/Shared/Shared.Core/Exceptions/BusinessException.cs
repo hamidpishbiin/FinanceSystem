@@ -8,7 +8,7 @@ namespace Shared.Core.Exceptions
 
         public int Code => _explicitCode ?? DefaultCode;
 
-        protected virtual int DefaultCode => BusinessExceptionCodes.Unspecified;
+        protected virtual int DefaultCode => 0;
 
         public HttpStatusCode StatusCode { get; }
         public string ExceptionMessage { get; }

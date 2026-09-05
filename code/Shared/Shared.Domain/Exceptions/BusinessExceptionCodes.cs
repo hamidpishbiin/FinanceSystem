@@ -1,4 +1,4 @@
-namespace Shared.Core.Exceptions;
+namespace Shared.Domain.Exceptions;
 
 public static class BusinessExceptionCodes
 {
