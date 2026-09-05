@@ -1,4 +1,5 @@
 using FinanceSystem.Domain.AccountEntries;
+using FinanceSystem.Domain.AccountEntries.Enums;
 using FinanceSystem.Domain.Accounts;
 using FinanceSystem.Domain.Payments;
 
@@ -37,7 +38,7 @@ public class AccountEntryMapping() : EntityBaseMap<AccountEntry, long>("AccountE
 
         builder
             .HasIndex(p => p.AccountId)
-            .IncludeProperties(p => p.AmountRial)
+            .IncludeProperties(p => new { p.AmountRial, p.Direction })
             .HasDatabaseName("IX_AccountEntries_AccountId");
 
         builder
@@ -51,5 +52,12 @@ public class AccountEntryMapping() : EntityBaseMap<AccountEntry, long>("AccountE
             .Property(p => p.AmountRial)
             .HasColumnName("AmountRial")
             .HasPrecision(18, 0);
+
+        builder
+            .Property(p => p.Direction)
+            .HasColumnName("Direction")
+            .HasConversion<byte>();
+
+        builder.Ignore(p => p.SignedAmountRial);
     }
 }
