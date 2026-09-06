@@ -7,5 +7,4 @@ public static class AccountExceptionCodes
     public const int AccountClosed = 302;
     public const int AccountDirectionNotAllowed = 303;
     public const int InsufficientBalance = 304;
-    public const int NullEntry = 305;
 }

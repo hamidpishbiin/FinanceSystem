@@ -1,6 +1,7 @@
 using FinanceSystem.Domain.Contract.Payments;
 using FinanceSystem.Domain.Payments.Enums;
 using FinanceSystem.Domain.Payments.Exceptions;
+using Shared.Domain.Exceptions;
 
 namespace FinanceSystem.Domain.Payments;
 
@@ -38,14 +39,26 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
         long? bankPaymentDetailId,
         IEventPublisher eventPublisher)
     {
-        Guard<IncoherentPaymentException>.AgainstNullOrEmpty(idempotencyKey);
-        Guard<IncoherentPaymentException>.SmallerThan(sourceAccountId, 0);
-        Guard<IncoherentPaymentException>.SmallerThan(destinationAccountId, 0);
-        Guard<IncoherentPaymentException>.AgainstNullOrEmpty(originServiceId);
-        Guard<IncoherentPaymentException>.AgainstNullOrEmpty(externalReferenceId);
-        Guard<IncoherentPaymentException>.AgainstNullOrEmpty(externalTag);
-        Guard<IncoherentPaymentException>.IsTrue(amount.Currency != Currency.Rial);
-        Guard<IncoherentPaymentException>.IsTrue(channel == PaymentChannel.Bank && bankPaymentDetailId == null);
+        Guard<InvalidIdempotencyKeyException>.AgainstNullOrEmpty(idempotencyKey);
+        Guard<InvalidPaymentPurposeException>.IsFalse(Enum.IsDefined(purpose));
+        Guard<InvalidPaymentChannelException>.IsFalse(Enum.IsDefined(channel));
+
+        Guard<NullEntryException>.AgainstNull(amount);
+        Guard<InvalidPaymentAmountException>.IsTrue(amount.Value <= 0);
+        Guard<InvalidMoneyCurrencyException>.IsTrue(amount.Currency != Currency.Rial);
+
+        Guard<InvalidSourceAccountIdException>.IsTrue(sourceAccountId <= 0);
+        Guard<InvalidDestinationAccountIdException>.IsTrue(destinationAccountId <= 0);
+        Guard<SameSourceAndDestinationAccountException>.IsTrue(sourceAccountId == destinationAccountId);
+
+        Guard<InvalidOriginServiceIdException>.AgainstNullOrEmpty(originServiceId);
+        Guard<InvalidExternalReferenceIdException>.AgainstNullOrEmpty(externalReferenceId);
+        Guard<InvalidExternalTagException>.AgainstNullOrEmpty(externalTag);
+
+        Guard<MissingBankPaymentDetailException>.IsTrue(channel == PaymentChannel.Bank && bankPaymentDetailId == null);
+        Guard<UnexpectedBankPaymentDetailException>.IsTrue(channel != PaymentChannel.Bank && bankPaymentDetailId != null);
+
+        Guard<NullEntryException>.AgainstNull(eventPublisher);
 
         var payment = new Payment()
         {
