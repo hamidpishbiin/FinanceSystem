@@ -1,4 +1,6 @@
 using FinanceSystem.Domain.Contract.Payments;
+using FinanceSystem.Domain.Accounts;
+using FinanceSystem.Domain.BankPaymentDetails;
 using FinanceSystem.Domain.Payments.Enums;
 using FinanceSystem.Domain.Payments.Exceptions;
 using Shared.Domain.Exceptions;
@@ -20,6 +22,10 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
     public string ExternalReferenceId { get; private set; }
     public string ExternalTag { get; private set; }
     public long? BankPaymentDetailId { get; private set; }
+
+    public Account? SourceAccount { get; private set; }
+    public Account? DestinationAccount { get; private set; }
+    public BankPaymentDetail? BankPaymentDetail { get; private set; }
 
     private Payment()
     {

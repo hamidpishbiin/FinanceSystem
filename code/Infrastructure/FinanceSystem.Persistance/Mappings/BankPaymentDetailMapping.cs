@@ -20,7 +20,7 @@ public class BankPaymentDetailMapping() : EntityBaseMap<BankPaymentDetail, long>
             .HasColumnName("PspId");
 
         builder
-            .HasOne<PaymentServiceProvider>()
+            .HasOne(p => p.Psp)
             .WithMany()
             .HasForeignKey(p => p.PspId)
             .OnDelete(DeleteBehavior.Restrict)
@@ -49,7 +49,7 @@ public class BankPaymentDetailMapping() : EntityBaseMap<BankPaymentDetail, long>
             .HasColumnName("TargetAccountId");
 
         builder
-            .HasOne<Account>()
+            .HasOne(p => p.TargetAccount)
             .WithMany()
             .HasForeignKey(p => p.TargetAccountId)
             .OnDelete(DeleteBehavior.Restrict)

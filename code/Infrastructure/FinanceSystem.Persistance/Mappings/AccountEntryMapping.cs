@@ -26,7 +26,7 @@ public class AccountEntryMapping() : EntityBaseMap<AccountEntry, long>("AccountE
             .HasDatabaseName("IX_AccountEntries_PaymentId");
 
         builder
-            .HasOne<Payment>()
+            .HasOne(p => p.Payment)
             .WithMany()
             .HasForeignKey(p => p.PaymentId)
             .OnDelete(DeleteBehavior.Restrict)
@@ -42,7 +42,7 @@ public class AccountEntryMapping() : EntityBaseMap<AccountEntry, long>("AccountE
             .HasDatabaseName("IX_AccountEntries_AccountId");
 
         builder
-            .HasOne<Account>()
+            .HasOne(p => p.Account)
             .WithMany()
             .HasForeignKey(p => p.AccountId)
             .OnDelete(DeleteBehavior.Restrict)

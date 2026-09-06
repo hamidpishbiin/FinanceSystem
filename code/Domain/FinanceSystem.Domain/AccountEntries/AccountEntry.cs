@@ -1,5 +1,6 @@
 using FinanceSystem.Domain.AccountEntries.Enums;
 using FinanceSystem.Domain.AccountEntries.Exceptions;
+using FinanceSystem.Domain.Accounts;
 using FinanceSystem.Domain.Payments;
 using FinanceSystem.Domain.Payments.Enums;
 using Shared.Domain.Exceptions;
@@ -12,6 +13,9 @@ public class AccountEntry : EntityBase<long>
     public long AccountId { get; private set; }
     public decimal AmountRial { get; private set; }
     public EntryDirection Direction { get; private set; }
+
+    public Account? Account { get; private set; }
+    public Payment? Payment { get; private set; }
 
     public decimal SignedAmountRial => Direction == EntryDirection.In ? AmountRial : -AmountRial;
 

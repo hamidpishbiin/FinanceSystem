@@ -1,4 +1,6 @@
 using FinanceSystem.Domain.BankPaymentDetails.Exceptions;
+using FinanceSystem.Domain.Accounts;
+using FinanceSystem.Domain.PaymentServiceProviders;
 using FinanceSystem.Domain.Payments;
 using FinanceSystem.Domain.Payments.Enums;
 using Shared.Domain.Exceptions;
@@ -22,6 +24,9 @@ public class BankPaymentDetail : EntityBase<long>, IAggregateRoot
     public short? ResultCode { get; private set; }
     public string? RawCallback { get; private set; }
     public DateTimeOffset? VerifiedAtUtc { get; private set; }
+
+    public PaymentServiceProvider? Psp { get; private set; }
+    public Account? TargetAccount { get; private set; }
 
     private BankPaymentDetail()
     {

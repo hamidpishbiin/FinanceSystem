@@ -76,21 +76,21 @@ public class PaymentMapping() : EntityBaseMap<Payment, long>("Payments")
             .HasDatabaseName("UX_Payments_BankPaymentDetailId");
 
         builder
-            .HasOne<BankPaymentDetail>()
+            .HasOne(p => p.BankPaymentDetail)
             .WithOne()
             .HasForeignKey<Payment>(p => p.BankPaymentDetailId)
             .OnDelete(DeleteBehavior.Restrict)
             .HasConstraintName("FK_Payments_BankPaymentDetails_BankPaymentDetailId");
 
         builder
-            .HasOne<Account>()
+            .HasOne(p => p.SourceAccount)
             .WithMany()
             .HasForeignKey(p => p.SourceAccountId)
             .OnDelete(DeleteBehavior.Restrict)
             .HasConstraintName("FK_Payments_Accounts_SourceAccountId");
 
         builder
-            .HasOne<Account>()
+            .HasOne(p => p.DestinationAccount)
             .WithMany()
             .HasForeignKey(p => p.DestinationAccountId)
             .OnDelete(DeleteBehavior.Restrict)

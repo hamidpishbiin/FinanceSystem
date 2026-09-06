@@ -20,7 +20,7 @@ public class BalanceCheckpointMapping() : EntityBaseMap<BalanceCheckpoint, long>
             .HasColumnName("AccountId");
 
         builder
-            .HasOne<Account>()
+            .HasOne(p => p.Account)
             .WithMany()
             .HasForeignKey(p => p.AccountId)
             .OnDelete(DeleteBehavior.Restrict)
@@ -31,7 +31,7 @@ public class BalanceCheckpointMapping() : EntityBaseMap<BalanceCheckpoint, long>
             .HasColumnName("UpToEntryId");
 
         builder
-            .HasOne<AccountEntry>()
+            .HasOne(p => p.UpToEntry)
             .WithMany()
             .HasForeignKey(p => p.UpToEntryId)
             .OnDelete(DeleteBehavior.Restrict)

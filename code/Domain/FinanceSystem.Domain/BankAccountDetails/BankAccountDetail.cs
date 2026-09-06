@@ -1,4 +1,5 @@
 using FinanceSystem.Domain.BankAccountDetails.Exceptions;
+using FinanceSystem.Domain.Accounts;
 
 namespace FinanceSystem.Domain.BankAccountDetails;
 
@@ -8,6 +9,8 @@ public class BankAccountDetail : EntityBase<long>
     public string Iban { get; private set; } = default!;
     public string? MaskedPan { get; private set; }
     public string? BankName { get; private set; }
+
+    public Account? Account { get; private set; }
 
     private BankAccountDetail()
     {

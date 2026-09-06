@@ -23,7 +23,7 @@ public class BankAccountDetailMapping() : EntityBaseMap<BankAccountDetail, long>
             .HasDatabaseName("IX_BankAccountDetails_AccountId");
 
         builder
-            .HasOne<Account>()
+            .HasOne(p => p.Account)
             .WithMany()
             .HasForeignKey(p => p.AccountId)
             .OnDelete(DeleteBehavior.Restrict)
