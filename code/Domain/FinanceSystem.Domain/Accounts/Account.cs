@@ -21,7 +21,7 @@ public class Account : EntityBase<long>
     {
     }
 
-    public static Account Create(
+    public static async Task<Account> Create(
         AccountType type,
         AccountStatus status,
         long ownerId,

@@ -17,6 +17,7 @@ public class BalanceCheckpointMapping() : EntityBaseMap<BalanceCheckpoint, long>
 
         builder
             .Property(p => p.AccountId)
+            .IsRequired()
             .HasColumnName("AccountId");
 
         builder
@@ -28,6 +29,7 @@ public class BalanceCheckpointMapping() : EntityBaseMap<BalanceCheckpoint, long>
 
         builder
             .Property(p => p.UpToEntryId)
+            .IsRequired()
             .HasColumnName("UpToEntryId");
 
         builder

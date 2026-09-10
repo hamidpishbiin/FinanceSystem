@@ -1,4 +1,4 @@
-namespace FinanceSystem.Domain.BankPaymentDetails;
+namespace FinanceSystem.Domain.BankPaymentDetails.Enums;
 
 public enum BankPaymentStatus
 {

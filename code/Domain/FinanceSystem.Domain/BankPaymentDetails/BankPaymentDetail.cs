@@ -1,5 +1,6 @@
 using FinanceSystem.Domain.BankPaymentDetails.Exceptions;
 using FinanceSystem.Domain.Accounts;
+using FinanceSystem.Domain.BankPaymentDetails.Enums;
 using FinanceSystem.Domain.PaymentServiceProviders;
 using FinanceSystem.Domain.Payments;
 using FinanceSystem.Domain.Payments.Enums;
@@ -32,7 +33,7 @@ public class BankPaymentDetail : EntityBase<long>, IAggregateRoot
     {
     }
 
-    public static BankPaymentDetail Create(
+    public static async Task<BankPaymentDetail> Create(
         Guid pspId,
         long targetAccountId,
         Money requestAmountRial,

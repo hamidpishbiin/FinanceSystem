@@ -1,3 +1,4 @@
+using FinanceSystem.Domain.PaymentServiceProviders.Enums;
 using FinanceSystem.Domain.PaymentServiceProviders.Exceptions;
 using Shared.Domain.Exceptions;
 
@@ -19,7 +20,7 @@ public class PaymentServiceProvider : EntityBase<Guid>
     {
     }
 
-    public static PaymentServiceProvider Create(
+    public static async Task<PaymentServiceProvider> Create(
         Guid id,
         PsPCode code,
         string name,

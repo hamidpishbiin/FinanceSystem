@@ -16,7 +16,7 @@ public class BankAccountDetail : EntityBase<long>
     {
     }
 
-    public static BankAccountDetail Create(
+    public static async Task<BankAccountDetail> Create(
         long accountId,
         string iban,
         string? maskedPan,

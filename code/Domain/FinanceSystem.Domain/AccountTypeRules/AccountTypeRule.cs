@@ -15,7 +15,7 @@ public class AccountTypeRule : EntityBase<int>
     {
     }
 
-    public static AccountTypeRule Create(
+    public static async Task<AccountTypeRule> Create(
         AccountType type,
         PaymentPurpose purpose,
         bool canBeSource,
@@ -23,6 +23,7 @@ public class AccountTypeRule : EntityBase<int>
     {
         Guard<InvalidAccountTypeException>.IsFalse(Enum.IsDefined(type));
         Guard<InvalidPaymentPurposeException>.IsFalse(Enum.IsDefined(purpose));
+        Guard<InvalidSourceDestinationException>.IsTrue(!canBeSource && !canBeDestination);
 
         return new AccountTypeRule()
         {

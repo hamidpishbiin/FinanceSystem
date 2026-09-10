@@ -23,7 +23,7 @@ public class AccountEntry : EntityBase<long>
     {
     }
 
-    public static AccountEntry Create(
+    public async static Task<AccountEntry> Create(
         long paymentId,
         long accountId,
         Money amountRial,
