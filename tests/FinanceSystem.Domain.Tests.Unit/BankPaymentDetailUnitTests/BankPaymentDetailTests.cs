@@ -95,5 +95,8 @@ public class BankPaymentDetailTests
         ((int)BankPaymentStatus.Failed).Should().Be(4);
         ((int)BankPaymentStatus.Expired).Should().Be(5);
         ((int)BankPaymentStatus.Reversed).Should().Be(6);
+
+        Enum.GetValues<BankPaymentStatus>().Should().HaveCount(6,
+            "adding a member requires updating the Status check constraint and any DDL");
     }
 }

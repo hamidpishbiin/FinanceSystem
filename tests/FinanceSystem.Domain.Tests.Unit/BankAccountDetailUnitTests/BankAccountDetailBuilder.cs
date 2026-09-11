@@ -5,7 +5,7 @@ namespace FinanceSystem.Domain.Tests.Unit.BankAccountDetailUnitTests;
 public class BankAccountDetailBuilder
 {
     public const long DefaultAccountId = 1276;
-    public const string DefaultIban = "kqskjdjhflaskdjfhlskadjfh";
+    public const string DefaultIban = "IR820540102680020817909002";
     public const string DefaultMaskedPan = "6219********1471";
     public const string DefaultBankName = "Mellat";
 
@@ -25,9 +25,9 @@ public class BankAccountDetailBuilder
         return this;
     }
 
-    public BankAccountDetailBuilder WithIban(string iban)
+    public BankAccountDetailBuilder WithIban(string? iban)
     {
-        Iban = iban;
+        Iban = iban!;
         return this;
     }
 

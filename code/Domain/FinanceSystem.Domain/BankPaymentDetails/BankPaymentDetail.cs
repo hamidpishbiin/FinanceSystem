@@ -42,7 +42,7 @@ public class BankPaymentDetail : EntityBase<long>, IAggregateRoot
         Guard<InvalidPspIdException>.IsTrue(pspId == Guid.Empty);
         Guard<InvalidTargetAccountIdException>.IsTrue(targetAccountId <= 0);
         Guard<NullEntryException>.AgainstNull(requestAmountRial);
-        Guard<InvalidRequestAmountException>.IsTrue(requestAmountRial.Value == 0);
+        Guard<InvalidRequestAmountException>.IsTrue(requestAmountRial.Value <= 0);
         Guard<InvalidMoneyCurrencyException>.IsTrue(requestAmountRial.Currency != Currency.Rial);
         Guard<InvalidAuthorityException>.AgainstNullOrEmpty(authority);
 

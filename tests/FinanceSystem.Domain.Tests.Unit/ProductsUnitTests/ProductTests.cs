@@ -48,11 +48,11 @@ namespace FinanceSystem.Domain.Tests.Unit.ProductsUnitTests
         [InlineData("")]
         [InlineData(" ")]
         [InlineData(null)]
-        public void Constructor_and_Update_should_throw_when_Name_is_not_valid(string name)
+        public async Task Constructor_and_Update_should_throw_when_Name_is_not_valid(string? name)
         {
-            var builder = _builder.WithName(name);
+            var builder = _builder.WithName(name!);
             Func<Task> expected = async () => await builder.Build();
-            expected.Should().ThrowAsync<ProductNameRequiredException>();
+            await expected.Should().ThrowAsync<ProductNameRequiredException>();
         }
     }
 }
