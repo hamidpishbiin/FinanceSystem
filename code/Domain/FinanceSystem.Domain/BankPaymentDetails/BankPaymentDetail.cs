@@ -15,14 +15,14 @@ public class BankPaymentDetail : EntityBase<long>, IAggregateRoot
     public Guid PspId { get; private set; }
     public BankPaymentStatus Status { get; private set; }
     public decimal RequestAmountRial { get; private set; }
-    public decimal RedirectedAmountRial { get; private set; }
+    public decimal? RedirectedAmountRial { get; private set; }
     public long TargetAccountId { get; private set; }
     public string Authority { get; private set; } = default!;
     public string? RRN { get; private set; }
     public string? RefNum { get; private set; }
     public string? TraceNumber { get; private set; }
     public string? MaskedPan { get; private set; }
-    public short? ResultCode { get; private set; }
+    public int? ResultCode { get; private set; }
     public string? RawCallback { get; private set; }
     public DateTimeOffset? VerifiedAtUtc { get; private set; }
 
@@ -42,7 +42,7 @@ public class BankPaymentDetail : EntityBase<long>, IAggregateRoot
         Guard<InvalidPspIdException>.IsTrue(pspId == Guid.Empty);
         Guard<InvalidTargetAccountIdException>.IsTrue(targetAccountId <= 0);
         Guard<NullEntryException>.AgainstNull(requestAmountRial);
-        Guard<InvalidRequestAmountException>.IsTrue(requestAmountRial.Value <= 0);
+        Guard<InvalidRequestAmountException>.IsTrue(requestAmountRial.Value == 0);
         Guard<InvalidMoneyCurrencyException>.IsTrue(requestAmountRial.Currency != Currency.Rial);
         Guard<InvalidAuthorityException>.AgainstNullOrEmpty(authority);
 
@@ -51,7 +51,6 @@ public class BankPaymentDetail : EntityBase<long>, IAggregateRoot
             PspId = pspId,
             Status = BankPaymentStatus.Initiated,
             RequestAmountRial = requestAmountRial.Value,
-            RedirectedAmountRial = 0,
             TargetAccountId = targetAccountId,
             Authority = authority
         };

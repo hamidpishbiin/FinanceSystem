@@ -6,4 +6,5 @@ public static class BankPaymentDetailExceptionCodes
     public const int InvalidTargetAccountId = 701;
     public const int InvalidRequestAmount = 702;
     public const int InvalidAuthority = 703;
+    public const int BankPaymentStatusNotDefined = 704;
 }
