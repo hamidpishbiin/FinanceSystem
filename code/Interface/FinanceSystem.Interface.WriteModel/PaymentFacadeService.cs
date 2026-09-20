@@ -1,23 +1,26 @@
 using FinanceSystem.Application.Contracts.Payments.Command;
 using FinanceSystem.Domain.Contract.Payments;
+using FinanceSystem.Domain.Contract.PspPaymentDetails;
 using FinanceSystem.Interface.Contracts.Payments.Models;
 using FinanceSystem.Interface.Contracts.Payments.Services;
+using Shared.Core;
 
 namespace FinanceSystem.Interface.WriteModel;
 
 public class PaymentFacadeService(
-    ICommandBus _commandBus,
-    IEventListener _listener) : IPaymentFacadeService
+    ICommandBus commandBus,
+    IEventListener listener,
+    IUserResolver userResolver) : IPaymentFacadeService
 {
     public async Task<JsonResponse<string>> Create(CreatePaymentModel model)
     {
         string idempotencyKey = string.Empty;
-        await _listener.Subscribe(new ActionEventHandler<PaymentCreatedEvent>(a =>
+        await listener.Subscribe(new EventHandlerAction<PaymentCreatedEvent>(a =>
         {
             idempotencyKey = a.IdempotencyKey;
         }));
 
-        await _commandBus.Dispatch(new CreatePaymentCommand
+        await commandBus.Dispatch(new CreatePaymentCommand
         {
             IdempotencyKey = model.IdempotencyKey,
             Purpose = model.Purpose,
@@ -28,9 +31,28 @@ public class PaymentFacadeService(
             OriginServiceId = model.OriginServiceId,
             ExternalReferenceId = model.ExternalReferenceId,
             ExternalTag = model.ExternalTag,
-            BankPaymentDetailId = model.BankPaymentDetailId
+            PspPaymentDetailId = model.PspPaymentDetailId
         });
 
         return JsonResponse<string>.Success(idempotencyKey);
+    }
+
+    public async Task<JsonResponse<string>> TopUpAsync(TopUpModel model, CancellationToken cancellationToken = default)
+    {
+        var ipgUrl = string.Empty;
+
+        await listener.Subscribe(new EventHandlerAction<PspPaymentTokenReceivedEvent>(a =>
+        {
+            ipgUrl = a.IpgUrl;
+        }));
+
+        await commandBus.Dispatch(new TopUpPaymentCommand()
+        {
+            AmountRial = model.Amount,
+            PspCode = model.PspCode,
+            UserId = Guid.Parse(userResolver.GetUserId())
+        }, cancellationToken);
+
+        return JsonResponse<string>.Success(ipgUrl);
     }
 }

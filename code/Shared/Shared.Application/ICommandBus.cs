@@ -11,6 +11,6 @@ namespace Shared.Application
         /// <typeparam name="T"></typeparam>
         /// <param name="command"></param>
         /// <returns></returns>
-        Task Dispatch<T>(T command) where T : ICommand;
+        Task Dispatch<T>(T command, CancellationToken cancellationToken = default) where T : ICommand;
     }
 }

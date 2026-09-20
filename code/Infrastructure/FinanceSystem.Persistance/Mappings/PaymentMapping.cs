@@ -1,5 +1,5 @@
 using FinanceSystem.Domain.Accounts;
-using FinanceSystem.Domain.BankPaymentDetails;
+using FinanceSystem.Domain.PspPaymentDetails;
 using FinanceSystem.Domain.Payments;
 
 namespace FinanceSystem.Persistance.Mappings;
@@ -67,20 +67,20 @@ public class PaymentMapping() : EntityBaseMap<Payment, long>("Payments")
             .HasColumnName("ExternalTag");
 
         builder
-            .Property(p => p.BankPaymentDetailId)
-            .HasColumnName("BankPaymentDetailId");
+            .Property(p => p.PspPaymentDetailId)
+            .HasColumnName("PspPaymentDetailId");
 
         builder
-            .HasIndex(p => p.BankPaymentDetailId)
+            .HasIndex(p => p.PspPaymentDetailId)
             .IsUnique()
-            .HasDatabaseName("UX_Payments_BankPaymentDetailId");
+            .HasDatabaseName("UX_Payments_PspPaymentDetailId");
 
         builder
-            .HasOne(p => p.BankPaymentDetail)
+            .HasOne(p => p.PspPaymentDetail)
             .WithOne()
-            .HasForeignKey<Payment>(p => p.BankPaymentDetailId)
+            .HasForeignKey<Payment>(p => p.PspPaymentDetailId)
             .OnDelete(DeleteBehavior.Restrict)
-            .HasConstraintName("FK_Payments_BankPaymentDetails_BankPaymentDetailId");
+            .HasConstraintName("FK_Payments_PspPaymentDetails_PspPaymentDetailId");
 
         builder
             .HasOne(p => p.SourceAccount)

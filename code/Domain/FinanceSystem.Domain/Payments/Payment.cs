@@ -1,6 +1,6 @@
 using FinanceSystem.Domain.Contract.Payments;
 using FinanceSystem.Domain.Accounts;
-using FinanceSystem.Domain.BankPaymentDetails;
+using FinanceSystem.Domain.PspPaymentDetails;
 using FinanceSystem.Domain.Payments.Enums;
 using FinanceSystem.Domain.Payments.Exceptions;
 using Shared.Domain.Exceptions;
@@ -21,11 +21,11 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
     public string OriginServiceId { get; private set; }
     public string ExternalReferenceId { get; private set; }
     public string ExternalTag { get; private set; }
-    public long? BankPaymentDetailId { get; private set; }
+    public long? PspPaymentDetailId { get; private set; }
 
     public Account? SourceAccount { get; private set; }
     public Account? DestinationAccount { get; private set; }
-    public BankPaymentDetail? BankPaymentDetail { get; private set; }
+    public PspPaymentDetail? PspPaymentDetail { get; private set; }
 
     private Payment()
     {
@@ -42,7 +42,7 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
         string originServiceId,
         string externalReferenceId,
         string externalTag,
-        long? bankPaymentDetailId,
+        long? pspPaymentDetailId,
         IEventPublisher eventPublisher)
     {
         Guard<InvalidIdempotencyKeyException>.AgainstNullOrEmpty(idempotencyKey);
@@ -51,7 +51,6 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
 
         Guard<NullEntryException>.AgainstNull(amount);
         Guard<InvalidPaymentAmountException>.IsTrue(amount.Value <= 0);
-        Guard<InvalidMoneyCurrencyException>.IsTrue(amount.Currency != Currency.Rial);
 
         Guard<InvalidSourceAccountIdException>.IsTrue(sourceAccountId <= 0);
         Guard<InvalidDestinationAccountIdException>.IsTrue(destinationAccountId <= 0);
@@ -61,8 +60,8 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
         Guard<InvalidExternalReferenceIdException>.AgainstNullOrEmpty(externalReferenceId);
         Guard<InvalidExternalTagException>.AgainstNullOrEmpty(externalTag);
 
-        Guard<MissingBankPaymentDetailException>.IsTrue(channel == PaymentChannel.Bank && bankPaymentDetailId == null);
-        Guard<UnexpectedBankPaymentDetailException>.IsTrue(channel != PaymentChannel.Bank && bankPaymentDetailId != null);
+        Guard<MissingPspPaymentDetailException>.IsTrue(channel == PaymentChannel.Psp && pspPaymentDetailId == null);
+        Guard<UnexpectedPspPaymentDetailException>.IsTrue(channel != PaymentChannel.Psp && pspPaymentDetailId != null);
 
         Guard<NullEntryException>.AgainstNull(eventPublisher);
 
@@ -77,15 +76,11 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
             OriginServiceId = originServiceId,
             ExternalReferenceId = externalReferenceId,
             ExternalTag = externalTag,
-            BankPaymentDetailId = bankPaymentDetailId,
+            PspPaymentDetailId = pspPaymentDetailId,
             Publisher = eventPublisher
         };
 
-        var paymentCreatedEvent = new PaymentCreatedEvent()
-        {
-            IdempotencyKey = payment.IdempotencyKey,
-            AmountRial = amount.Value
-        };
+        var paymentCreatedEvent = new PaymentCreatedEvent(payment.IdempotencyKey, amount.Value);
 
         await eventPublisher.Publish(paymentCreatedEvent);
 

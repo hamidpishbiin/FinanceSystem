@@ -52,9 +52,5 @@ public class PaymentServiceProviderMapping() : EntityBaseMap<PaymentServiceProvi
         builder
             .Property(p => p.BaseUrl)
             .HasColumnName("BaseUrl");
-
-        builder
-            .Property(p => p.CallbackUrl)
-            .HasColumnName("CallbackUrl");
     }
 }

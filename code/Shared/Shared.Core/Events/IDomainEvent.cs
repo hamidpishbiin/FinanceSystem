@@ -3,6 +3,6 @@
     public interface IDomainEvent : IEvent
     {
         Guid EventId { get; }
-        DateTime CreateDateTime { get; }
+        DateTime CreatedAtUtc { get; }
     }
 }

@@ -6,7 +6,7 @@ namespace FinanceSystem.Domain.Tests.Unit.PaymentServiceProviderUnitTests;
 public class PaymentServiceProviderBuilder
 {
     public const string DefaultIdString = "9f1d2c3b-4a5e-6f70-8192-a3b4c5d6e7f8";
-    public const PsPCode DefaultCode = PsPCode.Saman;
+    public const PspCode DefaultCode = PspCode.Saman;
     public const string DefaultName = "Saman Bank Gateway";
     public const bool DefaultIsActive = true;
     public const short DefaultPriority = 10;
@@ -14,12 +14,11 @@ public class PaymentServiceProviderBuilder
     public const string DefaultTerminalId = "terminal-88";
     public const string DefaultCredentialsRef = "vault://psp/saman";
     public const string DefaultBaseUrl = "https://sep.shaparak.ir";
-    public const string DefaultCallbackUrl = "https://finance.local/psp/callback";
 
     public static readonly Guid DefaultId = Guid.Parse(DefaultIdString);
 
     private Guid Id { get; set; } = DefaultId;
-    private PsPCode Code { get; set; } = DefaultCode;
+    private PspCode Code { get; set; } = DefaultCode;
     private string Name { get; set; } = DefaultName;
     private bool IsActive { get; set; } = DefaultIsActive;
     private short Priority { get; set; } = DefaultPriority;
@@ -27,7 +26,6 @@ public class PaymentServiceProviderBuilder
     private string? TerminalId { get; set; } = DefaultTerminalId;
     private string CredentialsRef { get; set; } = DefaultCredentialsRef;
     private string BaseUrl { get; set; } = DefaultBaseUrl;
-    private string CallbackUrl { get; set; } = DefaultCallbackUrl;
 
     public async Task<PaymentServiceProvider> Build()
     {
@@ -40,8 +38,7 @@ public class PaymentServiceProviderBuilder
             MerchantId,
             TerminalId,
             CredentialsRef,
-            BaseUrl,
-            CallbackUrl);
+            BaseUrl);
     }
 
     public PaymentServiceProviderBuilder WithId(Guid id)
@@ -50,7 +47,7 @@ public class PaymentServiceProviderBuilder
         return this;
     }
 
-    public PaymentServiceProviderBuilder WithCode(PsPCode code)
+    public PaymentServiceProviderBuilder WithCode(PspCode code)
     {
         Code = code;
         return this;
@@ -95,12 +92,6 @@ public class PaymentServiceProviderBuilder
     public PaymentServiceProviderBuilder WithBaseUrl(string? baseUrl)
     {
         BaseUrl = baseUrl!;
-        return this;
-    }
-
-    public PaymentServiceProviderBuilder WithCallbackUrl(string? callbackUrl)
-    {
-        CallbackUrl = callbackUrl!;
         return this;
     }
 }

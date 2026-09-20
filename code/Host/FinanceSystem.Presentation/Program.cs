@@ -2,6 +2,7 @@ using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Options;
+using FinanceSystem.Application.Payments.Gateways;
 using FinanceSystem.Bootstrap;
 using FinanceSystem.Persistance.Mappings;
 using FinanceSystem.Presentation;
@@ -33,12 +34,16 @@ try
 
     builder.AddCORS();
 
-    builder.Services.AddSingleton<IUserResolver, UserResolver>();
+    builder.Services.AddScoped<IUserResolver, UserResolver>();
 
     builder.AddAuthenticationByJwtToken();
 
 
     builder.Services.Configure<ConnectionStrings>(builder.Configuration.GetSection(ConnectionStrings.SectionName));
+    builder.Services.AddOptions<PspCallbackUrlOptions>()
+        .Bind(builder.Configuration.GetSection(PspCallbackUrlOptions.SectionName))
+        .Validate(o => Uri.TryCreate(o.TopUp, UriKind.Absolute, out _), $"{PspCallbackUrlOptions.SectionName}:TopUp must be an absolute URL.")
+        .ValidateOnStart();
     var connectionString = builder.Configuration[$"{ConnectionStrings.SectionName}:DefaultConnection"];
     var readonlyConnectionString = builder.Configuration[$"{ConnectionStrings.SectionName}:ReadOnlyConnection"];
     builder.Host.ConfigureContainer<ContainerBuilder>(builder =>

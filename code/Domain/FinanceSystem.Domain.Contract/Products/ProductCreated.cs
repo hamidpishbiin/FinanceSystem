@@ -1,7 +1,4 @@
 ﻿namespace FinanceSystem.Domain.Contract.Products
 {
-    public sealed class ProductCreated : ProductEventBase
-    {
-
-    }
+    public sealed record ProductCreated : ProductEventBase;
 }

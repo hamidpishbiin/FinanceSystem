@@ -1,7 +1,4 @@
 ﻿namespace FinanceSystem.Domain.Contract.Products
 {
-    public class ProductModified : ProductEventBase
-    {
-
-    }
+    public record ProductModified : ProductEventBase;
 }

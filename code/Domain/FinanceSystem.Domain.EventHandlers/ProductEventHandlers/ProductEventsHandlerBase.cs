@@ -16,7 +16,7 @@ namespace FinanceSystem.Domain.EventHandlers.ProductEventHandlers
 
         public async Task Handle(T happen)
         {
-            var model = new ProductEventModel(happen, happen.EventId, happen.CreateDateTime, DetermineEventType());
+            var model = new ProductEventModel(happen, happen.EventId, happen.CreatedAtUtc, DetermineEventType());
             await _eventRepository.Persist(model);
         }
     }

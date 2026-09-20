@@ -12,7 +12,7 @@ public class BalanceCheckpointBuilder
 
     private long AccountId { get; set; } = DefaultAccountId;
     private long UpToEntryId { get; set; } = DefaultUpToEntryId;
-    private Money BalanceAmount { get; set; } = new Money(DefaultBalanceRial, Currency.Rial);
+    private Money BalanceAmount { get; set; } = new Money(DefaultBalanceRial);
 
     public async Task<BalanceCheckpoint> Build()
     {

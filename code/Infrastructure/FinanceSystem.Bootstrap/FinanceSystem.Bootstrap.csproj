@@ -15,6 +15,7 @@
     <ProjectReference Include="..\..\interface\FinanceSystem.Interface.WriteModel\FinanceSystem.Interface.WriteModel.csproj" />
     <ProjectReference Include="..\..\shared\Shared.Bootstrap\Shared.Bootstrap.csproj" />
     <ProjectReference Include="..\FinanceSystem.Persistance\FinanceSystem.Persistance.csproj" />
+    <ProjectReference Include="..\FinanceSystem.Psp\FinanceSystem.Psp.csproj" />
     <ProjectReference Include="..\FinanceSystem.Security\FinanceSystem.Security.csproj" />
     
   </ItemGroup>

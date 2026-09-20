@@ -31,7 +31,6 @@ public class Account : EntityBase<long>
     {
         Guard<InvalidIdException>.IsTrue(ownerId <= 0);
         Guard<NullEntryException>.AgainstNull(cachedBalanceRial);
-        Guard<InvalidMoneyCurrencyException>.IsTrue(cachedBalanceRial.Currency != Currency.Rial);
 
         return new Account()
         {

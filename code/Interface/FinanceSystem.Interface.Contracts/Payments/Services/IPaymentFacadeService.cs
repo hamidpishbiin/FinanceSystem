@@ -9,4 +9,6 @@ public interface IPaymentFacadeService : IFacadeService
 {
     [HasPermission(Permissions.CreatePayment, (int)UserRoleEnum.Owner)]
     Task<JsonResponse<string>> Create(CreatePaymentModel model);
+    [HasPermission(Permissions.CreatePayment, (int)UserRoleEnum.Owner)]
+    Task<JsonResponse<string>> TopUpAsync(TopUpModel model, CancellationToken cancellationToken = default);
 }

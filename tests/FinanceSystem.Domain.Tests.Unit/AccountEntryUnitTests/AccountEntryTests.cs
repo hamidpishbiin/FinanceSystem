@@ -70,17 +70,9 @@ public class AccountEntryTests
     [Fact]
     public async Task Create_should_throw_when_Amount_is_zero()
     {
-        Func<Task> act = () => _builder.WithAmount(new Money(0, Currency.Rial)).Build();
+        Func<Task> act = () => _builder.WithAmount(new Money(0)).Build();
 
         await act.Should().ThrowAsync<InvalidAmountException>();
-    }
-
-    [Fact]
-    public async Task Create_should_throw_when_Amount_is_not_in_Rial()
-    {
-        Func<Task> act = () => _builder.WithAmount(new Money(110, Currency.Toman)).Build();
-
-        await act.Should().ThrowAsync<InvalidMoneyCurrencyException>();
     }
 
     [Theory]

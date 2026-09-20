@@ -1,6 +1,4 @@
 namespace FinanceSystem.Domain.Contract.Payments;
 
-public class PaymentCreatedEvent : PaymentEventBase
-{
-
-}
+public record PaymentCreatedEvent(string IdempotencyKey, decimal AmountRial)
+    : PaymentEventBase(IdempotencyKey, AmountRial);

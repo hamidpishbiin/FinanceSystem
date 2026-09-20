@@ -16,7 +16,7 @@ namespace FinanceSystem.Application.Product.CommandHandlers
         {
         }
 
-        public override async Task Execute(ModifyProductCommand command)
+        public override async Task Execute(ModifyProductCommand command, CancellationToken cancellationToken = default)
         {
             var product = await Repository.GetByIdAsync(command.Id);
 

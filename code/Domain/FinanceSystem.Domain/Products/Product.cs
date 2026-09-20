@@ -24,14 +24,8 @@ public sealed class Product : EntityBase<Guid>, IAggregateRoot
 
         await stockQuantityService.CheckStockQuantity();
 
-        var product = new Product
-        {
-            Id = id,
-            Name = name,
-            Description = description,
-            Price = price,
-            StockQuantity = stockQuantity,
-        };
+        var product = new Product { Id = id };
+        product.SetProperties(name, description, price, stockQuantity);
 
         var created = new ProductCreated()
         {

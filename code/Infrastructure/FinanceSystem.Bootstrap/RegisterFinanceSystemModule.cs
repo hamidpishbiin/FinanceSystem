@@ -1,4 +1,5 @@
 ﻿using Autofac;
+using FinanceSystem.Psp;
 using Shared.Bootstrap;
 using System.Reflection;
 
@@ -13,6 +14,7 @@ namespace FinanceSystem.Bootstrap
         {
             builder.AddFramework(connectionString, readonlyConnectionString, mappingAssembly);
             builder.RegisterModule(new FinanceSystemModule());
+            builder.RegisterModule(new PspModule());
         }
     }
 }

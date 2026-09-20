@@ -23,7 +23,6 @@ public class PaymentServiceProviderTests
         psp.TerminalId.Should().Be(PaymentServiceProviderBuilder.DefaultTerminalId);
         psp.CredentialsRef.Should().Be(PaymentServiceProviderBuilder.DefaultCredentialsRef);
         psp.BaseUrl.Should().Be(PaymentServiceProviderBuilder.DefaultBaseUrl);
-        psp.CallbackUrl.Should().Be(PaymentServiceProviderBuilder.DefaultCallbackUrl);
     }
 
     [Fact]
@@ -35,9 +34,9 @@ public class PaymentServiceProviderTests
     }
 
     [Theory]
-    [InlineData((PsPCode)0)]
-    [InlineData((PsPCode)99)]
-    public async Task Create_should_throw_when_code_is_not_defined(PsPCode code)
+    [InlineData((PspCode)0)]
+    [InlineData((PspCode)99)]
+    public async Task Create_should_throw_when_code_is_not_defined(PspCode code)
     {
         Func<Task> act = () => _builder.WithCode(code).Build();
 
@@ -106,17 +105,6 @@ public class PaymentServiceProviderTests
         await act.Should().ThrowAsync<InvalidBaseUrlException>();
     }
 
-    [Theory]
-    [InlineData("")]
-    [InlineData("   ")]
-    [InlineData(null)]
-    public async Task Create_should_throw_when_callbackUrl_is_null_or_empty_or_whiteSpace(string? callbackUrl)
-    {
-        Func<Task> act = () => _builder.WithCallbackUrl(callbackUrl).Build();
-
-        await act.Should().ThrowAsync<InvalidCallbackUrlException>();
-    }
-
     [Fact]
     public async Task Create_should_allow_null_terminalId()
     {
@@ -136,10 +124,10 @@ public class PaymentServiceProviderTests
     [Fact]
     public void PsPCode_values_are_persisted_contract_and_should_not_change()
     {
-        ((int)PsPCode.Saman).Should().Be(1);
-        ((int)PsPCode.BehPardakht).Should().Be(2);
+        ((int)PspCode.Saman).Should().Be(1);
+        ((int)PspCode.BehPardakht).Should().Be(2);
 
-        Enum.GetValues<PsPCode>().Should().HaveCount(2,
+        Enum.GetValues<PspCode>().Should().HaveCount(2,
             "adding a provider requires a matching row in PaymentServiceProviders and any Code check constraint");
     }
 }

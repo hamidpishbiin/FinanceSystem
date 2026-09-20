@@ -27,7 +27,7 @@ public class PaymentTests
         payment.OriginServiceId.Should().Be(PaymentBuilder.DefaultOriginServiceId);
         payment.ExternalReferenceId.Should().Be(PaymentBuilder.DefaultExternalReferenceId);
         payment.ExternalTag.Should().Be(PaymentBuilder.DefaultExternalTag);
-        payment.BankPaymentDetailId.Should().BeNull();
+        payment.PspPaymentDetailId.Should().BeNull();
         payment.Publisher.Should().BeSameAs(_builder.EventPublisher);
     }
 
@@ -85,19 +85,9 @@ public class PaymentTests
     [Fact]
     public async Task Create_should_throw_when_amount_is_zero()
     {
-        Func<Task> act = () => _builder.WithAmount(new Money(0, Currency.Rial)).Build();
+        Func<Task> act = () => _builder.WithAmount(new Money(0)).Build();
 
         await act.Should().ThrowAsync<InvalidPaymentAmountException>();
-    }
-
-    [Fact]
-    public async Task Create_should_throw_when_amount_currency_is_not_rial()
-    {
-        Func<Task> act = () => _builder
-            .WithAmount(new Money(PaymentBuilder.DefaultAmountRial, Currency.Toman))
-            .Build();
-
-        await act.Should().ThrowAsync<InvalidMoneyCurrencyException>();
     }
 
     [Theory]
@@ -165,37 +155,37 @@ public class PaymentTests
     }
 
     [Fact]
-    public async Task Create_should_throw_when_channel_is_bank_and_bankPaymentDetailId_is_missing()
+    public async Task Create_should_throw_when_channel_is_bank_and_pspPaymentDetailId_is_missing()
     {
         Func<Task> act = () => _builder
-            .WithChannel(PaymentChannel.Bank)
-            .WithBankPaymentDetailId(null)
+            .WithChannel(PaymentChannel.Psp)
+            .WithPspPaymentDetailId(null)
             .Build();
 
-        await act.Should().ThrowAsync<MissingBankPaymentDetailException>();
+        await act.Should().ThrowAsync<MissingPspPaymentDetailException>();
     }
 
     [Fact]
-    public async Task Create_should_throw_when_channel_is_not_bank_and_bankPaymentDetailId_is_supplied()
+    public async Task Create_should_throw_when_channel_is_not_bank_and_pspPaymentDetailId_is_supplied()
     {
         Func<Task> act = () => _builder
             .WithChannel(PaymentChannel.Wallet)
-            .WithBankPaymentDetailId(PaymentBuilder.DefaultBankPaymentDetailId)
+            .WithPspPaymentDetailId(PaymentBuilder.DefaultPspPaymentDetailId)
             .Build();
 
-        await act.Should().ThrowAsync<UnexpectedBankPaymentDetailException>();
+        await act.Should().ThrowAsync<UnexpectedPspPaymentDetailException>();
     }
 
     [Fact]
-    public async Task Create_should_succeed_when_channel_is_bank_and_bankPaymentDetailId_is_supplied()
+    public async Task Create_should_succeed_when_channel_is_bank_and_pspPaymentDetailId_is_supplied()
     {
         var payment = await _builder
-            .WithChannel(PaymentChannel.Bank)
-            .WithBankPaymentDetailId(PaymentBuilder.DefaultBankPaymentDetailId)
+            .WithChannel(PaymentChannel.Psp)
+            .WithPspPaymentDetailId(PaymentBuilder.DefaultPspPaymentDetailId)
             .Build();
 
-        payment.Channel.Should().Be(PaymentChannel.Bank);
-        payment.BankPaymentDetailId.Should().Be(PaymentBuilder.DefaultBankPaymentDetailId);
+        payment.Channel.Should().Be(PaymentChannel.Psp);
+        payment.PspPaymentDetailId.Should().Be(PaymentBuilder.DefaultPspPaymentDetailId);
     }
 
     [Fact]
@@ -224,9 +214,9 @@ public class PaymentTests
     public void PaymentChannel_values_are_persisted_contract_and_should_not_change()
     {
         ((byte)PaymentChannel.Wallet).Should().Be(1);
-        ((byte)PaymentChannel.Bank).Should().Be(2);
+        ((byte)PaymentChannel.Psp).Should().Be(2);
 
         Enum.GetValues<PaymentChannel>().Should().HaveCount(2,
-            "adding a member requires revisiting the Bank/BankPaymentDetailId pairing rules in Payment.Create");
+            "adding a member requires revisiting the Bank/PspPaymentDetailId pairing rules in Payment.Create");
     }
 }

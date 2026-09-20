@@ -20,7 +20,7 @@ namespace FinanceSystem.Application.Product.CommandHandlers
             _stockQuantityService = stockQuantityService;
         }
 
-        public override async Task Execute(CreateProductCommand command)
+        public override async Task Execute(CreateProductCommand command, CancellationToken cancellationToken = default)
         {
             var productId = Guid.NewGuid();
             var model = await Domain.Products.Product.Create(

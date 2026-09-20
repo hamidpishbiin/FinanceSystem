@@ -28,7 +28,6 @@ public class BalanceCheckpoint : EntityBase<long>
         Guard<InvalidAccountIdException>.IsTrue(accountId <= 0);
         Guard<InvalidUpToEntryIdException>.IsTrue(upToEntryId <= 0);
         Guard<NullEntryException>.AgainstNull(balance);
-        Guard<InvalidMoneyCurrencyException>.IsTrue(balance.Currency != Currency.Rial);
 
         return new BalanceCheckpoint()
         {

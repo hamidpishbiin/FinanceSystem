@@ -2,12 +2,12 @@
 
 namespace FinanceSystem.Domain.Contract.Products
 {
-    public abstract class ProductEventBase : DomainEvent
+    public abstract record ProductEventBase : DomainEvent
     {
-        public Guid Id { get; set; }
-        public string Name { get; set; }
-        public string Description { get; set; }
-        public decimal Price { get; set; }
-        public int StockQuantity { get; set; }
+        public Guid Id { get; init; }
+        public string Name { get; init; }
+        public string Description { get; init; }
+        public decimal Price { get; init; }
+        public int StockQuantity { get; init; }
     }
 }

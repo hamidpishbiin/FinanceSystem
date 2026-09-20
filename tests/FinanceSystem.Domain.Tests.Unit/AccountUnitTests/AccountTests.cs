@@ -46,14 +46,4 @@ public class AccountTests
 
         await account.Should().ThrowAsync<NullEntryException>();
     }
-
-    [Fact]
-    public async Task Create_should_throw_when_currency_is_not_rial()
-    {
-        Func<Task> account = () => _accountBuilder
-            .WithAmount(new Money(AccountBuilder.DefaultCachedBalanceRial, Currency.Toman))
-            .Build();
-
-        await account.Should().ThrowAsync<InvalidMoneyCurrencyException>();
-    }
 }

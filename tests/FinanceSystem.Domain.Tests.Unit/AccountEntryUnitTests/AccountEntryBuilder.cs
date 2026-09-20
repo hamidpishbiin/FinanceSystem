@@ -14,7 +14,7 @@ public class AccountEntryBuilder
 
     private long PaymentId { get; set; } = DefaultPaymentId;
     private long AccountId { get; set; } = DefaultAccountId;
-    private Money Amount { get; set; } = new(DefaultAmountRial, Currency.Rial);
+    private Money Amount { get; set; } = new(DefaultAmountRial);
     private EntryDirection Direction { get; set; } = DefaultDirection;
 
     public Task<AccountEntry> Build()

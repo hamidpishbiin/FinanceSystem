@@ -16,19 +16,19 @@ public class PaymentCreateCommandHandler : PaymentCommandHandler<CreatePaymentCo
     {
     }
 
-    public override async Task Execute(CreatePaymentCommand command)
+    public override async Task Execute(CreatePaymentCommand command, CancellationToken cancellationToken = default)
     {
         var model = await Payment.Create(
             command.IdempotencyKey,
             (PaymentPurpose)command.Purpose,
             (PaymentChannel)command.Channel,
-            new Money(command.AmountRial, Currency.Rial),
+            new Money(command.AmountRial),
             command.SourceAccountId,
             command.DestinationAccountId,
             command.OriginServiceId,
             command.ExternalReferenceId,
             command.ExternalTag,
-            command.BankPaymentDetailId,
+            command.PspPaymentDetailId,
             Publisher);
 
         await Repository.AddAsync(model);

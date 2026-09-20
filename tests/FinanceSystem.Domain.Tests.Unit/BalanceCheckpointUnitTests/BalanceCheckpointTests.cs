@@ -52,14 +52,4 @@ public class BalanceCheckpointTests
 
         await bc.Should().ThrowAsync<NullEntryException>();
     }
-
-    [Fact]
-    public async Task Create_should_throw_when_balance_currency_is_not_Rial()
-    {
-        Func<Task> bc = () => _builder
-            .WithBalanceAmount(new Money(BalanceCheckpointBuilder.DefaultBalanceRial, Currency.Toman))
-            .Build();
-
-        await bc.Should().ThrowAsync<InvalidMoneyCurrencyException>();
-    }
 }

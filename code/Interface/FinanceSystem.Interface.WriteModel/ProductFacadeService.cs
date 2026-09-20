@@ -17,7 +17,7 @@ namespace FinanceSystem.Interface.WriteModel
         public async Task<JsonResponse<Guid>> Create(CreateProductModel model)
         {
             Guid productId = default;
-            await _listener.Subscribe(new ActionEventHandler<ProductCreated>(a =>
+            await _listener.Subscribe(new EventHandlerAction<ProductCreated>(a =>
             {
                 productId = a.Id;
             }));

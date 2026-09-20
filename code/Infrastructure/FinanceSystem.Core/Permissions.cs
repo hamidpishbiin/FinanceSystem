@@ -9,5 +9,6 @@
 
         AccessPayment = 200,
         CreatePayment = 201,
+        TopUpPayment  = 202,
     }
 }

@@ -7,11 +7,11 @@ namespace Shared.Application
         ICommandHandler<T> commandHandler,
         ILoggerService loggerService) : ICommandHandler<T> where T : ICommand
     {
-        public async Task Handle(T command)
+        public async Task Handle(T command, CancellationToken cancellationToken = default)
         {
             try
             {
-                await commandHandler.Handle(command);
+                await commandHandler.Handle(command, cancellationToken);
                 await unitOfWork.SaveChangesAsync();
             }
             catch (Exception ex)

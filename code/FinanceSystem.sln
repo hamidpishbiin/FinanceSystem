@@ -67,6 +67,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FinanceSystem.Domain.Tests.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FinanceSystem.Architecture.Tests.Unit", "..\tests\FinanceSystem.Architecture.Tests.Unit\FinanceSystem.Architecture.Tests.Unit.csproj", "{6697D178-2FB0-4CE0-95F1-7B0F107AD831}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FinanceSystem.Psp", "Infrastructure\FinanceSystem.Psp\FinanceSystem.Psp.csproj", "{6D64294B-7D42-44A1-BD4B-4BF7A20DA566}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -169,6 +171,10 @@ Global
 		{6697D178-2FB0-4CE0-95F1-7B0F107AD831}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6697D178-2FB0-4CE0-95F1-7B0F107AD831}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6697D178-2FB0-4CE0-95F1-7B0F107AD831}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6D64294B-7D42-44A1-BD4B-4BF7A20DA566}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6D64294B-7D42-44A1-BD4B-4BF7A20DA566}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6D64294B-7D42-44A1-BD4B-4BF7A20DA566}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6D64294B-7D42-44A1-BD4B-4BF7A20DA566}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -203,6 +209,7 @@ Global
 		{F25067B1-39A3-A6B5-2166-47740E2A6BC1} = {166AD4BF-3521-4170-9772-24ED50617668}
 		{D1CBF7F7-AEB0-8B1D-3C04-0D85CB8D37AB} = {166AD4BF-3521-4170-9772-24ED50617668}
 		{6697D178-2FB0-4CE0-95F1-7B0F107AD831} = {166AD4BF-3521-4170-9772-24ED50617668}
+		{6D64294B-7D42-44A1-BD4B-4BF7A20DA566} = {553C157A-987F-4CD8-97C8-CB2D5DC0660E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {CA5DB187-D26B-4EF2-8F12-D7A8D09EC2E7}

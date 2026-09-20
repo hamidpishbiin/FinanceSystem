@@ -17,7 +17,7 @@ public class AccountBuilder
     private AccountType Type { get; set; } = DefaultType;
     private AccountStatus Status { get; set; } = DefaultStatus;
     private long OwnerId { get; set; } = DefaultOwnerId;
-    private Money CachedAmount { get; set; } = new(DefaultCachedBalanceRial, Currency.Rial);
+    private Money CachedAmount { get; set; } = new(DefaultCachedBalanceRial);
     private DateTimeOffset BalanceCalculatedAt { get; set; } = DefaultBalanceCalculatedAt;
     private bool AllowNegativeBalance { get; set; } = DefaultAllowNegativeBalance;
 

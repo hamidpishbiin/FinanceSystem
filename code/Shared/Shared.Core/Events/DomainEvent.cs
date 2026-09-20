@@ -1,14 +1,14 @@
 ﻿namespace Shared.Core.Events
 {
-    public class DomainEvent : IDomainEvent
+    public abstract record DomainEvent : IDomainEvent
     {
         public Guid EventId { get; }
-        public DateTime CreateDateTime { get; }
+        public DateTime CreatedAtUtc { get; }
 
-        public DomainEvent()
+        protected DomainEvent()
         {
             EventId = Guid.NewGuid();
-            CreateDateTime = DateTime.UtcNow;
+            CreatedAtUtc = DateTime.UtcNow;
         }
     }
 }

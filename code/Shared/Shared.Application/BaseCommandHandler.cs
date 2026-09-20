@@ -15,7 +15,7 @@ namespace Shared.Application
             Listener = listener;
         }
 
-        public abstract Task Handle(T command);
+        public abstract Task Handle(T command, CancellationToken cancellationToken = default);
     }
     public abstract class BaseCommandHandler<T, TEvent> : BaseCommandHandler<T> where TEvent : IDomainEvent where T : ICommand
     {
@@ -29,12 +29,12 @@ namespace Shared.Application
             EventHandler = eventHandler;
         }
 
-        public override async Task Handle(T command)
+        public override async Task Handle(T command, CancellationToken cancellationToken = default)
         {
             await Listener.Subscribe(EventHandler);
-            await Execute(command);
+            await Execute(command, cancellationToken);
         }
 
-        public abstract Task Execute(T command);
+        public abstract Task Execute(T command, CancellationToken cancellationToken = default);
     }
 }

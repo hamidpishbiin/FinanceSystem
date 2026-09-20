@@ -2,6 +2,21 @@ using FinanceSystem.Domain.Payments;
 
 namespace FinanceSystem.Application.Payments.CommandHandlers;
 
+public abstract class PaymentCommandHandler<T> : BaseCommandHandler<T>
+    where T : ICommand
+{
+    protected readonly IPaymentRepository Repository;
+
+    protected PaymentCommandHandler(
+        IPaymentRepository repository,
+        IEventPublisher publisher,
+        IEventListener listener)
+        : base(publisher, listener)
+    {
+        Repository = repository;
+    }
+}
+
 public abstract class PaymentCommandHandler<T, TEvent> : BaseCommandHandler<T, TEvent>
     where TEvent : IDomainEvent
     where T : ICommand

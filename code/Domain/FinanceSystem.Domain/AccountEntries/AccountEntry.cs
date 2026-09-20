@@ -33,7 +33,6 @@ public class AccountEntry : EntityBase<long>
         Guard<InvalidAccountIdException>.IsTrue(accountId <= 0);
         Guard<NullEntryException>.AgainstNull(amountRial);
         Guard<InvalidAmountException>.IsTrue(amountRial.Value == 0);
-        Guard<InvalidMoneyCurrencyException>.IsTrue(amountRial.Currency != Currency.Rial);
         Guard<InvalidEntryDirectionException>.IsFalse(Enum.IsDefined(direction));
 
         return new AccountEntry()
