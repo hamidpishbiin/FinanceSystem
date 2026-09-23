@@ -90,3 +90,8 @@ _[Ss]cripts
 /src/Decafe.Server.RestAPI/dc-logs
 .tmp
 CLAUDE.local.md
+
+# Local environment files
+.env
+.env.*
+!.env.example

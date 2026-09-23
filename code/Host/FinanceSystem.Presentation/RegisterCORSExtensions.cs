@@ -1,4 +1,7 @@
-﻿namespace FinanceSystem.Presentation
+using Microsoft.AspNetCore.Cors.Infrastructure;
+using Microsoft.Extensions.Options;
+
+namespace FinanceSystem.Presentation
 {
     public static class RegisterCORSExtensions
     {
@@ -6,18 +9,30 @@
 
         public static WebApplicationBuilder AddCORS(this WebApplicationBuilder builder)
         {
-            builder.Services.Configure<Origins>(builder.Configuration.GetSection(Origins.SectionName));
-            var allowOrigins = builder.Configuration[$"{Origins.SectionName}:AllowOrigins"];
-            builder.Services.AddCors(options =>
-            {
-                options.AddPolicy(name: CORSName,
-                                  builder => builder.SetIsOriginAllowedToAllowWildcardSubdomains()
-                                      .AllowAnyHeader()
-                                      .AllowAnyMethod()
-                                      .AllowCredentials()
-                                      .WithOrigins(allowOrigins?.Split(",") ?? [])
-                                      .SetIsOriginAllowed((host) => true));
-            });
+            builder.Services.AddOptions<Origins>()
+                .Bind(builder.Configuration.GetSection(Origins.SectionName))
+                .Validate(
+                    o => !string.IsNullOrWhiteSpace(o.AllowOrigins),
+                    $"{Origins.SectionName}:AllowOrigins must list at least one origin.")
+                .ValidateOnStart();
+
+            builder.Services.AddCors();
+
+            builder.Services.AddOptions<CorsOptions>()
+                .Configure<IOptions<Origins>>((cors, origins) =>
+                {
+                    var allowOrigins = origins.Value.AllowOrigins
+                        .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+                    cors.AddPolicy(name: CORSName,
+                                   policy => policy.SetIsOriginAllowedToAllowWildcardSubdomains()
+                                       .AllowAnyHeader()
+                                       .AllowAnyMethod()
+                                       .AllowCredentials()
+                                       .WithOrigins(allowOrigins)
+                                       .SetIsOriginAllowed((host) => true));
+                });
+
             return builder;
         }
     }

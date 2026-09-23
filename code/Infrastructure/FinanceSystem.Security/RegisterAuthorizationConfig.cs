@@ -1,6 +1,7 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.Net;
 using System.Text;
@@ -9,13 +10,22 @@ namespace FinanceSystem.Security
 {
     public static class RegisterAuthorizationConfig
     {
+        private const int MinimumSecretKeyBytes = 32;
+
         public static WebApplicationBuilder AddAuthenticationByJwtToken(this WebApplicationBuilder builder)
         {
-            builder.Services.Configure<JWTTokenConfig>(builder.Configuration.GetSection(JWTTokenConfig.SectionName));
-            var secretKey = builder.Configuration[$"{JWTTokenConfig.SectionName}:SecretKey"];
-            var issuer = builder.Configuration[$"{JWTTokenConfig.SectionName}:Issuer"];
-            var audience = builder.Configuration[$"{JWTTokenConfig.SectionName}:Audience"];
-
+            builder.Services.AddOptions<JWTTokenConfig>()
+                .Bind(builder.Configuration.GetSection(JWTTokenConfig.SectionName))
+                .Validate(
+                    c => !string.IsNullOrWhiteSpace(c.SecretKey) && Encoding.UTF8.GetByteCount(c.SecretKey) >= MinimumSecretKeyBytes,
+                    $"{JWTTokenConfig.SectionName}:SecretKey must be at least {MinimumSecretKeyBytes} bytes for HMAC-SHA256.")
+                .Validate(
+                    c => !string.IsNullOrWhiteSpace(c.Issuer),
+                    $"{JWTTokenConfig.SectionName}:Issuer is required.")
+                .Validate(
+                    c => !string.IsNullOrWhiteSpace(c.Audience),
+                    $"{JWTTokenConfig.SectionName}:Audience is required.")
+                .ValidateOnStart();
 
             ServicePointManager.Expect100Continue = true;
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
@@ -27,19 +37,24 @@ namespace FinanceSystem.Security
                 o.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
                 o.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
             })
-            .AddJwtBearer(options =>
-            {
-                options.TokenValidationParameters = new TokenValidationParameters
+            .AddJwtBearer();
+
+            builder.Services.AddOptions<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme)
+                .Configure<IOptions<JWTTokenConfig>>((jwtBearer, tokenConfig) =>
                 {
-                    ValidateIssuer = true,
-                    ValidateAudience = true,
-                    ValidateLifetime = true,
-                    ValidateIssuerSigningKey = true,
-                    ValidIssuer = issuer,
-                    ValidAudience = audience,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey))
-                };
-            });
+                    var config = tokenConfig.Value;
+
+                    jwtBearer.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidateAudience = true,
+                        ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
+                        ValidIssuer = config.Issuer,
+                        ValidAudience = config.Audience,
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config.SecretKey))
+                    };
+                });
 
             return builder;
         }

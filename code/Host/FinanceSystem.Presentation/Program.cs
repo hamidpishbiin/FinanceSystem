@@ -28,7 +28,18 @@ try
     builder.Services.AddSerilog();
 
     if (builder.Environment.IsProduction())
+    {
+        var envPath = Environment.GetEnvironmentVariable("FINANCESYSTEM_ENV_FILE") ?? "/etc/financesystem/.env";
+
+        if (!File.Exists(envPath))
+        {
+            throw new InvalidOperationException($"Env file not found at path '{envPath}'");
+        }
+
+        DotNetEnv.Env.Load(envPath);
+
         builder.Configuration.AddEnvironmentVariables();
+    }
 
     builder.Services.AddOpenApi();
 
@@ -39,15 +50,34 @@ try
     builder.AddAuthenticationByJwtToken();
 
 
-    builder.Services.Configure<ConnectionStrings>(builder.Configuration.GetSection(ConnectionStrings.SectionName));
+    builder.Services.AddOptions<ConnectionStrings>()
+        .Bind(builder.Configuration.GetSection(ConnectionStrings.SectionName))
+        .Validate(
+            c => !string.IsNullOrWhiteSpace(c.DefaultConnection),
+            $"{ConnectionStrings.SectionName}:DefaultConnection is required.")
+        .Validate(
+            c => !string.IsNullOrWhiteSpace(c.ReadOnlyConnection),
+            $"{ConnectionStrings.SectionName}:ReadOnlyConnection is required.")
+        .ValidateOnStart();
     builder.Services.AddOptions<PspCallbackUrlOptions>()
         .Bind(builder.Configuration.GetSection(PspCallbackUrlOptions.SectionName))
         .Validate(o => Uri.TryCreate(o.TopUp, UriKind.Absolute, out _), $"{PspCallbackUrlOptions.SectionName}:TopUp must be an absolute URL.")
         .ValidateOnStart();
-    var connectionString = builder.Configuration[$"{ConnectionStrings.SectionName}:DefaultConnection"];
-    var readonlyConnectionString = builder.Configuration[$"{ConnectionStrings.SectionName}:ReadOnlyConnection"];
+    // The Autofac module needs the connection strings while the container is being built,
+    // before DI (and therefore IOptions) exists — so bind the section directly here and fail
+    // fast. The AddOptions registration above still guards every IOptions<ConnectionStrings>
+    // consumer.
+    var connectionStrings = builder.Configuration.GetSection(ConnectionStrings.SectionName).Get<ConnectionStrings>()
+        ?? throw new InvalidOperationException($"Configuration section '{ConnectionStrings.SectionName}' is missing.");
+
+    if (string.IsNullOrWhiteSpace(connectionStrings.DefaultConnection))
+        throw new InvalidOperationException($"{ConnectionStrings.SectionName}:DefaultConnection is required.");
+
+    if (string.IsNullOrWhiteSpace(connectionStrings.ReadOnlyConnection))
+        throw new InvalidOperationException($"{ConnectionStrings.SectionName}:ReadOnlyConnection is required.");
+
     builder.Host.ConfigureContainer<ContainerBuilder>(builder =>
-        builder.AddModule(connectionString, readonlyConnectionString, typeof(ProductMapping).Assembly));
+        builder.AddModule(connectionStrings.DefaultConnection, connectionStrings.ReadOnlyConnection, typeof(ProductMapping).Assembly));
 
     builder.Host.UseSerilog();
 
@@ -59,7 +89,7 @@ try
 
     var app = builder.Build();
 
-    
+
 
     var locOptions = app.Services.GetService<IOptions<RequestLocalizationOptions>>();
     app.UseRequestLocalization(locOptions.Value);

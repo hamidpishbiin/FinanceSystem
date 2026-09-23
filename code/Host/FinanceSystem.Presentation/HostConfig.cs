@@ -11,12 +11,12 @@ namespace FinanceSystem.Presentation
     public sealed class Origins
     {
         public const string SectionName = "Origins";
-        public string AllowOrigins { get; set; }
+        public string AllowOrigins { get; set; } = default!;
     }
     public sealed class ConnectionStrings
     {
         public const string SectionName = "ConnectionStrings";
-        public string DefaultConnection { get; set; }
-        public string ReadOnlyConnection { get; set; }
+        public string DefaultConnection { get; set; } = default!;
+        public string ReadOnlyConnection { get; set; } = default!;
     }
 }

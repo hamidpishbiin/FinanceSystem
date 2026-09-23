@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Localization;
+using Shared.Core;
 using System.Globalization;
 
 namespace FinanceSystem.Presentation
@@ -8,6 +9,7 @@ namespace FinanceSystem.Presentation
         public static IServiceCollection RegisterLocalization(this IServiceCollection services)
         {
             services.AddLocalization(options => options.ResourcesPath = "Resources");
+            services.AddSingleton<IStringLocalizerService, StringLocalizerService>();
             services.Configure<RequestLocalizationOptions>(options =>
             {
                 var supportedCultures = new[]
