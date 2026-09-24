@@ -59,10 +59,18 @@ try
             c => !string.IsNullOrWhiteSpace(c.ReadOnlyConnection),
             $"{ConnectionStrings.SectionName}:ReadOnlyConnection is required.")
         .ValidateOnStart();
-    builder.Services.AddOptions<PspCallbackUrlOptions>()
-        .Bind(builder.Configuration.GetSection(PspCallbackUrlOptions.SectionName))
-        .Validate(o => Uri.TryCreate(o.TopUp, UriKind.Absolute, out _), $"{PspCallbackUrlOptions.SectionName}:TopUp must be an absolute URL.")
+    builder.Services.AddOptions<PspOptions>()
+        .Bind(builder.Configuration.GetSection(PspOptions.SectionName))
+        .Validate(
+            o => IsConfigured(o.Saman),
+            $"{PspOptions.SectionName}:Saman:TopUpCallBackUrl must be an absolute URL.")
+        .Validate(
+            o => IsConfigured(o.BehPardakht),
+            $"{PspOptions.SectionName}:BehPardakht:TopUpCallBackUrl must be an absolute URL.")
         .ValidateOnStart();
+
+    static bool IsConfigured(PspSettings? psp) =>
+        psp is not null && Uri.TryCreate(psp.TopUpCallBackUrl, UriKind.Absolute, out _);
     // The Autofac module needs the connection strings while the container is being built,
     // before DI (and therefore IOptions) exists — so bind the section directly here and fail
     // fast. The AddOptions registration above still guards every IOptions<ConnectionStrings>

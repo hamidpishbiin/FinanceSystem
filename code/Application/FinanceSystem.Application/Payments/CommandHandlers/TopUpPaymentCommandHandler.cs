@@ -18,7 +18,7 @@ public class TopUpPaymentCommandHandler(
     IPspPaymentDetailRepository pspPaymentDetailRepository,
     PspSelector pspSelector,
     IPspGatewayFactory pspGatewayFactory,
-    IOptions<PspCallbackUrlOptions> callbackUrls,
+    IOptions<PspOptions> pspOptions,
     IUnitOfWork unitOfWork)
     : PaymentCommandHandler<TopUpPaymentCommand>(repository, publisher, listener)
 {
@@ -48,7 +48,7 @@ public class TopUpPaymentCommandHandler(
         {
             Amount = amount.Value,
             ReferenceNumber = pspPaymentDetail.ReferenceNumber,
-            CallbackUrl = callbackUrls.Value.TopUp
+            CallbackUrl = pspOptions.Value.For(pspCode).TopUpCallBackUrl
         };
 
         var paymentTokenResponse = await pspGateway.RequestPaymentTokenAsync(pspPaymentRequest, cancellationToken);
