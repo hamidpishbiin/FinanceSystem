@@ -12,7 +12,7 @@ public class Account : EntityBase<long>
 {
     public AccountType Type { get; private set; }
     public AccountStatus Status { get; private set; }
-    public long OwnerId { get; private set; }
+    public long UserId { get; private set; }
     public decimal CachedBalanceRial { get; private set; }
     public DateTimeOffset BalanceCalculatedAt { get; private set; }
     public bool AllowNegativeBalance { get; private set; }
@@ -36,7 +36,7 @@ public class Account : EntityBase<long>
         {
             Type = type,
             Status = status,
-            OwnerId = ownerId,
+            UserId = ownerId,
             CachedBalanceRial = cachedBalanceRial.Value,
             BalanceCalculatedAt = balanceCalculatedAt,
             AllowNegativeBalance = allowNegativeBalance
@@ -58,7 +58,7 @@ public class Account : EntityBase<long>
         BalanceCalculatedAt = occurredAt;
     }
 
-    public bool Allows(EntryDirection direction) => Status switch
+    private bool Allows(EntryDirection direction) => Status switch
     {
         AccountStatus.Active => true,
         AccountStatus.InboundFrozen => direction == EntryDirection.Out,

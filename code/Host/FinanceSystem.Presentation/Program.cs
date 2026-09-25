@@ -5,6 +5,7 @@ using Microsoft.Extensions.Options;
 using FinanceSystem.Application.Payments.Gateways;
 using FinanceSystem.Bootstrap;
 using FinanceSystem.Persistance.Mappings;
+using FinanceSystem.Psp;
 using FinanceSystem.Presentation;
 using FinanceSystem.Security;
 using Serilog;
@@ -25,6 +26,7 @@ try
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddAuthorization();
     builder.Services.AddHttpClient();
+    builder.Services.AddPspHttpClients();
     builder.Services.AddSerilog();
 
     if (builder.Environment.IsProduction())
@@ -63,18 +65,20 @@ try
         .Bind(builder.Configuration.GetSection(PspOptions.SectionName))
         .Validate(
             o => IsConfigured(o.Saman),
-            $"{PspOptions.SectionName}:Saman:TopUpCallBackUrl must be an absolute URL.")
+            $"{PspOptions.SectionName}:Saman needs absolute TopUpCallBackUrl and BaseUrl, MerchantId, TerminalId, CredentialsRef and a positive TimeoutInSeconds.")
         .Validate(
             o => IsConfigured(o.BehPardakht),
-            $"{PspOptions.SectionName}:BehPardakht:TopUpCallBackUrl must be an absolute URL.")
+            $"{PspOptions.SectionName}:BehPardakht needs absolute TopUpCallBackUrl and BaseUrl, MerchantId, TerminalId, CredentialsRef and a positive TimeoutInSeconds.")
         .ValidateOnStart();
 
     static bool IsConfigured(PspSettings? psp) =>
-        psp is not null && Uri.TryCreate(psp.TopUpCallBackUrl, UriKind.Absolute, out _);
-    // The Autofac module needs the connection strings while the container is being built,
-    // before DI (and therefore IOptions) exists — so bind the section directly here and fail
-    // fast. The AddOptions registration above still guards every IOptions<ConnectionStrings>
-    // consumer.
+        psp is not null
+        && Uri.TryCreate(psp.TopUpCallBackUrl, UriKind.Absolute, out _)
+        && Uri.TryCreate(psp.BaseUrl, UriKind.Absolute, out _)
+        && !string.IsNullOrWhiteSpace(psp.MerchantId)
+        && !string.IsNullOrWhiteSpace(psp.TerminalId)
+        && !string.IsNullOrWhiteSpace(psp.CredentialsRef)
+        && psp.TimeoutInSeconds > 0;
     var connectionStrings = builder.Configuration.GetSection(ConnectionStrings.SectionName).Get<ConnectionStrings>()
         ?? throw new InvalidOperationException($"Configuration section '{ConnectionStrings.SectionName}' is missing.");
 

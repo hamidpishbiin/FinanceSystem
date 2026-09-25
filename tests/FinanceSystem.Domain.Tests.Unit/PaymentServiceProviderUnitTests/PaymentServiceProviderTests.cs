@@ -19,10 +19,6 @@ public class PaymentServiceProviderTests
         psp.Name.Should().Be(PaymentServiceProviderBuilder.DefaultName);
         psp.IsActive.Should().Be(PaymentServiceProviderBuilder.DefaultIsActive);
         psp.Priority.Should().Be(PaymentServiceProviderBuilder.DefaultPriority);
-        psp.MerchantId.Should().Be(PaymentServiceProviderBuilder.DefaultMerchantId);
-        psp.TerminalId.Should().Be(PaymentServiceProviderBuilder.DefaultTerminalId);
-        psp.CredentialsRef.Should().Be(PaymentServiceProviderBuilder.DefaultCredentialsRef);
-        psp.BaseUrl.Should().Be(PaymentServiceProviderBuilder.DefaultBaseUrl);
     }
 
     [Fact]
@@ -70,47 +66,6 @@ public class PaymentServiceProviderTests
         var psp = await _builder.WithPriority(0).Build();
 
         psp.Priority.Should().Be(0);
-    }
-
-    [Theory]
-    [InlineData("")]
-    [InlineData("   ")]
-    [InlineData(null)]
-    public async Task Create_should_throw_when_merchantId_is_null_or_empty_or_whiteSpace(string? merchantId)
-    {
-        Func<Task> act = () => _builder.WithMerchantId(merchantId).Build();
-
-        await act.Should().ThrowAsync<InvalidMerchantIdException>();
-    }
-
-    [Theory]
-    [InlineData("")]
-    [InlineData("   ")]
-    [InlineData(null)]
-    public async Task Create_should_throw_when_credentialsRef_is_null_or_empty_or_whiteSpace(string? credentialsRef)
-    {
-        Func<Task> act = () => _builder.WithCredentialsRef(credentialsRef).Build();
-
-        await act.Should().ThrowAsync<InvalidCredentialsRefException>();
-    }
-
-    [Theory]
-    [InlineData("")]
-    [InlineData("   ")]
-    [InlineData(null)]
-    public async Task Create_should_throw_when_baseUrl_is_null_or_empty_or_whiteSpace(string? baseUrl)
-    {
-        Func<Task> act = () => _builder.WithBaseUrl(baseUrl).Build();
-
-        await act.Should().ThrowAsync<InvalidBaseUrlException>();
-    }
-
-    [Fact]
-    public async Task Create_should_allow_null_terminalId()
-    {
-        var psp = await _builder.WithTerminalId(null).Build();
-
-        psp.TerminalId.Should().BeNull();
     }
 
     [Fact]

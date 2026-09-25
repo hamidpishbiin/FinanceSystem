@@ -26,10 +26,11 @@ public class PspPaymentDetail : EntityBase<long>, IAggregateRoot
     public string? RefNum { get; private set; }
     public string? TraceNumber { get; private set; }
     public string? MaskedPan { get; private set; }
-    public int? ResultCode { get; private set; }
-    public string? RawCallback { get; private set; }
+    public PspFailureReason? FailureReason { get; private set; }
+    public string? RawStatus { get; private set; }
+    public string? RawErrorCode { get; private set; }
+    public string? RawDescription { get; private set; }
     public DateTimeOffset? VerifiedAtUtc { get; private set; }
-
     public PaymentServiceProvider? Psp { get; private set; }
     public Account? TargetAccount { get; private set; }
 
@@ -59,9 +60,17 @@ public class PspPaymentDetail : EntityBase<long>, IAggregateRoot
         };
     }
 
-    public async Task MarkPaymentFailed()
+    public async Task MarkPaymentFailed(
+        PspFailureReason failureReason,
+        string? rawStatus,
+        string? rawErrorCode,
+        string? rawDescription)
     {
         Status = PspPaymentStatus.Failed;
+        FailureReason = failureReason;
+        RawStatus = rawStatus;
+        RawErrorCode = rawErrorCode;
+        RawDescription = rawDescription;
 
         await Publisher.Publish(new PspPaymentFailedEvent(Id));
     }

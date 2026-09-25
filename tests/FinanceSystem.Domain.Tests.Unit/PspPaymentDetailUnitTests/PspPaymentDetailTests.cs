@@ -30,8 +30,10 @@ public class PspPaymentDetailTests
         bpd.ReferenceNumber.Should().Be(0, "the database sequence assigns it on insert");
         bpd.TraceNumber.Should().BeNull();
         bpd.MaskedPan.Should().BeNull();
-        bpd.ResultCode.Should().BeNull();
-        bpd.RawCallback.Should().BeNull();
+        bpd.FailureReason.Should().BeNull();
+        bpd.RawStatus.Should().BeNull();
+        bpd.RawErrorCode.Should().BeNull();
+        bpd.RawDescription.Should().BeNull();
         bpd.VerifiedAtUtc.Should().BeNull();
     }
 

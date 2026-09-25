@@ -10,10 +10,6 @@ public class PaymentServiceProviderBuilder
     public const string DefaultName = "Saman Bank Gateway";
     public const bool DefaultIsActive = true;
     public const short DefaultPriority = 10;
-    public const string DefaultMerchantId = "merchant-55012";
-    public const string DefaultTerminalId = "terminal-88";
-    public const string DefaultCredentialsRef = "vault://psp/saman";
-    public const string DefaultBaseUrl = "https://sep.shaparak.ir";
 
     public static readonly Guid DefaultId = Guid.Parse(DefaultIdString);
 
@@ -22,10 +18,6 @@ public class PaymentServiceProviderBuilder
     private string Name { get; set; } = DefaultName;
     private bool IsActive { get; set; } = DefaultIsActive;
     private short Priority { get; set; } = DefaultPriority;
-    private string MerchantId { get; set; } = DefaultMerchantId;
-    private string? TerminalId { get; set; } = DefaultTerminalId;
-    private string CredentialsRef { get; set; } = DefaultCredentialsRef;
-    private string BaseUrl { get; set; } = DefaultBaseUrl;
 
     public async Task<PaymentServiceProvider> Build()
     {
@@ -34,11 +26,7 @@ public class PaymentServiceProviderBuilder
             Code,
             Name,
             IsActive,
-            Priority,
-            MerchantId,
-            TerminalId,
-            CredentialsRef,
-            BaseUrl);
+            Priority);
     }
 
     public PaymentServiceProviderBuilder WithId(Guid id)
@@ -71,27 +59,7 @@ public class PaymentServiceProviderBuilder
         return this;
     }
 
-    public PaymentServiceProviderBuilder WithMerchantId(string? merchantId)
-    {
-        MerchantId = merchantId!;
-        return this;
-    }
 
-    public PaymentServiceProviderBuilder WithTerminalId(string? terminalId)
-    {
-        TerminalId = terminalId;
-        return this;
-    }
 
-    public PaymentServiceProviderBuilder WithCredentialsRef(string? credentialsRef)
-    {
-        CredentialsRef = credentialsRef!;
-        return this;
-    }
 
-    public PaymentServiceProviderBuilder WithBaseUrl(string? baseUrl)
-    {
-        BaseUrl = baseUrl!;
-        return this;
-    }
 }

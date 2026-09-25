@@ -14,7 +14,7 @@ public class AccountMapping() : EntityBaseMap<Account, long>("Accounts")
             .ValueGeneratedOnAdd();
 
         builder
-            .Property(p => p.OwnerId)
+            .Property(p => p.UserId)
             .HasColumnName("OwnerId");
 
         // builder

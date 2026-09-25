@@ -33,24 +33,5 @@ public class PaymentServiceProviderMapping() : EntityBaseMap<PaymentServiceProvi
         builder
             .Property(p => p.Priority)
             .HasColumnName("Priority");
-
-        builder
-            .Property(p => p.MerchantId)
-            .HasColumnName("MerchantId")
-            .HasMaxLength(50);
-
-        builder
-            .Property(p => p.TerminalId)
-            .HasColumnName("TerminalId")
-            .HasMaxLength(50);
-
-        builder
-            .Property(p => p.CredentialsRef)
-            .HasColumnName("CredentialsRef")
-            .HasMaxLength(50);
-
-        builder
-            .Property(p => p.BaseUrl)
-            .HasColumnName("BaseUrl");
     }
 }

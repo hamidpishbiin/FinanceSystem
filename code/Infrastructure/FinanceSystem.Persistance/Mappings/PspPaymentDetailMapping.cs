@@ -107,12 +107,22 @@ public class PspPaymentDetailMapping() : EntityBaseMap<PspPaymentDetail, long>("
             .HasColumnName("MaskedPan");
 
         builder
-            .Property(p => p.ResultCode)
-            .HasColumnName("ResultCode");
+            .Property(p => p.FailureReason)
+            .HasColumnName("FailureReason");
 
         builder
-            .Property(p => p.RawCallback)
-            .HasColumnName("RawCallback");
+            .Property(p => p.RawStatus)
+            .HasColumnName("RawStatus")
+            .HasMaxLength(20);
+
+        builder
+            .Property(p => p.RawErrorCode)
+            .HasColumnName("RawErrorCode")
+            .HasMaxLength(20);
+
+        builder
+            .Property(p => p.RawDescription)
+            .HasColumnName("RawDescription");
 
         builder
             .Property(p => p.VerifiedAtUtc)

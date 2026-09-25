@@ -23,7 +23,7 @@ public class AccountTests
 
         account.Type.Should().Be(AccountBuilder.DefaultType);
         account.Status.Should().Be(AccountBuilder.DefaultStatus);
-        account.OwnerId.Should().Be(AccountBuilder.DefaultOwnerId);
+        account.UserId.Should().Be(AccountBuilder.DefaultOwnerId);
         account.CachedBalanceRial.Should().Be(AccountBuilder.DefaultCachedBalanceRial);
         account.BalanceCalculatedAt.Should().Be(AccountBuilder.DefaultBalanceCalculatedAt);
         account.AllowNegativeBalance.Should().Be(AccountBuilder.DefaultAllowNegativeBalance);

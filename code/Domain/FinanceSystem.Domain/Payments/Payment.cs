@@ -12,7 +12,7 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
 
     public IEventPublisher Publisher { get; set; }
 
-    public string IdempotencyKey { get; private set; }
+    public string IdempotencyKey { get; private set; } // Remove
     public PaymentPurpose Purpose { get; private set; }
     public PaymentChannel Channel { get; private set; }
     public decimal AmountRial { get; private set; }
