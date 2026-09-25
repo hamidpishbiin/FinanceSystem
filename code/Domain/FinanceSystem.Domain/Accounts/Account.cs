@@ -13,7 +13,7 @@ public class Account : EntityBase<long>
     public AccountType Type { get; private set; }
     public AccountStatus Status { get; private set; }
     public long UserId { get; private set; }
-    public decimal CachedBalanceRial { get; private set; }
+    public decimal CachedBalance { get; private set; }
     public DateTimeOffset BalanceCalculatedAt { get; private set; }
     public bool AllowNegativeBalance { get; private set; }
 
@@ -25,19 +25,19 @@ public class Account : EntityBase<long>
         AccountType type,
         AccountStatus status,
         long ownerId,
-        Money cachedBalanceRial,
+        Money cachedBalance,
         DateTimeOffset balanceCalculatedAt,
         bool allowNegativeBalance)
     {
         Guard<InvalidIdException>.IsTrue(ownerId <= 0);
-        Guard<NullEntryException>.AgainstNull(cachedBalanceRial);
+        Guard<NullEntryException>.AgainstNull(cachedBalance);
 
         return new Account()
         {
             Type = type,
             Status = status,
             UserId = ownerId,
-            CachedBalanceRial = cachedBalanceRial.Value,
+            CachedBalance = cachedBalance.Value,
             BalanceCalculatedAt = balanceCalculatedAt,
             AllowNegativeBalance = allowNegativeBalance
         };
@@ -50,11 +50,11 @@ public class Account : EntityBase<long>
         Guard<AccountClosedException>.IsTrue(Status == AccountStatus.Closed);
         Guard<AccountDirectionNotAllowedException>.IsFalse(Allows(entry.Direction));
 
-        var newBalance = CachedBalanceRial + entry.SignedAmountRial;
+        var newBalance = CachedBalance + entry.SignedAmount;
 
         Guard<InsufficientBalanceException>.IsTrue(newBalance < 0 && !AllowNegativeBalance);
 
-        CachedBalanceRial = newBalance;
+        CachedBalance = newBalance;
         BalanceCalculatedAt = occurredAt;
     }
 

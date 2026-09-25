@@ -24,7 +24,7 @@ public class AccountTests
         account.Type.Should().Be(AccountBuilder.DefaultType);
         account.Status.Should().Be(AccountBuilder.DefaultStatus);
         account.UserId.Should().Be(AccountBuilder.DefaultOwnerId);
-        account.CachedBalanceRial.Should().Be(AccountBuilder.DefaultCachedBalanceRial);
+        account.CachedBalance.Should().Be(AccountBuilder.DefaultCachedBalance);
         account.BalanceCalculatedAt.Should().Be(AccountBuilder.DefaultBalanceCalculatedAt);
         account.AllowNegativeBalance.Should().Be(AccountBuilder.DefaultAllowNegativeBalance);
     }
@@ -40,7 +40,7 @@ public class AccountTests
     }
 
     [Fact]
-    public async Task Create_should_throw_when_cachedBalanceRial_is_null()
+    public async Task Create_should_throw_when_cachedBalance_is_null()
     {
         Func<Task> account = () => _accountBuilder.WithAmount(null!).Build();
 

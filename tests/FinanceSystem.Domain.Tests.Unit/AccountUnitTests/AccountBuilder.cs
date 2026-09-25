@@ -10,14 +10,14 @@ public class AccountBuilder
     public const AccountType DefaultType = AccountType.BankGateway;
     public const AccountStatus DefaultStatus = AccountStatus.Active;
     public const long DefaultOwnerId = 1234;
-    public const decimal DefaultCachedBalanceRial = 300;
+    public const decimal DefaultCachedBalance = 300;
     public static readonly DateTimeOffset DefaultBalanceCalculatedAt = new(2026, 08, 09, 0, 0, 0, TimeSpan.Zero);
     public const bool DefaultAllowNegativeBalance = false;
 
     private AccountType Type { get; set; } = DefaultType;
     private AccountStatus Status { get; set; } = DefaultStatus;
     private long OwnerId { get; set; } = DefaultOwnerId;
-    private Money CachedAmount { get; set; } = new(DefaultCachedBalanceRial);
+    private Money CachedAmount { get; set; } = new(DefaultCachedBalance);
     private DateTimeOffset BalanceCalculatedAt { get; set; } = DefaultBalanceCalculatedAt;
     private bool AllowNegativeBalance { get; set; } = DefaultAllowNegativeBalance;
 
@@ -50,9 +50,9 @@ public class AccountBuilder
         return this;
     }
 
-    public AccountBuilder WithAmount(Money cachedBalanceRial)
+    public AccountBuilder WithAmount(Money cachedBalance)
     {
-        CachedAmount = cachedBalanceRial;
+        CachedAmount = cachedBalance;
         return this;
     }
 

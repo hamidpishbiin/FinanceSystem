@@ -10,11 +10,11 @@ namespace FinanceSystem.Domain.Tests.Unit.RequestToPayUnitTests;
 public class RequestToPayBuilder
 {
     public const PspCode DefaultPspCode = PspCode.Saman;
-    public const decimal DefaultRequestAmountRial = 1234123;
+    public const decimal DefaultRequestAmount = 1234123;
     public const long DefaultTargetAccountId = 12;
 
     private PspCode PspCode { get; set; } = DefaultPspCode;
-    private Money RequestAmount { get; set; } = new(DefaultRequestAmountRial);
+    private Money RequestAmount { get; set; } = new(DefaultRequestAmount);
     private long TargetAccountId { get; set; } = DefaultTargetAccountId;
 
     public IEventPublisher EventPublisher { get; private set; } = Substitute.For<IEventPublisher>();

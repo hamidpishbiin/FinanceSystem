@@ -11,7 +11,7 @@ public class BalanceCheckpoint : EntityBase<long>
 {
     public long AccountId { get; private set; }
     public long UpToEntryId { get; private set; }
-    public decimal BalanceRial { get; private set; }
+    public decimal Balance { get; private set; }
 
     public Account? Account { get; private set; }
     public AccountEntry? UpToEntry { get; private set; }
@@ -33,7 +33,7 @@ public class BalanceCheckpoint : EntityBase<long>
         {
             AccountId = accountId,
             UpToEntryId = upToEntryId,
-            BalanceRial = balance.Value
+            Balance = balance.Value
         };
     }
 }

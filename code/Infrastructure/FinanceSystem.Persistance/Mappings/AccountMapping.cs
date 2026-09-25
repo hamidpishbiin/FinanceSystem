@@ -33,8 +33,8 @@ public class AccountMapping() : EntityBaseMap<Account, long>("Accounts")
             .HasColumnName("BalanceCalculatedAt");
 
         builder
-            .Property(p => p.CachedBalanceRial)
-            .HasColumnName("CachedBalanceRial")
+            .Property(p => p.CachedBalance)
+            .HasColumnName("CachedBalance")
             .HasPrecision(18, 0);
 
         builder

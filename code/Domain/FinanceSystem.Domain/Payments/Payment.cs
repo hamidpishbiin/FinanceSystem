@@ -15,7 +15,7 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
     public string IdempotencyKey { get; private set; } // Remove
     public PaymentPurpose Purpose { get; private set; }
     public PaymentChannel Channel { get; private set; }
-    public decimal AmountRial { get; private set; }
+    public decimal Amount { get; private set; }
     public long SourceAccountId { get; private set; }
     public long DestinationAccountId { get; private set; }
     public string OriginServiceId { get; private set; }
@@ -70,7 +70,7 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
             IdempotencyKey = idempotencyKey,
             Purpose = purpose,
             Channel = channel,
-            AmountRial = amount.Value,
+            Amount = amount.Value,
             SourceAccountId = sourceAccountId,
             DestinationAccountId = destinationAccountId,
             OriginServiceId = originServiceId,

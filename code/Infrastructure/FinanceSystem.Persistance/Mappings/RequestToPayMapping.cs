@@ -36,13 +36,13 @@ public class RequestToPayMapping() : EntityBaseMap<RequestToPay, long>("Requests
             .HasColumnName("Status");
 
         builder
-            .Property(p => p.RequestAmountRial)
-            .HasColumnName("RequestAmountRial")
+            .Property(p => p.RequestAmount)
+            .HasColumnName("RequestAmount")
             .HasPrecision(18, 0);
 
         builder
-            .Property(p => p.RedirectedAmountRial)
-            .HasColumnName("RedirectedAmountRial")
+            .Property(p => p.RedirectedAmount)
+            .HasColumnName("RedirectedAmount")
             .HasPrecision(18, 0);
 
         builder

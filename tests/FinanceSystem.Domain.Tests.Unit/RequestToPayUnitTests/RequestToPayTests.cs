@@ -21,8 +21,8 @@ public class RequestToPayTests
 
         bpd.PspCode.Should().Be(RequestToPayBuilder.DefaultPspCode);
         bpd.Status.Should().Be(RequestToPayStatus.Initiated);
-        bpd.RequestAmountRial.Should().Be(RequestToPayBuilder.DefaultRequestAmountRial);
-        bpd.RedirectedAmountRial.Should().BeNull();
+        bpd.RequestAmount.Should().Be(RequestToPayBuilder.DefaultRequestAmount);
+        bpd.RedirectedAmount.Should().BeNull();
         bpd.TargetAccountId.Should().Be(RequestToPayBuilder.DefaultTargetAccountId);
         bpd.Token.Should().BeNull();
         bpd.RRN.Should().BeNull();

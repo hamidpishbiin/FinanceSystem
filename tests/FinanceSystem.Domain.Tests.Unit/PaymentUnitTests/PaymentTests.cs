@@ -21,7 +21,7 @@ public class PaymentTests
         payment.IdempotencyKey.Should().Be(PaymentBuilder.DefaultIdempotencyKey);
         payment.Purpose.Should().Be(PaymentBuilder.DefaultPurpose);
         payment.Channel.Should().Be(PaymentBuilder.DefaultChannel);
-        payment.AmountRial.Should().Be(PaymentBuilder.DefaultAmountRial);
+        payment.Amount.Should().Be(PaymentBuilder.DefaultAmount);
         payment.SourceAccountId.Should().Be(PaymentBuilder.DefaultSourceAccountId);
         payment.DestinationAccountId.Should().Be(PaymentBuilder.DefaultDestinationAccountId);
         payment.OriginServiceId.Should().Be(PaymentBuilder.DefaultOriginServiceId);
@@ -40,7 +40,7 @@ public class PaymentTests
             .Received(1)
             .Publish(Arg.Is<PaymentCreatedEvent>(e =>
                 e.IdempotencyKey == PaymentBuilder.DefaultIdempotencyKey &&
-                e.AmountRial == PaymentBuilder.DefaultAmountRial));
+                e.Amount == PaymentBuilder.DefaultAmount));
     }
 
     [Theory]

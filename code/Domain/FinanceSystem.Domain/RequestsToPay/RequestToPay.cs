@@ -17,8 +17,8 @@ public class RequestToPay : EntityBase<long>, IAggregateRoot
 
     public PspCode PspCode { get; private set; }
     public RequestToPayStatus Status { get; private set; }
-    public decimal RequestAmountRial { get; private set; }
-    public decimal? RedirectedAmountRial { get; private set; }
+    public decimal RequestAmount { get; private set; }
+    public decimal? RedirectedAmount { get; private set; }
     public long TargetAccountId { get; private set; }
     public long ReferenceNumber { get; private set; }
     public string? Token { get; private set; }
@@ -54,7 +54,7 @@ public class RequestToPay : EntityBase<long>, IAggregateRoot
         {
             PspCode = pspCode,
             Status = RequestToPayStatus.Initiated,
-            RequestAmountRial = amount.Value,
+            RequestAmount = amount.Value,
             TargetAccountId = targetAccountId,
             Publisher = eventPublisher
         };

@@ -22,7 +22,7 @@ public class AccountEntryMapping() : EntityBaseMap<AccountEntry, long>("AccountE
 
         builder
             .HasIndex(p => p.PaymentId)
-            .IncludeProperties(p => p.AmountRial)
+            .IncludeProperties(p => p.Amount)
             .HasDatabaseName("IX_AccountEntries_PaymentId");
 
         builder
@@ -38,7 +38,7 @@ public class AccountEntryMapping() : EntityBaseMap<AccountEntry, long>("AccountE
 
         builder
             .HasIndex(p => p.AccountId)
-            .IncludeProperties(p => new { p.AmountRial, p.Direction })
+            .IncludeProperties(p => new { p.Amount, p.Direction })
             .HasDatabaseName("IX_AccountEntries_AccountId");
 
         builder
@@ -49,8 +49,8 @@ public class AccountEntryMapping() : EntityBaseMap<AccountEntry, long>("AccountE
             .HasConstraintName("FK_AccountEntries_Accounts_AccountId");
 
         builder
-            .Property(p => p.AmountRial)
-            .HasColumnName("AmountRial")
+            .Property(p => p.Amount)
+            .HasColumnName("Amount")
             .HasPrecision(18, 0);
 
         builder
@@ -58,6 +58,6 @@ public class AccountEntryMapping() : EntityBaseMap<AccountEntry, long>("AccountE
             .HasColumnName("Direction")
             .HasConversion<byte>();
 
-        builder.Ignore(p => p.SignedAmountRial);
+        builder.Ignore(p => p.SignedAmount);
     }
 }

@@ -23,20 +23,20 @@ public class AccountEntryTests
 
         accountEntry.PaymentId.Should().Be(AccountEntryBuilder.DefaultPaymentId);
         accountEntry.AccountId.Should().Be(AccountEntryBuilder.DefaultAccountId);
-        accountEntry.AmountRial.Should().Be(AccountEntryBuilder.DefaultAmountRial);
+        accountEntry.Amount.Should().Be(AccountEntryBuilder.DefaultAmount);
         accountEntry.Direction.Should().Be(AccountEntryBuilder.DefaultDirection);
     }
 
     [Theory]
     [InlineData(EntryDirection.In, 110)]
     [InlineData(EntryDirection.Out, -110)]
-    public async Task SignedAmountRial_should_be_negative_only_for_outgoing_entries(
+    public async Task SignedAmount_should_be_negative_only_for_outgoing_entries(
         EntryDirection direction,
         decimal expected)
     {
         var accountEntry = await _builder.WithDirection(direction).Build();
 
-        accountEntry.SignedAmountRial.Should().Be(expected);
+        accountEntry.SignedAmount.Should().Be(expected);
     }
 
     [Theory]

@@ -22,7 +22,7 @@ public class TopUpCommandHandler(
     {
         var targetAccountId = 12;
 
-        var amount = new Money(command.AmountRial);
+        var amount = new Money(command.Amount);
 
         var psp = await pspSelector.SelectAsync((PspCode)command.PspCode, cancellationToken);
 

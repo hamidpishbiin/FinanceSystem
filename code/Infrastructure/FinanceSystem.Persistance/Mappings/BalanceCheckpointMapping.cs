@@ -40,13 +40,13 @@ public class BalanceCheckpointMapping() : EntityBaseMap<BalanceCheckpoint, long>
             .HasConstraintName("FK_BalanceCheckpoints_AccountEntries_UpToEntryId");
 
         builder
-            .Property(p => p.BalanceRial)
-            .HasColumnName("BalanceRial")
+            .Property(p => p.Balance)
+            .HasColumnName("Balance")
             .HasPrecision(18, 0);
 
         builder
             .HasIndex(p => new { p.AccountId, p.UpToEntryId })
-            .IncludeProperties(p => p.BalanceRial)
+            .IncludeProperties(p => p.Balance)
             .HasDatabaseName("IX_BalanceCheckpoints_AccountId_UpToEntryId");
     }
 }

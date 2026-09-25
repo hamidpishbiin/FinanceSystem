@@ -25,7 +25,7 @@ public class WalletFacadeService(
             IdempotencyKey = model.IdempotencyKey,
             Purpose = model.Purpose,
             Channel = model.Channel,
-            AmountRial = model.AmountRial,
+            Amount = model.Amount,
             SourceAccountId = model.SourceAccountId,
             DestinationAccountId = model.DestinationAccountId,
             OriginServiceId = model.OriginServiceId,
@@ -48,7 +48,7 @@ public class WalletFacadeService(
 
         await commandBus.Dispatch(new TopUpCommand()
         {
-            AmountRial = model.Amount,
+            Amount = model.Amount,
             PspCode = model.PspCode,
             UserId = Guid.Parse(userResolver.GetUserId())
         }, cancellationToken);

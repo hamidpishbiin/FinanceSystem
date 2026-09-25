@@ -11,13 +11,13 @@ public class AccountEntry : EntityBase<long>
 {
     public long PaymentId { get; private set; }
     public long AccountId { get; private set; }
-    public decimal AmountRial { get; private set; }
+    public decimal Amount { get; private set; }
     public EntryDirection Direction { get; private set; }
 
     public Account? Account { get; private set; }
     public Payment? Payment { get; private set; }
 
-    public decimal SignedAmountRial => Direction == EntryDirection.In ? AmountRial : -AmountRial;
+    public decimal SignedAmount => Direction == EntryDirection.In ? Amount : -Amount;
 
     private AccountEntry()
     {
@@ -26,20 +26,20 @@ public class AccountEntry : EntityBase<long>
     public async static Task<AccountEntry> Create(
         long paymentId,
         long accountId,
-        Money amountRial,
+        Money amount,
         EntryDirection direction)
     {
         Guard<InvalidPaymentIdException>.IsTrue(paymentId <= 0);
         Guard<InvalidAccountIdException>.IsTrue(accountId <= 0);
-        Guard<NullEntryException>.AgainstNull(amountRial);
-        Guard<InvalidAmountException>.IsTrue(amountRial.Value == 0);
+        Guard<NullEntryException>.AgainstNull(amount);
+        Guard<InvalidAmountException>.IsTrue(amount.Value == 0);
         Guard<InvalidEntryDirectionException>.IsFalse(Enum.IsDefined(direction));
 
         return new AccountEntry()
         {
             PaymentId = paymentId,
             AccountId = accountId,
-            AmountRial = amountRial.Value,
+            Amount = amount.Value,
             Direction = direction
         };
     }

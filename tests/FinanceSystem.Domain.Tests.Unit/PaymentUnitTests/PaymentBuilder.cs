@@ -10,7 +10,7 @@ public class PaymentBuilder
     public const string DefaultIdempotencyKey = "b2f1c7d0-idem-key";
     public const PaymentPurpose DefaultPurpose = PaymentPurpose.Purchase;
     public const PaymentChannel DefaultChannel = PaymentChannel.Wallet;
-    public const decimal DefaultAmountRial = 250_000;
+    public const decimal DefaultAmount = 250_000;
     public const long DefaultSourceAccountId = 11;
     public const long DefaultDestinationAccountId = 22;
     public const string DefaultOriginServiceId = "checkout-service";
@@ -21,7 +21,7 @@ public class PaymentBuilder
     private string IdempotencyKey { get; set; } = DefaultIdempotencyKey;
     private PaymentPurpose Purpose { get; set; } = DefaultPurpose;
     private PaymentChannel Channel { get; set; } = DefaultChannel;
-    private Money Amount { get; set; } = new(DefaultAmountRial);
+    private Money Amount { get; set; } = new(DefaultAmount);
     private long SourceAccountId { get; set; } = DefaultSourceAccountId;
     private long DestinationAccountId { get; set; } = DefaultDestinationAccountId;
     private string OriginServiceId { get; set; } = DefaultOriginServiceId;

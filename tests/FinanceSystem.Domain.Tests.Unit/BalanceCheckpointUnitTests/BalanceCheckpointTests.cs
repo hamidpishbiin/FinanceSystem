@@ -22,7 +22,7 @@ public class BalanceCheckpointTests
 
         bc.AccountId.Should().Be(BalanceCheckpointBuilder.DefaultAccountId);
         bc.UpToEntryId.Should().Be(BalanceCheckpointBuilder.DefaultUpToEntryId);
-        bc.BalanceRial.Should().Be(BalanceCheckpointBuilder.DefaultBalanceRial);
+        bc.Balance.Should().Be(BalanceCheckpointBuilder.DefaultBalance);
     }
 
     [Theory]

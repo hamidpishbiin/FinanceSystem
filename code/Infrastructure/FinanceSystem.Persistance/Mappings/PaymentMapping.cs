@@ -37,8 +37,8 @@ public class PaymentMapping() : EntityBaseMap<Payment, long>("Payments")
             .HasColumnName("Channel");
 
         builder
-            .Property(p => p.AmountRial)
-            .HasColumnName("AmountRial");
+            .Property(p => p.Amount)
+            .HasColumnName("Amount");
 
         builder
             .Property(p => p.SourceAccountId)

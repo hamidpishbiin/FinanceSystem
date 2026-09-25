@@ -9,12 +9,12 @@ public class AccountEntryBuilder
 {
     public const long DefaultPaymentId = 12;
     public const long DefaultAccountId = 13;
-    public const decimal DefaultAmountRial = 110;
+    public const decimal DefaultAmount = 110;
     public const EntryDirection DefaultDirection = EntryDirection.In;
 
     private long PaymentId { get; set; } = DefaultPaymentId;
     private long AccountId { get; set; } = DefaultAccountId;
-    private Money Amount { get; set; } = new(DefaultAmountRial);
+    private Money Amount { get; set; } = new(DefaultAmount);
     private EntryDirection Direction { get; set; } = DefaultDirection;
 
     public Task<AccountEntry> Build()

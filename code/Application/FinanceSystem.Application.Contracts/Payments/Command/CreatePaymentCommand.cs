@@ -5,7 +5,7 @@ public class CreatePaymentCommand : PaymentCommand
     public string IdempotencyKey { get; set; }
     public int Purpose { get; set; }
     public int Channel { get; set; }
-    public decimal AmountRial { get; set; }
+    public decimal Amount { get; set; }
     public long SourceAccountId { get; set; }
     public long DestinationAccountId { get; set; }
     public string OriginServiceId { get; set; }

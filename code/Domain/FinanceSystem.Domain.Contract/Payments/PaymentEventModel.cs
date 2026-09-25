@@ -20,7 +20,7 @@ public class PaymentEventModel
         EventBody = System.Text.Json.JsonSerializer.Serialize(new
         {
             domainEvent.IdempotencyKey,
-            domainEvent.AmountRial,
+            domainEvent.Amount,
         });
     }
 }

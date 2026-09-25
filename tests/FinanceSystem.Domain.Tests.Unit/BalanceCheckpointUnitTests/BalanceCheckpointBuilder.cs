@@ -8,11 +8,11 @@ public class BalanceCheckpointBuilder
 {
     public const long DefaultAccountId = 1234;
     public const long DefaultUpToEntryId = 5678;
-    public const decimal DefaultBalanceRial = 9086131;
+    public const decimal DefaultBalance = 9086131;
 
     private long AccountId { get; set; } = DefaultAccountId;
     private long UpToEntryId { get; set; } = DefaultUpToEntryId;
-    private Money BalanceAmount { get; set; } = new Money(DefaultBalanceRial);
+    private Money BalanceAmount { get; set; } = new Money(DefaultBalance);
 
     public async Task<BalanceCheckpoint> Build()
     {
