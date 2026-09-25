@@ -2,7 +2,6 @@ namespace FinanceSystem.Domain.Payments.Exceptions;
 
 public static class PaymentExceptionCodes
 {
-    public const int InvalidIdempotencyKey = 200;
     public const int InvalidSourceAccountId = 201;
     public const int InvalidDestinationAccountId = 202;
     public const int SameSourceAndDestinationAccount = 203;

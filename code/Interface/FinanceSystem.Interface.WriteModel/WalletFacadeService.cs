@@ -14,15 +14,14 @@ public class WalletFacadeService(
 {
     public async Task<JsonResponse<string>> Create(CreatePaymentModel model)
     {
-        string idempotencyKey = string.Empty;
+        string externalReferenceId = string.Empty;
         await listener.Subscribe(new EventHandlerAction<PaymentCreatedEvent>(a =>
         {
-            idempotencyKey = a.IdempotencyKey;
+            externalReferenceId = a.ExternalReferenceId;
         }));
 
         await commandBus.Dispatch(new CreatePaymentCommand
         {
-            IdempotencyKey = model.IdempotencyKey,
             Purpose = model.Purpose,
             Channel = model.Channel,
             Amount = model.Amount,
@@ -34,7 +33,7 @@ public class WalletFacadeService(
             RequestToPayId = model.RequestToPayId
         });
 
-        return JsonResponse<string>.Success(idempotencyKey);
+        return JsonResponse<string>.Success(externalReferenceId);
     }
 
     public async Task<JsonResponse<string>> TopUpAsync(TopUpModel model, CancellationToken cancellationToken = default)

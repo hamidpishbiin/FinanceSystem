@@ -19,7 +19,7 @@ public class PaymentEventModel
         EventState = 0;
         EventBody = System.Text.Json.JsonSerializer.Serialize(new
         {
-            domainEvent.IdempotencyKey,
+            domainEvent.ExternalReferenceId,
             domainEvent.Amount,
         });
     }

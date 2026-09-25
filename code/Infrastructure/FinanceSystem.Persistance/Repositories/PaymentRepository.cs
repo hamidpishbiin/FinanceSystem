@@ -21,11 +21,6 @@ public class PaymentRepository(IDbContext context) : IPaymentRepository
         return await DbSet.FirstOrDefaultAsync(a => a.Id == id);
     }
 
-    public async Task<Payment?> GetByIdempotencyKeyAsync(string idempotencyKey)
-    {
-        return await DbSet.FirstOrDefaultAsync(a => a.IdempotencyKey == idempotencyKey);
-    }
-
     public void Update(Payment payment)
     {
         DbSet.Update(payment);

@@ -7,7 +7,6 @@ namespace FinanceSystem.Domain.Tests.Unit.PaymentUnitTests;
 
 public class PaymentBuilder
 {
-    public const string DefaultIdempotencyKey = "b2f1c7d0-idem-key";
     public const PaymentPurpose DefaultPurpose = PaymentPurpose.Purchase;
     public const PaymentChannel DefaultChannel = PaymentChannel.Wallet;
     public const decimal DefaultAmount = 250_000;
@@ -18,7 +17,6 @@ public class PaymentBuilder
     public const string DefaultExternalTag = "order:9931";
     public const long DefaultRequestToPayId = 77;
 
-    private string IdempotencyKey { get; set; } = DefaultIdempotencyKey;
     private PaymentPurpose Purpose { get; set; } = DefaultPurpose;
     private PaymentChannel Channel { get; set; } = DefaultChannel;
     private Money Amount { get; set; } = new(DefaultAmount);
@@ -34,7 +32,6 @@ public class PaymentBuilder
     public async Task<Payment> Build()
     {
         return await Payment.Create(
-            IdempotencyKey,
             Purpose,
             Channel,
             Amount,
@@ -45,12 +42,6 @@ public class PaymentBuilder
             ExternalTag,
             RequestToPayId,
             EventPublisher);
-    }
-
-    public PaymentBuilder WithIdempotencyKey(string? idempotencyKey)
-    {
-        IdempotencyKey = idempotencyKey!;
-        return this;
     }
 
     public PaymentBuilder WithPurpose(PaymentPurpose purpose)

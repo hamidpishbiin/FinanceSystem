@@ -18,7 +18,6 @@ public class PaymentTests
     {
         var payment = await _builder.Build();
 
-        payment.IdempotencyKey.Should().Be(PaymentBuilder.DefaultIdempotencyKey);
         payment.Purpose.Should().Be(PaymentBuilder.DefaultPurpose);
         payment.Channel.Should().Be(PaymentBuilder.DefaultChannel);
         payment.Amount.Should().Be(PaymentBuilder.DefaultAmount);
@@ -32,26 +31,15 @@ public class PaymentTests
     }
 
     [Fact]
-    public async Task Create_should_publish_paymentCreatedEvent_carrying_idempotencyKey_and_amount()
+    public async Task Create_should_publish_paymentCreatedEvent_carrying_externalReferenceId_and_amount()
     {
         await _builder.Build();
 
         await _builder.EventPublisher
             .Received(1)
             .Publish(Arg.Is<PaymentCreatedEvent>(e =>
-                e.IdempotencyKey == PaymentBuilder.DefaultIdempotencyKey &&
+                e.ExternalReferenceId == PaymentBuilder.DefaultExternalReferenceId &&
                 e.Amount == PaymentBuilder.DefaultAmount));
-    }
-
-    [Theory]
-    [InlineData("")]
-    [InlineData("   ")]
-    [InlineData(null)]
-    public async Task Create_should_throw_when_idempotencyKey_is_null_or_empty_or_whiteSpace(string? idempotencyKey)
-    {
-        Func<Task> act = () => _builder.WithIdempotencyKey(idempotencyKey).Build();
-
-        await act.Should().ThrowAsync<InvalidIdempotencyKeyException>();
     }
 
     [Theory]

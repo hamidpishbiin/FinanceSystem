@@ -2,7 +2,6 @@ namespace FinanceSystem.Interface.Contracts.Payments.Models;
 
 public class CreatePaymentModel
 {
-    public string IdempotencyKey { get; set; }
     public int Purpose { get; set; }
     public int Channel { get; set; }
     public decimal Amount { get; set; }

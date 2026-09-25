@@ -16,17 +16,6 @@ public class PaymentMapping() : EntityBaseMap<Payment, long>("Payments")
             .ValueGeneratedOnAdd();
 
         builder
-            .Property(p => p.IdempotencyKey)
-            .IsRequired()
-            .HasMaxLength(50)
-            .HasColumnName("IdempotencyKey");
-
-        builder
-            .HasIndex(p => p.IdempotencyKey)
-            .IsUnique()
-            .HasDatabaseName("UX_Payments_IdempotencyKey");
-
-        builder
             .Property(p => p.Purpose)
             .IsRequired()
             .HasColumnName("Purpose");

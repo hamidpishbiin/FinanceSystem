@@ -12,7 +12,6 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
 
     public IEventPublisher Publisher { get; set; }
 
-    public string IdempotencyKey { get; private set; } // Remove
     public PaymentPurpose Purpose { get; private set; }
     public PaymentChannel Channel { get; private set; }
     public decimal Amount { get; private set; }
@@ -33,7 +32,6 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
     }
 
     public static async Task<Payment> Create(
-        string idempotencyKey,
         PaymentPurpose purpose,
         PaymentChannel channel,
         Money amount,
@@ -45,7 +43,6 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
         long? requestToPayId,
         IEventPublisher eventPublisher)
     {
-        Guard<InvalidIdempotencyKeyException>.AgainstNullOrEmpty(idempotencyKey);
         Guard<InvalidPaymentPurposeException>.IsFalse(Enum.IsDefined(purpose));
         Guard<InvalidPaymentChannelException>.IsFalse(Enum.IsDefined(channel));
 
@@ -67,7 +64,6 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
 
         var payment = new Payment()
         {
-            IdempotencyKey = idempotencyKey,
             Purpose = purpose,
             Channel = channel,
             Amount = amount.Value,
@@ -80,7 +76,7 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
             Publisher = eventPublisher
         };
 
-        var paymentCreatedEvent = new PaymentCreatedEvent(payment.IdempotencyKey, amount.Value);
+        var paymentCreatedEvent = new PaymentCreatedEvent(payment.ExternalReferenceId, amount.Value);
 
         await eventPublisher.Publish(paymentCreatedEvent);
 

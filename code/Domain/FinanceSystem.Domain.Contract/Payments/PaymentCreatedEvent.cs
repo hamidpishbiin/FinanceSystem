@@ -1,4 +1,4 @@
 namespace FinanceSystem.Domain.Contract.Payments;
 
-public record PaymentCreatedEvent(string IdempotencyKey, decimal Amount)
-    : PaymentEventBase(IdempotencyKey, Amount);
+public record PaymentCreatedEvent(string ExternalReferenceId, decimal Amount)
+    : PaymentEventBase(ExternalReferenceId, Amount);
