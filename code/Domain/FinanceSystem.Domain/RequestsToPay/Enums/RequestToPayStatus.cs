@@ -1,6 +1,6 @@
-namespace FinanceSystem.Domain.PspPaymentDetails.Enums;
+namespace FinanceSystem.Domain.RequestsToPay.Enums;
 
-public enum PspPaymentStatus
+public enum RequestToPayStatus
 {
     Initiated = 1,
     TokenReceived = 2,

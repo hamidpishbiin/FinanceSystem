@@ -1,6 +1,6 @@
 using FinanceSystem.Domain.Contract.Payments;
 using FinanceSystem.Domain.Accounts;
-using FinanceSystem.Domain.PspPaymentDetails;
+using FinanceSystem.Domain.RequestsToPay;
 using FinanceSystem.Domain.Payments.Enums;
 using FinanceSystem.Domain.Payments.Exceptions;
 using Shared.Domain.Exceptions;
@@ -21,11 +21,11 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
     public string OriginServiceId { get; private set; }
     public string ExternalReferenceId { get; private set; }
     public string ExternalTag { get; private set; }
-    public long? PspPaymentDetailId { get; private set; }
+    public long? RequestToPayId { get; private set; }
 
     public Account? SourceAccount { get; private set; }
     public Account? DestinationAccount { get; private set; }
-    public PspPaymentDetail? PspPaymentDetail { get; private set; }
+    public RequestToPay? RequestToPay { get; private set; }
 
     private Payment()
     {
@@ -42,7 +42,7 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
         string originServiceId,
         string externalReferenceId,
         string externalTag,
-        long? pspPaymentDetailId,
+        long? requestToPayId,
         IEventPublisher eventPublisher)
     {
         Guard<InvalidIdempotencyKeyException>.AgainstNullOrEmpty(idempotencyKey);
@@ -60,8 +60,8 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
         Guard<InvalidExternalReferenceIdException>.AgainstNullOrEmpty(externalReferenceId);
         Guard<InvalidExternalTagException>.AgainstNullOrEmpty(externalTag);
 
-        Guard<MissingPspPaymentDetailException>.IsTrue(channel == PaymentChannel.Psp && pspPaymentDetailId == null);
-        Guard<UnexpectedPspPaymentDetailException>.IsTrue(channel != PaymentChannel.Psp && pspPaymentDetailId != null);
+        Guard<MissingRequestToPayException>.IsTrue(channel == PaymentChannel.Psp && requestToPayId == null);
+        Guard<UnexpectedRequestToPayException>.IsTrue(channel != PaymentChannel.Psp && requestToPayId != null);
 
         Guard<NullEntryException>.AgainstNull(eventPublisher);
 
@@ -76,7 +76,7 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
             OriginServiceId = originServiceId,
             ExternalReferenceId = externalReferenceId,
             ExternalTag = externalTag,
-            PspPaymentDetailId = pspPaymentDetailId,
+            RequestToPayId = requestToPayId,
             Publisher = eventPublisher
         };
 

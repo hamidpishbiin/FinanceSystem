@@ -28,7 +28,7 @@ public class PaymentCreateCommandHandler : PaymentCommandHandler<CreatePaymentCo
             command.OriginServiceId,
             command.ExternalReferenceId,
             command.ExternalTag,
-            command.PspPaymentDetailId,
+            command.RequestToPayId,
             Publisher);
 
         await Repository.AddAsync(model);

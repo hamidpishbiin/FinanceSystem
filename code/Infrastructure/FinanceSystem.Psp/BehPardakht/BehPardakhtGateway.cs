@@ -1,6 +1,6 @@
 using FinanceSystem.Application.Payments.Gateways;
 using FinanceSystem.Domain.PaymentServiceProviders.Enums;
-using FinanceSystem.Domain.PspPaymentDetails.Enums;
+using FinanceSystem.Domain.RequestsToPay.Enums;
 using Microsoft.Extensions.Options;
 
 namespace FinanceSystem.Psp.BehPardakht;
@@ -15,7 +15,7 @@ internal class BehPardakhtGateway(
 
     private HttpClient CreateClient() => httpClientFactory.CreateClient(nameof(PspCode.BehPardakht));
 
-    public Task<PspPaymentResponse> RequestPaymentTokenAsync(PspPaymentRequest request, CancellationToken cancellationToken)
+    public Task<PspTokenResponse> RequestTokenAsync(PspTokenRequest request, CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
     }

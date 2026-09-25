@@ -16,7 +16,7 @@ public class PaymentBuilder
     public const string DefaultOriginServiceId = "checkout-service";
     public const string DefaultExternalReferenceId = "ext-ref-9931";
     public const string DefaultExternalTag = "order:9931";
-    public const long DefaultPspPaymentDetailId = 77;
+    public const long DefaultRequestToPayId = 77;
 
     private string IdempotencyKey { get; set; } = DefaultIdempotencyKey;
     private PaymentPurpose Purpose { get; set; } = DefaultPurpose;
@@ -27,7 +27,7 @@ public class PaymentBuilder
     private string OriginServiceId { get; set; } = DefaultOriginServiceId;
     private string ExternalReferenceId { get; set; } = DefaultExternalReferenceId;
     private string ExternalTag { get; set; } = DefaultExternalTag;
-    private long? PspPaymentDetailId { get; set; }
+    private long? RequestToPayId { get; set; }
 
     public IEventPublisher EventPublisher { get; private set; } = Substitute.For<IEventPublisher>();
 
@@ -43,7 +43,7 @@ public class PaymentBuilder
             OriginServiceId,
             ExternalReferenceId,
             ExternalTag,
-            PspPaymentDetailId,
+            RequestToPayId,
             EventPublisher);
     }
 
@@ -101,9 +101,9 @@ public class PaymentBuilder
         return this;
     }
 
-    public PaymentBuilder WithPspPaymentDetailId(long? pspPaymentDetailId)
+    public PaymentBuilder WithRequestToPayId(long? requestToPayId)
     {
-        PspPaymentDetailId = pspPaymentDetailId;
+        RequestToPayId = requestToPayId;
         return this;
     }
 

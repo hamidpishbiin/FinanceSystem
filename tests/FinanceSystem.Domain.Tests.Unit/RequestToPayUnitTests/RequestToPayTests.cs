@@ -1,29 +1,29 @@
 using FinanceSystem.Domain.PaymentServiceProviders.Enums;
 using FinanceSystem.Domain.PaymentServiceProviders.Exceptions;
-using FinanceSystem.Domain.PspPaymentDetails.Enums;
-using FinanceSystem.Domain.PspPaymentDetails.Exceptions;
+using FinanceSystem.Domain.RequestsToPay.Enums;
+using FinanceSystem.Domain.RequestsToPay.Exceptions;
 using FinanceSystem.Domain.Payments;
 using FinanceSystem.Domain.Payments.Enums;
 using FluentAssertions;
 using NSubstitute;
 using Shared.Domain.Exceptions;
 
-namespace FinanceSystem.Domain.Tests.Unit.PspPaymentDetailUnitTests;
+namespace FinanceSystem.Domain.Tests.Unit.RequestToPayUnitTests;
 
-public class PspPaymentDetailTests
+public class RequestToPayTests
 {
-    private readonly PspPaymentDetailBuilder _builder = new();
+    private readonly RequestToPayBuilder _builder = new();
 
     [Fact]
-    public async Task Create_should_properly_create_pspPaymentDetail()
+    public async Task Create_should_properly_create_requestToPay()
     {
         var bpd = await _builder.Build();
 
-        bpd.PspCode.Should().Be(PspPaymentDetailBuilder.DefaultPspCode);
-        bpd.Status.Should().Be(PspPaymentStatus.Initiated);
-        bpd.RequestAmountRial.Should().Be(PspPaymentDetailBuilder.DefaultRequestAmountRial);
+        bpd.PspCode.Should().Be(RequestToPayBuilder.DefaultPspCode);
+        bpd.Status.Should().Be(RequestToPayStatus.Initiated);
+        bpd.RequestAmountRial.Should().Be(RequestToPayBuilder.DefaultRequestAmountRial);
         bpd.RedirectedAmountRial.Should().BeNull();
-        bpd.TargetAccountId.Should().Be(PspPaymentDetailBuilder.DefaultTargetAccountId);
+        bpd.TargetAccountId.Should().Be(RequestToPayBuilder.DefaultTargetAccountId);
         bpd.Token.Should().BeNull();
         bpd.RRN.Should().BeNull();
         bpd.RefNum.Should().BeNull();
@@ -83,17 +83,17 @@ public class PspPaymentDetailTests
     }
 
     [Fact]
-    public async Task PspPaymentStatus_values_are_persisted_contract_and_should_not_change()
+    public async Task RequestToPayStatus_values_are_persisted_contract_and_should_not_change()
     {
-        ((int)PspPaymentStatus.Initiated).Should().Be(1);
-        ((int)PspPaymentStatus.TokenReceived).Should().Be(2);
-        ((int)PspPaymentStatus.CallbackReceived).Should().Be(3);
-        ((int)PspPaymentStatus.Verified).Should().Be(4);
-        ((int)PspPaymentStatus.Failed).Should().Be(5);
-        ((int)PspPaymentStatus.Expired).Should().Be(6);
-        ((int)PspPaymentStatus.Reversed).Should().Be(7);
+        ((int)RequestToPayStatus.Initiated).Should().Be(1);
+        ((int)RequestToPayStatus.TokenReceived).Should().Be(2);
+        ((int)RequestToPayStatus.CallbackReceived).Should().Be(3);
+        ((int)RequestToPayStatus.Verified).Should().Be(4);
+        ((int)RequestToPayStatus.Failed).Should().Be(5);
+        ((int)RequestToPayStatus.Expired).Should().Be(6);
+        ((int)RequestToPayStatus.Reversed).Should().Be(7);
 
-        Enum.GetValues<PspPaymentStatus>().Should().HaveCount(7,
+        Enum.GetValues<RequestToPayStatus>().Should().HaveCount(7,
             "adding a member requires updating the Status check constraint and any DDL");
     }
 }

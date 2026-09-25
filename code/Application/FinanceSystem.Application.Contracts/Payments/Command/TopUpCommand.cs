@@ -1,6 +1,6 @@
 namespace FinanceSystem.Application.Contracts.Payments.Command;
 
-public class TopUpPaymentCommand : PaymentCommand
+public class TopUpCommand : PaymentCommand
 {
     public decimal AmountRial { get; set; }
     public int PspCode { get; set; }

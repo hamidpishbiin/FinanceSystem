@@ -1,8 +1,8 @@
-using FinanceSystem.Domain.PspPaymentDetails.Enums;
+using FinanceSystem.Domain.RequestsToPay.Enums;
 
 namespace FinanceSystem.Application.Payments.Gateways;
 
-public class PspPaymentResponse
+public class PspTokenResponse
 {
     public bool IsSuccess { get; set; }
     public string PaymentToken { get; set; } = string.Empty;

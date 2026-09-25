@@ -3,7 +3,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using FinanceSystem.Application.Payments.Gateways;
 using FinanceSystem.Domain.PaymentServiceProviders.Enums;
-using FinanceSystem.Domain.PspPaymentDetails.Enums;
+using FinanceSystem.Domain.RequestsToPay.Enums;
 using Microsoft.Extensions.Options;
 using Shared.Core;
 
@@ -29,7 +29,7 @@ internal class SamanGateway : IPspGateway
 
     private PspSettings Settings => _pspOptions.CurrentValue.Saman;
 
-    public async Task<PspPaymentResponse> RequestPaymentTokenAsync(PspPaymentRequest request, CancellationToken cancellationToken)
+    public async Task<PspTokenResponse> RequestTokenAsync(PspTokenRequest request, CancellationToken cancellationToken)
     {
         var settings = Settings;
 
@@ -59,7 +59,7 @@ internal class SamanGateway : IPspGateway
 
             var isSamanResponseSuccess = samanResponse.Status == 1;
 
-            return new PspPaymentResponse()
+            return new PspTokenResponse()
             {
                 IsSuccess = isSamanResponseSuccess,
                 FailureReason = isSamanResponseSuccess
@@ -113,9 +113,9 @@ internal class SamanGateway : IPspGateway
         };
     }
 
-    private PspPaymentResponse MakeGenericFailedResponse(PspFailureReason failureReason)
+    private PspTokenResponse MakeGenericFailedResponse(PspFailureReason failureReason)
     {
-        return new PspPaymentResponse()
+        return new PspTokenResponse()
         {
             IsSuccess = false,
             FailureReason = failureReason

@@ -1,7 +1,7 @@
 namespace FinanceSystem.Application.Payments.Gateways;
 
 // decimal Amount, long ReferenceNumber, string AdditionalData
-public class PspPaymentRequest()
+public class PspTokenRequest()
 {
     public required decimal Amount { get; set; }
     public required long ReferenceNumber { get; set; }

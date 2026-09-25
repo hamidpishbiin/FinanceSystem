@@ -1,13 +1,13 @@
 using FinanceSystem.Application.Contracts.Payments.Command;
 using FinanceSystem.Domain.Contract.Payments;
-using FinanceSystem.Domain.Contract.PspPaymentDetails;
+using FinanceSystem.Domain.Contract.RequestsToPay;
 using FinanceSystem.Interface.Contracts.Payments.Models;
 using FinanceSystem.Interface.Contracts.Payments.Services;
 using Shared.Core;
 
 namespace FinanceSystem.Interface.WriteModel;
 
-public class PaymentFacadeService(
+public class WalletFacadeService(
     ICommandBus commandBus,
     IEventListener listener,
     IUserResolver userResolver) : IPaymentFacadeService
@@ -31,7 +31,7 @@ public class PaymentFacadeService(
             OriginServiceId = model.OriginServiceId,
             ExternalReferenceId = model.ExternalReferenceId,
             ExternalTag = model.ExternalTag,
-            PspPaymentDetailId = model.PspPaymentDetailId
+            RequestToPayId = model.RequestToPayId
         });
 
         return JsonResponse<string>.Success(idempotencyKey);
@@ -41,12 +41,12 @@ public class PaymentFacadeService(
     {
         var ipgUrl = string.Empty;
 
-        await listener.Subscribe(new EventHandlerAction<PspPaymentTokenReceivedEvent>(a =>
+        await listener.Subscribe(new EventHandlerAction<RequestToPayTokenReceivedEvent>(a =>
         {
             ipgUrl = a.IpgUrl;
         }));
 
-        await commandBus.Dispatch(new TopUpPaymentCommand()
+        await commandBus.Dispatch(new TopUpCommand()
         {
             AmountRial = model.Amount,
             PspCode = model.PspCode,

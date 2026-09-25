@@ -1,7 +1,7 @@
-using FinanceSystem.Domain.PspPaymentDetails.Exceptions;
+using FinanceSystem.Domain.RequestsToPay.Exceptions;
 using FinanceSystem.Domain.Accounts;
-using FinanceSystem.Domain.Contract.PspPaymentDetails;
-using FinanceSystem.Domain.PspPaymentDetails.Enums;
+using FinanceSystem.Domain.Contract.RequestsToPay;
+using FinanceSystem.Domain.RequestsToPay.Enums;
 using FinanceSystem.Domain.PaymentServiceProviders;
 using FinanceSystem.Domain.PaymentServiceProviders.Enums;
 using FinanceSystem.Domain.PaymentServiceProviders.Exceptions;
@@ -9,14 +9,14 @@ using FinanceSystem.Domain.Payments;
 using FinanceSystem.Domain.Payments.Enums;
 using Shared.Domain.Exceptions;
 
-namespace FinanceSystem.Domain.PspPaymentDetails;
+namespace FinanceSystem.Domain.RequestsToPay;
 
-public class PspPaymentDetail : EntityBase<long>, IAggregateRoot
+public class RequestToPay : EntityBase<long>, IAggregateRoot
 {
     public IEventPublisher Publisher { get; set; } = default!;
 
     public PspCode PspCode { get; private set; }
-    public PspPaymentStatus Status { get; private set; }
+    public RequestToPayStatus Status { get; private set; }
     public decimal RequestAmountRial { get; private set; }
     public decimal? RedirectedAmountRial { get; private set; }
     public long TargetAccountId { get; private set; }
@@ -34,11 +34,11 @@ public class PspPaymentDetail : EntityBase<long>, IAggregateRoot
     public PaymentServiceProvider? Psp { get; private set; }
     public Account? TargetAccount { get; private set; }
 
-    private PspPaymentDetail()
+    private RequestToPay()
     {
     }
 
-    public static async Task<PspPaymentDetail> Create(
+    public static async Task<RequestToPay> Create(
         PspCode pspCode,
         long targetAccountId,
         Money amount,
@@ -50,38 +50,38 @@ public class PspPaymentDetail : EntityBase<long>, IAggregateRoot
         Guard<InvalidRequestAmountException>.IsTrue(amount.Value <= 0);
         Guard<NullEntryException>.AgainstNull(eventPublisher);
 
-        return new PspPaymentDetail()
+        return new RequestToPay()
         {
             PspCode = pspCode,
-            Status = PspPaymentStatus.Initiated,
+            Status = RequestToPayStatus.Initiated,
             RequestAmountRial = amount.Value,
             TargetAccountId = targetAccountId,
             Publisher = eventPublisher
         };
     }
 
-    public async Task MarkPaymentFailed(
+    public async Task MarkTokenRequestFailed(
         PspFailureReason failureReason,
         string? rawStatus,
         string? rawErrorCode,
         string? rawDescription)
     {
-        Status = PspPaymentStatus.Failed;
+        Status = RequestToPayStatus.Failed;
         FailureReason = failureReason;
         RawStatus = rawStatus;
         RawErrorCode = rawErrorCode;
         RawDescription = rawDescription;
 
-        await Publisher.Publish(new PspPaymentFailedEvent(Id));
+        await Publisher.Publish(new RequestToPayFailedEvent(Id));
     }
 
-    public async Task MarkPaymentTokenReceived(string token, string ipgUrl)
+    public async Task MarkTokenReceived(string token, string ipgUrl)
     {
         Guard<InvalidTokenException>.AgainstNullOrEmpty(token);
 
         Token = token;
-        Status = PspPaymentStatus.TokenReceived;
+        Status = RequestToPayStatus.TokenReceived;
 
-        await Publisher.Publish(new PspPaymentTokenReceivedEvent(Id, ipgUrl));
+        await Publisher.Publish(new RequestToPayTokenReceivedEvent(Id, ipgUrl));
     }
 }

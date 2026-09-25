@@ -1,12 +1,12 @@
 using FinanceSystem.Domain.Accounts;
-using FinanceSystem.Domain.PspPaymentDetails;
+using FinanceSystem.Domain.RequestsToPay;
 using FinanceSystem.Domain.PaymentServiceProviders;
 
 namespace FinanceSystem.Persistance.Mappings;
 
-public class PspPaymentDetailMapping() : EntityBaseMap<PspPaymentDetail, long>("PspPaymentDetails")
+public class RequestToPayMapping() : EntityBaseMap<RequestToPay, long>("RequestsToPay")
 {
-    override protected void ConfigureMap(EntityTypeBuilder<PspPaymentDetail> builder)
+    override protected void ConfigureMap(EntityTypeBuilder<RequestToPay> builder)
     {
         builder.HasKey(p => p.Id);
 
@@ -25,11 +25,11 @@ public class PspPaymentDetailMapping() : EntityBaseMap<PspPaymentDetail, long>("
             .HasForeignKey(p => p.PspCode)
             .HasPrincipalKey(psp => psp.Code)
             .OnDelete(DeleteBehavior.Restrict)
-            .HasConstraintName("FK_PspPaymentDetails_PaymentServiceProviders_PspCode");
+            .HasConstraintName("FK_RequestsToPay_PaymentServiceProviders_PspCode");
 
         builder
             .HasIndex(p => p.PspCode)
-            .HasDatabaseName("IX_PspPaymentDetails_PspCode");
+            .HasDatabaseName("IX_RequestsToPay_PspCode");
 
         builder
             .Property(p => p.Status)
@@ -54,22 +54,22 @@ public class PspPaymentDetailMapping() : EntityBaseMap<PspPaymentDetail, long>("
             .WithMany()
             .HasForeignKey(p => p.TargetAccountId)
             .OnDelete(DeleteBehavior.Restrict)
-            .HasConstraintName("FK_PspPaymentDetails_Accounts_TargetAccountId");
+            .HasConstraintName("FK_RequestsToPay_Accounts_TargetAccountId");
 
         builder
             .HasIndex(p => p.TargetAccountId)
-            .HasDatabaseName("IX_PspPaymentDetails_TargetAccountId");
+            .HasDatabaseName("IX_RequestsToPay_TargetAccountId");
 
         builder
             .Property(p => p.ReferenceNumber)
             .HasColumnName("ReferenceNumber")
-            .HasDefaultValueSql("nextval('\"PspPaymentDetails_ReferenceNumber_seq\"')")
+            .HasDefaultValueSql("nextval('\"RequestsToPay_ReferenceNumber_seq\"')")
             .ValueGeneratedOnAdd();
 
         builder
             .HasIndex(p => p.ReferenceNumber)
             .IsUnique()
-            .HasDatabaseName("UX_PspPaymentDetails_ReferenceNumber");
+            .HasDatabaseName("UX_RequestsToPay_ReferenceNumber");
 
         builder
             .Property(p => p.Token)
@@ -84,7 +84,7 @@ public class PspPaymentDetailMapping() : EntityBaseMap<PspPaymentDetail, long>("
         builder
             .HasIndex(p => p.RRN)
             .IsUnique()
-            .HasDatabaseName("UX_PspPaymentDetails_RRN");
+            .HasDatabaseName("UX_RequestsToPay_RRN");
 
         builder
             .Property(p => p.RefNum)
@@ -94,7 +94,7 @@ public class PspPaymentDetailMapping() : EntityBaseMap<PspPaymentDetail, long>("
         builder
             .HasIndex(p => p.RefNum)
             .IsUnique()
-            .HasDatabaseName("UX_PspPaymentDetails_RefNum");
+            .HasDatabaseName("UX_RequestsToPay_RefNum");
 
         builder
             .Property(p => p.TraceNumber)

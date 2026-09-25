@@ -27,7 +27,7 @@ public class PaymentTests
         payment.OriginServiceId.Should().Be(PaymentBuilder.DefaultOriginServiceId);
         payment.ExternalReferenceId.Should().Be(PaymentBuilder.DefaultExternalReferenceId);
         payment.ExternalTag.Should().Be(PaymentBuilder.DefaultExternalTag);
-        payment.PspPaymentDetailId.Should().BeNull();
+        payment.RequestToPayId.Should().BeNull();
         payment.Publisher.Should().BeSameAs(_builder.EventPublisher);
     }
 
@@ -155,37 +155,37 @@ public class PaymentTests
     }
 
     [Fact]
-    public async Task Create_should_throw_when_channel_is_bank_and_pspPaymentDetailId_is_missing()
+    public async Task Create_should_throw_when_channel_is_bank_and_requestToPayId_is_missing()
     {
         Func<Task> act = () => _builder
             .WithChannel(PaymentChannel.Psp)
-            .WithPspPaymentDetailId(null)
+            .WithRequestToPayId(null)
             .Build();
 
-        await act.Should().ThrowAsync<MissingPspPaymentDetailException>();
+        await act.Should().ThrowAsync<MissingRequestToPayException>();
     }
 
     [Fact]
-    public async Task Create_should_throw_when_channel_is_not_bank_and_pspPaymentDetailId_is_supplied()
+    public async Task Create_should_throw_when_channel_is_not_bank_and_requestToPayId_is_supplied()
     {
         Func<Task> act = () => _builder
             .WithChannel(PaymentChannel.Wallet)
-            .WithPspPaymentDetailId(PaymentBuilder.DefaultPspPaymentDetailId)
+            .WithRequestToPayId(PaymentBuilder.DefaultRequestToPayId)
             .Build();
 
-        await act.Should().ThrowAsync<UnexpectedPspPaymentDetailException>();
+        await act.Should().ThrowAsync<UnexpectedRequestToPayException>();
     }
 
     [Fact]
-    public async Task Create_should_succeed_when_channel_is_bank_and_pspPaymentDetailId_is_supplied()
+    public async Task Create_should_succeed_when_channel_is_bank_and_requestToPayId_is_supplied()
     {
         var payment = await _builder
             .WithChannel(PaymentChannel.Psp)
-            .WithPspPaymentDetailId(PaymentBuilder.DefaultPspPaymentDetailId)
+            .WithRequestToPayId(PaymentBuilder.DefaultRequestToPayId)
             .Build();
 
         payment.Channel.Should().Be(PaymentChannel.Psp);
-        payment.PspPaymentDetailId.Should().Be(PaymentBuilder.DefaultPspPaymentDetailId);
+        payment.RequestToPayId.Should().Be(PaymentBuilder.DefaultRequestToPayId);
     }
 
     [Fact]
@@ -217,6 +217,6 @@ public class PaymentTests
         ((byte)PaymentChannel.Psp).Should().Be(2);
 
         Enum.GetValues<PaymentChannel>().Should().HaveCount(2,
-            "adding a member requires revisiting the Bank/PspPaymentDetailId pairing rules in Payment.Create");
+            "adding a member requires revisiting the Bank/RequestToPayId pairing rules in Payment.Create");
     }
 }

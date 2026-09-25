@@ -11,5 +11,5 @@ public class CreatePaymentModel
     public string OriginServiceId { get; set; }
     public string ExternalReferenceId { get; set; }
     public string ExternalTag { get; set; }
-    public long? PspPaymentDetailId { get; set; }
+    public long? RequestToPayId { get; set; }
 }

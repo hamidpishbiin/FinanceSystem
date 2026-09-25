@@ -1,13 +1,13 @@
 using FinanceSystem.Domain.PaymentServiceProviders.Enums;
-using FinanceSystem.Domain.PspPaymentDetails;
+using FinanceSystem.Domain.RequestsToPay;
 using FinanceSystem.Domain.Payments;
 using FinanceSystem.Domain.Payments.Enums;
 using NSubstitute;
 using Shared.Core.Events;
 
-namespace FinanceSystem.Domain.Tests.Unit.PspPaymentDetailUnitTests;
+namespace FinanceSystem.Domain.Tests.Unit.RequestToPayUnitTests;
 
-public class PspPaymentDetailBuilder
+public class RequestToPayBuilder
 {
     public const PspCode DefaultPspCode = PspCode.Saman;
     public const decimal DefaultRequestAmountRial = 1234123;
@@ -19,30 +19,30 @@ public class PspPaymentDetailBuilder
 
     public IEventPublisher EventPublisher { get; private set; } = Substitute.For<IEventPublisher>();
 
-    public async Task<PspPaymentDetail> Build()
+    public async Task<RequestToPay> Build()
     {
-        return await PspPaymentDetail.Create(PspCode, TargetAccountId, RequestAmount, EventPublisher);
+        return await RequestToPay.Create(PspCode, TargetAccountId, RequestAmount, EventPublisher);
     }
 
-    public PspPaymentDetailBuilder WithPspCode(PspCode pspCode)
+    public RequestToPayBuilder WithPspCode(PspCode pspCode)
     {
         PspCode = pspCode;
         return this;
     }
 
-    public PspPaymentDetailBuilder WithEventPublisher(IEventPublisher? eventPublisher)
+    public RequestToPayBuilder WithEventPublisher(IEventPublisher? eventPublisher)
     {
         EventPublisher = eventPublisher!;
         return this;
     }
 
-    public PspPaymentDetailBuilder WithRequestAmount(Money requestAmount)
+    public RequestToPayBuilder WithRequestAmount(Money requestAmount)
     {
         RequestAmount = requestAmount;
         return this;
     }
 
-    public PspPaymentDetailBuilder WithTargetAccountId(long targetAccountId)
+    public RequestToPayBuilder WithTargetAccountId(long targetAccountId)
     {
         TargetAccountId = targetAccountId;
         return this;
