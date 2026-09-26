@@ -29,12 +29,10 @@ public class AccountTests
         account.AllowNegativeBalance.Should().Be(AccountBuilder.DefaultAllowNegativeBalance);
     }
 
-    [Theory]
-    [InlineData(0)]
-    [InlineData(-1)]
-    public async Task Create_should_throw_when_ownerId_is_not_positive(long ownerId)
+    [Fact]
+    public async Task Create_should_throw_when_ownerId_is_empty_guid()
     {
-        Func<Task> act = async () => await _accountBuilder.WithOwnerId(ownerId).Build();
+        Func<Task> act = async () => await _accountBuilder.WithOwnerId(Guid.Empty).Build();
 
         await act.Should().ThrowAsync<InvalidIdException>();
     }

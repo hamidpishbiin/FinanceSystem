@@ -12,7 +12,7 @@ public class Account : EntityBase<long>
 {
     public AccountType Type { get; private set; }
     public AccountStatus Status { get; private set; }
-    public long UserId { get; private set; }
+    public Guid UserId { get; private set; }
     public decimal CachedBalance { get; private set; }
     public DateTimeOffset BalanceCalculatedAt { get; private set; }
     public bool AllowNegativeBalance { get; private set; }
@@ -24,12 +24,12 @@ public class Account : EntityBase<long>
     public static async Task<Account> Create(
         AccountType type,
         AccountStatus status,
-        long ownerId,
+        Guid ownerId,
         Money cachedBalance,
         DateTimeOffset balanceCalculatedAt,
         bool allowNegativeBalance)
     {
-        Guard<InvalidIdException>.IsTrue(ownerId <= 0);
+        Guard<InvalidIdException>.IsTrue(ownerId == Guid.Empty);
         Guard<NullEntryException>.AgainstNull(cachedBalance);
 
         return new Account()

@@ -1,9 +1,11 @@
+using FinanceSystem.Domain.Users;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.Net;
+using System.Security.Claims;
 using System.Text;
 
 namespace FinanceSystem.Security
@@ -54,9 +56,30 @@ namespace FinanceSystem.Security
                         ValidAudience = config.Audience,
                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config.SecretKey))
                     };
+
+                    jwtBearer.Events = new JwtBearerEvents
+                    {
+                        OnTokenValidated = EnsureUserExists
+                    };
                 });
 
             return builder;
+        }
+
+        private static async Task EnsureUserExists(TokenValidatedContext context)
+        {
+            var userIdClaim = context.Principal?.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (!Guid.TryParse(userIdClaim, out var userId))
+            {
+                context.Fail("Token does not contain a valid user id.");
+                return;
+            }
+
+            var userRepository = context.HttpContext.RequestServices.GetRequiredService<IUserRepository>();
+
+            if (!await userRepository.ExistsAsync(userId, context.HttpContext.RequestAborted))
+                context.Fail("User not found.");
         }
     }
 }

@@ -6,7 +6,7 @@ namespace FinanceSystem.Domain.Tests.Unit.AccountTypeRuleUnitTests;
 
 public class AccountTypeRuleBuilder
 {
-    public const AccountType DefaultType = AccountType.BankGateway;
+    public const AccountType DefaultType = AccountType.UserWallet;
     public const PaymentPurpose DefaultPaymentPurpose = PaymentPurpose.TopUp;
     public const bool DefaultCanBeSource = true;
     public const bool DefaultCanBeDestination = true;

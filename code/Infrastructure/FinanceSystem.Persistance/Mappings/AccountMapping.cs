@@ -1,4 +1,5 @@
 using FinanceSystem.Domain.Accounts;
+using FinanceSystem.Domain.Users;
 
 namespace FinanceSystem.Persistance.Mappings;
 
@@ -17,12 +18,12 @@ public class AccountMapping() : EntityBaseMap<Account, long>("Accounts")
             .Property(p => p.UserId)
             .HasColumnName("OwnerId");
 
-        // builder
-        //     .HasOne<User>()
-        //     .WithMany()
-        //     .HasForeignKey(p => p.OwnerId)
-        //     .OnDelete(DeleteBehavior.Restrict)
-        //     .HasConstraintName("FK_Accounts_Users_OwnerId");
+        builder
+            .HasOne<User>()
+            .WithMany()
+            .HasForeignKey(p => p.UserId)
+            .OnDelete(DeleteBehavior.Restrict)
+            .HasConstraintName("FK_Accounts_Users_OwnerId");
 
         builder
             .Property(p => p.AllowNegativeBalance)
