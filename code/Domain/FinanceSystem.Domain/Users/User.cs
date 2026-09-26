@@ -16,7 +16,7 @@ public class User : EntityBase<Guid>
     {
     }
 
-    public static async Task<User> Create(
+    public User(
         Guid id,
         string firstName,
         string lastName,
@@ -29,14 +29,11 @@ public class User : EntityBase<Guid>
         Guard<InvalidPhoneNumberException>.AgainstNullOrEmpty(phoneNumber);
         Guard<InvalidNationalCodeException>.IsFalse(IsValidNationalCode(nationalCode));
 
-        return new User()
-        {
-            Id = id,
-            FirstName = firstName,
-            LastName = lastName,
-            PhoneNumber = phoneNumber,
-            NationalCode = nationalCode
-        };
+        Id = id;
+        FirstName = firstName;
+        LastName = lastName;
+        PhoneNumber = phoneNumber;
+        NationalCode = nationalCode;
     }
 
     private static bool IsValidNationalCode(string? nationalCode) =>

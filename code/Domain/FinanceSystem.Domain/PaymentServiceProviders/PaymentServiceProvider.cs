@@ -15,7 +15,7 @@ public class PaymentServiceProvider : EntityBase<Guid>
     {
     }
 
-    public static async Task<PaymentServiceProvider> Create(
+    public PaymentServiceProvider(
         Guid id,
         PspCode code,
         string name,
@@ -27,13 +27,10 @@ public class PaymentServiceProvider : EntityBase<Guid>
         Guard<InvalidPspNameException>.AgainstNullOrEmpty(name);
         Guard<InvalidPriorityException>.IsTrue(priority < 0);
 
-        return new PaymentServiceProvider()
-        {
-            Id = id,
-            Code = code,
-            Name = name,
-            IsActive = isActive,
-            Priority = priority
-        };
+        Id = id;
+        Code = code;
+        Name = name;
+        IsActive = isActive;
+        Priority = priority;
     }
 }

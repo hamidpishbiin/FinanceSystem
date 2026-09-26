@@ -17,9 +17,9 @@ public class AccountEntryBuilder
     private Money Amount { get; set; } = new(DefaultAmount);
     private EntryDirection Direction { get; set; } = DefaultDirection;
 
-    public Task<AccountEntry> Build()
+    public AccountEntry Build()
     {
-        return AccountEntry.Create(PaymentId, AccountId, Amount, Direction);
+        return new AccountEntry(PaymentId, AccountId, Amount, Direction);
     }
 
     public AccountEntryBuilder WithPaymentId(long paymentId)

@@ -20,7 +20,7 @@ public class BalanceCheckpoint : EntityBase<long>
     {
     }
 
-    public static async Task<BalanceCheckpoint> Create(
+    public BalanceCheckpoint(
         long accountId,
         long upToEntryId,
         Money balance)
@@ -29,11 +29,8 @@ public class BalanceCheckpoint : EntityBase<long>
         Guard<InvalidUpToEntryIdException>.IsTrue(upToEntryId <= 0);
         Guard<NullEntryException>.AgainstNull(balance);
 
-        return new BalanceCheckpoint()
-        {
-            AccountId = accountId,
-            UpToEntryId = upToEntryId,
-            Balance = balance.Value
-        };
+        AccountId = accountId;
+        UpToEntryId = upToEntryId;
+        Balance = balance.Value;
     }
 }

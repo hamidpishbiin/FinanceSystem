@@ -16,7 +16,7 @@ public class BankAccountDetail : EntityBase<long>
     {
     }
 
-    public static async Task<BankAccountDetail> Create(
+    public BankAccountDetail(
         long accountId,
         string iban,
         string? maskedPan,
@@ -25,12 +25,9 @@ public class BankAccountDetail : EntityBase<long>
         Guard<InvalidAccountIdException>.IsTrue(accountId <= 0);
         Guard<InvalidIbanException>.AgainstNullOrEmpty(iban);
 
-        return new BankAccountDetail()
-        {
-            AccountId = accountId,
-            Iban = iban,
-            MaskedPan = maskedPan,
-            BankName = bankName
-        };
+        AccountId = accountId;
+        Iban = iban;
+        MaskedPan = maskedPan;
+        BankName = bankName;
     }
 }

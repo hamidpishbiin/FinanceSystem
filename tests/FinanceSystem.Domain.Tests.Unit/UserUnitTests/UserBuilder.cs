@@ -18,9 +18,9 @@ public class UserBuilder
     private string PhoneNumber { get; set; } = DefaultPhoneNumber;
     private string NationalCode { get; set; } = DefaultNationalCode;
 
-    public async Task<User> Build()
+    public User Build()
     {
-        return await User.Create(
+        return new User(
             Id,
             FirstName,
             LastName,

@@ -17,9 +17,9 @@ public class AccountTests
     }
 
     [Fact]
-    public async Task Constructor_Should_Create_Properly_Account()
+    public void Constructor_Should_Create_Properly_Account()
     {
-        var account = await _accountBuilder.Build();
+        var account = _accountBuilder.Build();
 
         account.Type.Should().Be(AccountBuilder.DefaultType);
         account.Status.Should().Be(AccountBuilder.DefaultStatus);
@@ -30,18 +30,18 @@ public class AccountTests
     }
 
     [Fact]
-    public async Task Create_should_throw_when_ownerId_is_empty_guid()
+    public void Create_should_throw_when_ownerId_is_empty_guid()
     {
-        Func<Task> act = async () => await _accountBuilder.WithOwnerId(Guid.Empty).Build();
+        Action act = () => _accountBuilder.WithOwnerId(Guid.Empty).Build();
 
-        await act.Should().ThrowAsync<InvalidIdException>();
+        act.Should().Throw<InvalidIdException>();
     }
 
     [Fact]
-    public async Task Create_should_throw_when_cachedBalance_is_null()
+    public void Create_should_throw_when_cachedBalance_is_null()
     {
-        Func<Task> account = () => _accountBuilder.WithAmount(null!).Build();
+        Action account = () => _accountBuilder.WithAmount(null!).Build();
 
-        await account.Should().ThrowAsync<NullEntryException>();
+        account.Should().Throw<NullEntryException>();
     }
 }

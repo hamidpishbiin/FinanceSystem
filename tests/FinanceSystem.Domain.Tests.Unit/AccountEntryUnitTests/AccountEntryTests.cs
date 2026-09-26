@@ -17,9 +17,9 @@ public class AccountEntryTests
     }
 
     [Fact]
-    public async Task Create_should_properly_create_accountEntry()
+    public void Create_should_properly_create_accountEntry()
     {
-        var accountEntry = await _builder.Build();
+        var accountEntry = _builder.Build();
 
         accountEntry.PaymentId.Should().Be(AccountEntryBuilder.DefaultPaymentId);
         accountEntry.AccountId.Should().Be(AccountEntryBuilder.DefaultAccountId);
@@ -30,11 +30,11 @@ public class AccountEntryTests
     [Theory]
     [InlineData(EntryDirection.In, 110)]
     [InlineData(EntryDirection.Out, -110)]
-    public async Task SignedAmount_should_be_negative_only_for_outgoing_entries(
+    public void SignedAmount_should_be_negative_only_for_outgoing_entries(
         EntryDirection direction,
         decimal expected)
     {
-        var accountEntry = await _builder.WithDirection(direction).Build();
+        var accountEntry = _builder.WithDirection(direction).Build();
 
         accountEntry.SignedAmount.Should().Be(expected);
     }
@@ -42,46 +42,46 @@ public class AccountEntryTests
     [Theory]
     [InlineData(0)]
     [InlineData(-1)]
-    public async Task Create_should_throw_when_PaymentId_is_not_positive(long paymentId)
+    public void Create_should_throw_when_PaymentId_is_not_positive(long paymentId)
     {
-        Func<Task> act = () => _builder.WithPaymentId(paymentId).Build();
+        Action act = () => _builder.WithPaymentId(paymentId).Build();
 
-        await act.Should().ThrowAsync<InvalidPaymentIdException>();
+        act.Should().Throw<InvalidPaymentIdException>();
     }
 
     [Theory]
     [InlineData(0)]
     [InlineData(-1)]
-    public async Task Create_should_throw_when_AccountId_is_not_positive(long accountId)
+    public void Create_should_throw_when_AccountId_is_not_positive(long accountId)
     {
-        Func<Task> act = () => _builder.WithAccountId(accountId).Build();
+        Action act = () => _builder.WithAccountId(accountId).Build();
 
-        await act.Should().ThrowAsync<InvalidAccountIdException>();
+        act.Should().Throw<InvalidAccountIdException>();
     }
 
     [Fact]
-    public async Task Create_should_throw_when_Amount_is_null()
+    public void Create_should_throw_when_Amount_is_null()
     {
-        Func<Task> act = () => _builder.WithAmount(null!).Build();
+        Action act = () => _builder.WithAmount(null!).Build();
 
-        await act.Should().ThrowAsync<NullEntryException>();
+        act.Should().Throw<NullEntryException>();
     }
 
     [Fact]
-    public async Task Create_should_throw_when_Amount_is_zero()
+    public void Create_should_throw_when_Amount_is_zero()
     {
-        Func<Task> act = () => _builder.WithAmount(new Money(0)).Build();
+        Action act = () => _builder.WithAmount(new Money(0)).Build();
 
-        await act.Should().ThrowAsync<InvalidAmountException>();
+        act.Should().Throw<InvalidAmountException>();
     }
 
     [Theory]
     [InlineData((EntryDirection)0)]
     [InlineData((EntryDirection)99)]
-    public async Task Create_should_throw_when_Direction_is_not_defined(EntryDirection direction)
+    public void Create_should_throw_when_Direction_is_not_defined(EntryDirection direction)
     {
-        Func<Task> act = () => _builder.WithDirection(direction).Build();
+        Action act = () => _builder.WithDirection(direction).Build();
 
-        await act.Should().ThrowAsync<InvalidEntryDirectionException>();
+        act.Should().Throw<InvalidEntryDirectionException>();
     }
 }

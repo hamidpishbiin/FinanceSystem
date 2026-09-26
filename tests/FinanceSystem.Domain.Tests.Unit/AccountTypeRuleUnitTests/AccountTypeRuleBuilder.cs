@@ -16,9 +16,9 @@ public class AccountTypeRuleBuilder
     private bool CanBeSource { get; set; } = DefaultCanBeSource;
     private bool CanBeDestination { get; set; } = DefaultCanBeDestination;
 
-    public async Task<AccountTypeRule> Build()
+    public AccountTypeRule Build()
     {
-        return await AccountTypeRule.Create(Type, Purpose, CanBeSource, CanBeDestination);
+        return new AccountTypeRule(Type, Purpose, CanBeSource, CanBeDestination);
     }
 
     public AccountTypeRuleBuilder WithType(AccountType type)

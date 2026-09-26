@@ -21,7 +21,7 @@ public class Account : EntityBase<long>
     {
     }
 
-    public static async Task<Account> Create(
+    public Account(
         AccountType type,
         AccountStatus status,
         Guid ownerId,
@@ -32,15 +32,12 @@ public class Account : EntityBase<long>
         Guard<InvalidIdException>.IsTrue(ownerId == Guid.Empty);
         Guard<NullEntryException>.AgainstNull(cachedBalance);
 
-        return new Account()
-        {
-            Type = type,
-            Status = status,
-            UserId = ownerId,
-            CachedBalance = cachedBalance.Value,
-            BalanceCalculatedAt = balanceCalculatedAt,
-            AllowNegativeBalance = allowNegativeBalance
-        };
+        Type = type;
+        Status = status;
+        UserId = ownerId;
+        CachedBalance = cachedBalance.Value;
+        BalanceCalculatedAt = balanceCalculatedAt;
+        AllowNegativeBalance = allowNegativeBalance;
     }
 
     public void ApplyEntry(AccountEntry entry, DateTimeOffset occurredAt)

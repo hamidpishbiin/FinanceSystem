@@ -14,9 +14,9 @@ public class BankAccountDetailBuilder
     private string? MaskedPan { get; set; } = DefaultMaskedPan;
     private string? BankName { get; set; } = DefaultBankName;
 
-    public async Task<BankAccountDetail> Build()
+    public BankAccountDetail Build()
     {
-        return await BankAccountDetail.Create(AccountId, Iban, MaskedPan, BankName);
+        return new BankAccountDetail(AccountId, Iban, MaskedPan, BankName);
     }
 
     public BankAccountDetailBuilder WithAccountId(long accountId)

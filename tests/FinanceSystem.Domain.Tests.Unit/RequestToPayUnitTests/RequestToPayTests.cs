@@ -15,9 +15,9 @@ public class RequestToPayTests
     private readonly RequestToPayBuilder _builder = new();
 
     [Fact]
-    public async Task Create_should_properly_create_requestToPay()
+    public void Create_should_properly_create_requestToPay()
     {
-        var bpd = await _builder.Build();
+        var bpd = _builder.Build();
 
         bpd.PspCode.Should().Be(RequestToPayBuilder.DefaultPspCode);
         bpd.Status.Should().Be(RequestToPayStatus.Initiated);
@@ -40,50 +40,50 @@ public class RequestToPayTests
     [Theory]
     [InlineData(0)]
     [InlineData(99)]
-    public async Task Create_should_throw_when_pspCode_is_not_defined(int pspCode)
+    public void Create_should_throw_when_pspCode_is_not_defined(int pspCode)
     {
-        Func<Task> bpd = () => _builder.WithPspCode((PspCode)pspCode).Build();
+        Action bpd = () => _builder.WithPspCode((PspCode)pspCode).Build();
 
-        await bpd.Should().ThrowAsync<InvalidPspCodeException>();
+        bpd.Should().Throw<InvalidPspCodeException>();
     }
 
     [Theory]
     [InlineData(0)]
     [InlineData(-1)]
-    public async Task Create_should_throw_when_accountId_is_not_positive(long accountId)
+    public void Create_should_throw_when_accountId_is_not_positive(long accountId)
     {
-        Func<Task> bpd = () => _builder.WithTargetAccountId(accountId).Build();
+        Action bpd = () => _builder.WithTargetAccountId(accountId).Build();
 
-        await bpd.Should().ThrowAsync<InvalidTargetAccountIdException>();
+        bpd.Should().Throw<InvalidTargetAccountIdException>();
     }
 
     [Fact]
-    public async Task Create_should_throw_when_requestAmount_is_null()
+    public void Create_should_throw_when_requestAmount_is_null()
     {
-        Func<Task> bpd = () => _builder.WithRequestAmount(null!).Build();
+        Action bpd = () => _builder.WithRequestAmount(null!).Build();
 
-        await bpd.Should().ThrowAsync<NullEntryException>();
+        bpd.Should().Throw<NullEntryException>();
     }
 
     [Fact]
-    public async Task Create_should_throw_when_requestAmount_is_zero()
+    public void Create_should_throw_when_requestAmount_is_zero()
     {
-        Func<Task> bpd = () => _builder.WithRequestAmount(new Money(0)).Build();
+        Action bpd = () => _builder.WithRequestAmount(new Money(0)).Build();
 
-        await bpd.Should().ThrowAsync<InvalidRequestAmountException>();
+        bpd.Should().Throw<InvalidRequestAmountException>();
     }
 
 
     [Fact]
-    public async Task Create_should_throw_when_eventPublisher_is_null()
+    public void Create_should_throw_when_eventPublisher_is_null()
     {
-        Func<Task> bpd = () => _builder.WithEventPublisher(null).Build();
+        Action bpd = () => _builder.WithEventPublisher(null).Build();
 
-        await bpd.Should().ThrowAsync<NullEntryException>();
+        bpd.Should().Throw<NullEntryException>();
     }
 
     [Fact]
-    public async Task RequestToPayStatus_values_are_persisted_contract_and_should_not_change()
+    public void RequestToPayStatus_values_are_persisted_contract_and_should_not_change()
     {
         ((int)RequestToPayStatus.Initiated).Should().Be(1);
         ((int)RequestToPayStatus.TokenReceived).Should().Be(2);

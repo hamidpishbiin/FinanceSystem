@@ -9,9 +9,9 @@ public class UserTests
     private readonly UserBuilder _builder = new();
 
     [Fact]
-    public async Task Create_should_properly_create_user()
+    public void Create_should_properly_create_user()
     {
-        var user = await _builder.Build();
+        var user = _builder.Build();
 
         user.Id.Should().Be(UserBuilder.DefaultId);
         user.FirstName.Should().Be(UserBuilder.DefaultFirstName);
@@ -21,44 +21,44 @@ public class UserTests
     }
 
     [Fact]
-    public async Task Create_should_throw_when_id_is_empty_guid()
+    public void Create_should_throw_when_id_is_empty_guid()
     {
-        Func<Task> act = () => _builder.WithId(Guid.Empty).Build();
+        Action act = () => _builder.WithId(Guid.Empty).Build();
 
-        await act.Should().ThrowAsync<InvalidIdException>();
+        act.Should().Throw<InvalidIdException>();
     }
 
     [Theory]
     [InlineData("")]
     [InlineData("   ")]
     [InlineData(null)]
-    public async Task Create_should_throw_when_firstName_is_null_or_empty_or_whiteSpace(string? firstName)
+    public void Create_should_throw_when_firstName_is_null_or_empty_or_whiteSpace(string? firstName)
     {
-        Func<Task> act = () => _builder.WithFirstName(firstName).Build();
+        Action act = () => _builder.WithFirstName(firstName).Build();
 
-        await act.Should().ThrowAsync<InvalidFirstNameException>();
+        act.Should().Throw<InvalidFirstNameException>();
     }
 
     [Theory]
     [InlineData("")]
     [InlineData("   ")]
     [InlineData(null)]
-    public async Task Create_should_throw_when_lastName_is_null_or_empty_or_whiteSpace(string? lastName)
+    public void Create_should_throw_when_lastName_is_null_or_empty_or_whiteSpace(string? lastName)
     {
-        Func<Task> act = () => _builder.WithLastName(lastName).Build();
+        Action act = () => _builder.WithLastName(lastName).Build();
 
-        await act.Should().ThrowAsync<InvalidLastNameException>();
+        act.Should().Throw<InvalidLastNameException>();
     }
 
     [Theory]
     [InlineData("")]
     [InlineData("   ")]
     [InlineData(null)]
-    public async Task Create_should_throw_when_phoneNumber_is_null_or_empty_or_whiteSpace(string? phoneNumber)
+    public void Create_should_throw_when_phoneNumber_is_null_or_empty_or_whiteSpace(string? phoneNumber)
     {
-        Func<Task> act = () => _builder.WithPhoneNumber(phoneNumber).Build();
+        Action act = () => _builder.WithPhoneNumber(phoneNumber).Build();
 
-        await act.Should().ThrowAsync<InvalidPhoneNumberException>();
+        act.Should().Throw<InvalidPhoneNumberException>();
     }
 
     [Theory]
@@ -69,10 +69,10 @@ public class UserTests
     [InlineData("00123456789")]
     [InlineData("00123a5678")]
     [InlineData("００１２３４５６７８")]
-    public async Task Create_should_throw_when_nationalCode_is_not_ten_ascii_digits(string? nationalCode)
+    public void Create_should_throw_when_nationalCode_is_not_ten_ascii_digits(string? nationalCode)
     {
-        Func<Task> act = () => _builder.WithNationalCode(nationalCode).Build();
+        Action act = () => _builder.WithNationalCode(nationalCode).Build();
 
-        await act.Should().ThrowAsync<InvalidNationalCodeException>();
+        act.Should().Throw<InvalidNationalCodeException>();
     }
 }

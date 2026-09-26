@@ -38,7 +38,7 @@ public class RequestToPay : EntityBase<long>, IAggregateRoot
     {
     }
 
-    public static async Task<RequestToPay> Create(
+    public RequestToPay(
         PspCode pspCode,
         long targetAccountId,
         Money amount,
@@ -50,14 +50,11 @@ public class RequestToPay : EntityBase<long>, IAggregateRoot
         Guard<InvalidRequestAmountException>.IsTrue(amount.Value <= 0);
         Guard<NullEntryException>.AgainstNull(eventPublisher);
 
-        return new RequestToPay()
-        {
-            PspCode = pspCode,
-            Status = RequestToPayStatus.Initiated,
-            RequestAmount = amount.Value,
-            TargetAccountId = targetAccountId,
-            Publisher = eventPublisher
-        };
+        PspCode = pspCode;
+        Status = RequestToPayStatus.Initiated;
+        RequestAmount = amount.Value;
+        TargetAccountId = targetAccountId;
+        Publisher = eventPublisher;
     }
 
     public async Task MarkTokenRequestFailed(

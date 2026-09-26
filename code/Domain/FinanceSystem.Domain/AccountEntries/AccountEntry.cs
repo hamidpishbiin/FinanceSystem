@@ -23,7 +23,7 @@ public class AccountEntry : EntityBase<long>
     {
     }
 
-    public async static Task<AccountEntry> Create(
+    public AccountEntry(
         long paymentId,
         long accountId,
         Money amount,
@@ -35,12 +35,9 @@ public class AccountEntry : EntityBase<long>
         Guard<InvalidAmountException>.IsTrue(amount.Value == 0);
         Guard<InvalidEntryDirectionException>.IsFalse(Enum.IsDefined(direction));
 
-        return new AccountEntry()
-        {
-            PaymentId = paymentId,
-            AccountId = accountId,
-            Amount = amount.Value,
-            Direction = direction
-        };
+        PaymentId = paymentId;
+        AccountId = accountId;
+        Amount = amount.Value;
+        Direction = direction;
     }
 }

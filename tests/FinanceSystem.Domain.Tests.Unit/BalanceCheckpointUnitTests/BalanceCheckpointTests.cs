@@ -16,9 +16,9 @@ public class BalanceCheckpointTests
     }
 
     [Fact]
-    public async Task Create_should_properly_create_balanceCheckpoint()
+    public void Create_should_properly_create_balanceCheckpoint()
     {
-        var bc = await _builder.Build();
+        var bc = _builder.Build();
 
         bc.AccountId.Should().Be(BalanceCheckpointBuilder.DefaultAccountId);
         bc.UpToEntryId.Should().Be(BalanceCheckpointBuilder.DefaultUpToEntryId);
@@ -28,28 +28,28 @@ public class BalanceCheckpointTests
     [Theory]
     [InlineData(0)]
     [InlineData(-1)]
-    public async Task Create_should_throw_when_accountId_is_not_positive(long accountId)
+    public void Create_should_throw_when_accountId_is_not_positive(long accountId)
     {
-        Func<Task> bc = () => _builder.WithAccountId(accountId).Build();
+        Action bc = () => _builder.WithAccountId(accountId).Build();
 
-        await bc.Should().ThrowAsync<InvalidAccountIdException>();
+        bc.Should().Throw<InvalidAccountIdException>();
     }
 
     [Theory]
     [InlineData(0)]
     [InlineData(-1)]
-    public async Task Create_should_throw_when_upToEntryId_is_not_positive(long upToEntryId)
+    public void Create_should_throw_when_upToEntryId_is_not_positive(long upToEntryId)
     {
-        Func<Task> bc = () => _builder.WithUpToEntryId(upToEntryId).Build();
+        Action bc = () => _builder.WithUpToEntryId(upToEntryId).Build();
 
-        await bc.Should().ThrowAsync<InvalidUpToEntryIdException>();
+        bc.Should().Throw<InvalidUpToEntryIdException>();
     }
 
     [Fact]
-    public async Task Create_should_throw_when_balance_is_null()
+    public void Create_should_throw_when_balance_is_null()
     {
-        Func<Task> bc = () => _builder.WithBalanceAmount(null!).Build();
+        Action bc = () => _builder.WithBalanceAmount(null!).Build();
 
-        await bc.Should().ThrowAsync<NullEntryException>();
+        bc.Should().Throw<NullEntryException>();
     }
 }

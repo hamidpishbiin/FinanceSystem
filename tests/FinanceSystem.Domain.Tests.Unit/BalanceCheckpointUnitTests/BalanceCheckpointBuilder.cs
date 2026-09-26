@@ -14,9 +14,9 @@ public class BalanceCheckpointBuilder
     private long UpToEntryId { get; set; } = DefaultUpToEntryId;
     private Money BalanceAmount { get; set; } = new Money(DefaultBalance);
 
-    public async Task<BalanceCheckpoint> Build()
+    public BalanceCheckpoint Build()
     {
-        return await BalanceCheckpoint.Create(AccountId, UpToEntryId, BalanceAmount);
+        return new BalanceCheckpoint(AccountId, UpToEntryId, BalanceAmount);
     }
 
     public BalanceCheckpointBuilder WithAccountId(long accountId)

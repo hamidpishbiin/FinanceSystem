@@ -28,7 +28,7 @@ public class TopUpCommandHandler(
 
         var pspCode = psp.Code;
 
-        var requestToPay = await RequestToPay.Create(
+        var requestToPay = new RequestToPay(
             pspCode,
             targetAccountId,
             amount,

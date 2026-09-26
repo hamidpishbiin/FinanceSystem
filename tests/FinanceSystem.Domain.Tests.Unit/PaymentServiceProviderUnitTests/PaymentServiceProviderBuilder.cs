@@ -19,9 +19,9 @@ public class PaymentServiceProviderBuilder
     private bool IsActive { get; set; } = DefaultIsActive;
     private short Priority { get; set; } = DefaultPriority;
 
-    public async Task<PaymentServiceProvider> Build()
+    public PaymentServiceProvider Build()
     {
-        return await PaymentServiceProvider.Create(
+        return new PaymentServiceProvider(
             Id,
             Code,
             Name,

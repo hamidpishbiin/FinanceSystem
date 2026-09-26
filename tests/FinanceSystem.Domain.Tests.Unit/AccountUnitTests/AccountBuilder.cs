@@ -23,9 +23,9 @@ public class AccountBuilder
     private DateTimeOffset BalanceCalculatedAt { get; set; } = DefaultBalanceCalculatedAt;
     private bool AllowNegativeBalance { get; set; } = DefaultAllowNegativeBalance;
 
-    public async Task<Account> Build()
+    public Account Build()
     {
-        return await Account.Create(
+        return new Account(
             Type,
             Status,
             OwnerId,

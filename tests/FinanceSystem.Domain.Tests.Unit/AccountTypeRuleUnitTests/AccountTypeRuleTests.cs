@@ -15,9 +15,9 @@ public class AccountTypeRuleTests
     }
 
     [Fact]
-    public async Task Create_should_properly_create_accountTypeRule()
+    public void Create_should_properly_create_accountTypeRule()
     {
-        var atr = await _builder
+        var atr = _builder
             .WithCanBeSource(true)
             .WithCanBeDestination(false)
             .Build();
@@ -31,31 +31,31 @@ public class AccountTypeRuleTests
     [Theory]
     [InlineData((AccountType)0)]
     [InlineData((AccountType)10)]
-    public async Task Create_should_throw_when_accountType_is_not_defined(AccountType accountType)
+    public void Create_should_throw_when_accountType_is_not_defined(AccountType accountType)
     {
-        Func<Task> atr = () => _builder.WithType(accountType).Build();
+        Action atr = () => _builder.WithType(accountType).Build();
 
-        await atr.Should().ThrowAsync<InvalidAccountTypeException>();
+        atr.Should().Throw<InvalidAccountTypeException>();
     }
 
     [Theory]
     [InlineData((PaymentPurpose)0)]
     [InlineData((PaymentPurpose)10)]
-    public async Task Create_should_throw_when_paymentPurpose_is_not_defined(PaymentPurpose paymentPurpose)
+    public void Create_should_throw_when_paymentPurpose_is_not_defined(PaymentPurpose paymentPurpose)
     {
-        Func<Task> atr = () => _builder.WithPurpose(paymentPurpose).Build();
+        Action atr = () => _builder.WithPurpose(paymentPurpose).Build();
 
-        await atr.Should().ThrowAsync<InvalidPaymentPurposeException>();
+        atr.Should().Throw<InvalidPaymentPurposeException>();
     }
 
     [Fact]
-    public async Task Create_should_throw_when_both_canBeSource_and_canBeDestination_are_False()
+    public void Create_should_throw_when_both_canBeSource_and_canBeDestination_are_False()
     {
-        Func<Task> atr = () => _builder
+        Action atr = () => _builder
             .WithCanBeSource(false)
             .WithCanBeDestination(false)
             .Build();
 
-        await atr.Should().ThrowAsync<InvalidSourceDestinationException>();
+        atr.Should().Throw<InvalidSourceDestinationException>();
     }
 }

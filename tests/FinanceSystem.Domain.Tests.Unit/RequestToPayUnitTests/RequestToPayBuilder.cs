@@ -19,9 +19,9 @@ public class RequestToPayBuilder
 
     public IEventPublisher EventPublisher { get; private set; } = Substitute.For<IEventPublisher>();
 
-    public async Task<RequestToPay> Build()
+    public RequestToPay Build()
     {
-        return await RequestToPay.Create(PspCode, TargetAccountId, RequestAmount, EventPublisher);
+        return new RequestToPay(PspCode, TargetAccountId, RequestAmount, EventPublisher);
     }
 
     public RequestToPayBuilder WithPspCode(PspCode pspCode)
