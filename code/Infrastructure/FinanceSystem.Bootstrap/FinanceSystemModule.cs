@@ -1,6 +1,8 @@
 ﻿using Autofac;
 using Autofac.Extras.DynamicProxy;
+using FinanceSystem.Application.Payments.Gateways;
 using FinanceSystem.Application.Product.CommandHandlers;
+using FinanceSystem.BehPardakht;
 using FinanceSystem.Core;
 using FinanceSystem.Domain.EventHandlers.ProductEventHandlers;
 using FinanceSystem.Domain.Products.DomainServices;
@@ -8,6 +10,8 @@ using FinanceSystem.Interface.ReadModel;
 using FinanceSystem.Interface.WriteModel;
 using FinanceSystem.Persistance;
 using FinanceSystem.Persistance.Repositories;
+using FinanceSystem.Psp;
+using FinanceSystem.Saman;
 using Shared.Application;
 using Shared.Core;
 using Shared.Core.EventHandlers;
@@ -54,6 +58,24 @@ namespace FinanceSystem.Bootstrap
 
             builder.RegisterAssemblyTypes(typeof(ProductCreateCommandHandler).Assembly)
                 .AsClosedTypesOf(typeof(ICommandHandler<>)).InstancePerLifetimeScope();
+
+            builder
+                .RegisterAssemblyTypes(PspAssemblyReference.Assembly)
+                .AssignableTo<IPspGatewayFactory>()
+                .As<IPspGatewayFactory>()
+                .InstancePerLifetimeScope();
+
+            builder
+                .RegisterAssemblyTypes(SamanAssemblyReference.Assembly)
+                .AssignableTo<IPspGateway>()
+                .As<IPspGateway>()
+                .InstancePerLifetimeScope();
+
+            builder
+                .RegisterAssemblyTypes(BehPardakhtAssemblyReference.Assembly)
+                .AssignableTo<IPspGateway>()
+                .As<IPspGateway>()
+                .InstancePerLifetimeScope();
         }
     }
 }

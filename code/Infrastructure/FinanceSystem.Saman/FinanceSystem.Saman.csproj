@@ -9,6 +9,7 @@
     <ItemGroup>
       <ProjectReference Include="..\..\application\FinanceSystem.Application\FinanceSystem.Application.csproj" />
       <ProjectReference Include="..\..\domain\FinanceSystem.Domain\FinanceSystem.Domain.csproj" />
+      <ProjectReference Include="..\..\shared\Shared.Autofac\Shared.Autofac.csproj" />
     </ItemGroup>
 
     <ItemGroup>

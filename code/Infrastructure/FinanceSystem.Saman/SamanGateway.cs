@@ -1,13 +1,11 @@
 using System.Net.Http.Json;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using FinanceSystem.Application.Payments.Gateways;
 using FinanceSystem.Domain.PaymentServiceProviders.Enums;
 using FinanceSystem.Domain.RequestsToPay.Enums;
 using Microsoft.Extensions.Options;
 using Shared.Core;
 
-namespace FinanceSystem.Psp.Saman;
+namespace FinanceSystem.Saman;
 
 internal class SamanGateway : IPspGateway
 {

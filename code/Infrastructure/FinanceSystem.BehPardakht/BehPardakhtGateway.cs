@@ -3,7 +3,7 @@ using FinanceSystem.Domain.PaymentServiceProviders.Enums;
 using FinanceSystem.Domain.RequestsToPay.Enums;
 using Microsoft.Extensions.Options;
 
-namespace FinanceSystem.Psp.BehPardakht;
+namespace FinanceSystem.BehPardakht;
 
 internal class BehPardakhtGateway(
     IOptionsMonitor<PspOptions> pspOptions,
