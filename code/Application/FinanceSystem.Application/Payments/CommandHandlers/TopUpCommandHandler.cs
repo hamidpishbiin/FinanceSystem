@@ -20,7 +20,7 @@ public class TopUpCommandHandler(
 {
     public override async Task Handle(TopUpCommand command, CancellationToken cancellationToken = default)
     {
-        var targetAccountId = 12;
+        var targetFinanceAccountId = 12;
 
         var amount = new Money(command.Amount);
 
@@ -30,7 +30,7 @@ public class TopUpCommandHandler(
 
         var requestToPay = new RequestToPay(
             pspCode,
-            targetAccountId,
+            targetFinanceAccountId,
             amount,
             publisher);
 

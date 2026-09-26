@@ -11,17 +11,17 @@ public class RequestToPayBuilder
 {
     public const PspCode DefaultPspCode = PspCode.Saman;
     public const decimal DefaultRequestAmount = 1234123;
-    public const long DefaultTargetAccountId = 12;
+    public const long DefaultTargetFinanceAccountId = 12;
 
     private PspCode PspCode { get; set; } = DefaultPspCode;
     private Money RequestAmount { get; set; } = new(DefaultRequestAmount);
-    private long TargetAccountId { get; set; } = DefaultTargetAccountId;
+    private long TargetFinanceAccountId { get; set; } = DefaultTargetFinanceAccountId;
 
     public IEventPublisher EventPublisher { get; private set; } = Substitute.For<IEventPublisher>();
 
     public RequestToPay Build()
     {
-        return new RequestToPay(PspCode, TargetAccountId, RequestAmount, EventPublisher);
+        return new RequestToPay(PspCode, TargetFinanceAccountId, RequestAmount, EventPublisher);
     }
 
     public RequestToPayBuilder WithPspCode(PspCode pspCode)
@@ -42,9 +42,9 @@ public class RequestToPayBuilder
         return this;
     }
 
-    public RequestToPayBuilder WithTargetAccountId(long targetAccountId)
+    public RequestToPayBuilder WithTargetFinanceAccountId(long targetFinanceAccountId)
     {
-        TargetAccountId = targetAccountId;
+        TargetFinanceAccountId = targetFinanceAccountId;
         return this;
     }
 

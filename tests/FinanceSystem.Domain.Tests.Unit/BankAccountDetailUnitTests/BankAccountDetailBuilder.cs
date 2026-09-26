@@ -4,24 +4,24 @@ namespace FinanceSystem.Domain.Tests.Unit.BankAccountDetailUnitTests;
 
 public class BankAccountDetailBuilder
 {
-    public const long DefaultAccountId = 1276;
+    public const long DefaultFinanceAccountId = 1276;
     public const string DefaultIban = "IR820540102680020817909002";
     public const string DefaultMaskedPan = "6219********1471";
     public const string DefaultBankName = "Mellat";
 
-    private long AccountId { get; set; } = DefaultAccountId;
+    private long FinanceAccountId { get; set; } = DefaultFinanceAccountId;
     private string Iban { get; set; } = DefaultIban;
     private string? MaskedPan { get; set; } = DefaultMaskedPan;
     private string? BankName { get; set; } = DefaultBankName;
 
     public BankAccountDetail Build()
     {
-        return new BankAccountDetail(AccountId, Iban, MaskedPan, BankName);
+        return new BankAccountDetail(FinanceAccountId, Iban, MaskedPan, BankName);
     }
 
-    public BankAccountDetailBuilder WithAccountId(long accountId)
+    public BankAccountDetailBuilder WithFinanceAccountId(long financeAccountId)
     {
-        AccountId = accountId;
+        FinanceAccountId = financeAccountId;
         return this;
     }
 

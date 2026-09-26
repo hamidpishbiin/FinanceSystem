@@ -22,7 +22,7 @@ public class AccountEntryTests
         var accountEntry = _builder.Build();
 
         accountEntry.PaymentId.Should().Be(AccountEntryBuilder.DefaultPaymentId);
-        accountEntry.AccountId.Should().Be(AccountEntryBuilder.DefaultAccountId);
+        accountEntry.FinanceAccountId.Should().Be(AccountEntryBuilder.DefaultFinanceAccountId);
         accountEntry.Amount.Should().Be(AccountEntryBuilder.DefaultAmount);
         accountEntry.Direction.Should().Be(AccountEntryBuilder.DefaultDirection);
     }
@@ -52,11 +52,11 @@ public class AccountEntryTests
     [Theory]
     [InlineData(0)]
     [InlineData(-1)]
-    public void Create_should_throw_when_AccountId_is_not_positive(long accountId)
+    public void Create_should_throw_when_FinanceAccountId_is_not_positive(long financeAccountId)
     {
-        Action act = () => _builder.WithAccountId(accountId).Build();
+        Action act = () => _builder.WithFinanceAccountId(financeAccountId).Build();
 
-        act.Should().Throw<InvalidAccountIdException>();
+        act.Should().Throw<InvalidFinanceAccountIdException>();
     }
 
     [Fact]

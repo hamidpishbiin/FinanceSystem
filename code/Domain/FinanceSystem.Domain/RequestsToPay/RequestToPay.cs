@@ -1,5 +1,5 @@
 using FinanceSystem.Domain.RequestsToPay.Exceptions;
-using FinanceSystem.Domain.Accounts;
+using FinanceSystem.Domain.FinanceAccounts;
 using FinanceSystem.Domain.Contract.RequestsToPay;
 using FinanceSystem.Domain.RequestsToPay.Enums;
 using FinanceSystem.Domain.PaymentServiceProviders;
@@ -19,7 +19,7 @@ public class RequestToPay : EntityBase<long>, IAggregateRoot
     public RequestToPayStatus Status { get; private set; }
     public decimal RequestAmount { get; private set; }
     public decimal? RedirectedAmount { get; private set; }
-    public long TargetAccountId { get; private set; }
+    public long TargetFinanceAccountId { get; private set; }
     public long ReferenceNumber { get; private set; }
     public string? Token { get; private set; }
     public string? RRN { get; private set; }
@@ -32,7 +32,7 @@ public class RequestToPay : EntityBase<long>, IAggregateRoot
     public string? RawDescription { get; private set; }
     public DateTimeOffset? VerifiedAtUtc { get; private set; }
     public PaymentServiceProvider? Psp { get; private set; }
-    public Account? TargetAccount { get; private set; }
+    public FinanceAccount? TargetFinanceAccount { get; private set; }
 
     private RequestToPay()
     {
@@ -40,12 +40,12 @@ public class RequestToPay : EntityBase<long>, IAggregateRoot
 
     public RequestToPay(
         PspCode pspCode,
-        long targetAccountId,
+        long targetFinanceAccountId,
         Money amount,
         IEventPublisher eventPublisher)
     {
         Guard<InvalidPspCodeException>.IsFalse(Enum.IsDefined(pspCode));
-        Guard<InvalidTargetAccountIdException>.IsTrue(targetAccountId <= 0);
+        Guard<InvalidTargetFinanceAccountIdException>.IsTrue(targetFinanceAccountId <= 0);
         Guard<NullEntryException>.AgainstNull(amount);
         Guard<InvalidRequestAmountException>.IsTrue(amount.Value <= 0);
         Guard<NullEntryException>.AgainstNull(eventPublisher);
@@ -53,7 +53,7 @@ public class RequestToPay : EntityBase<long>, IAggregateRoot
         PspCode = pspCode;
         Status = RequestToPayStatus.Initiated;
         RequestAmount = amount.Value;
-        TargetAccountId = targetAccountId;
+        TargetFinanceAccountId = targetFinanceAccountId;
         Publisher = eventPublisher;
     }
 

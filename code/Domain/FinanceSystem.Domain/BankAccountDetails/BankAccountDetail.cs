@@ -1,31 +1,31 @@
 using FinanceSystem.Domain.BankAccountDetails.Exceptions;
-using FinanceSystem.Domain.Accounts;
+using FinanceSystem.Domain.FinanceAccounts;
 
 namespace FinanceSystem.Domain.BankAccountDetails;
 
 public class BankAccountDetail : EntityBase<long>
 {
-    public long AccountId { get; private set; }
+    public long FinanceAccountId { get; private set; }
     public string Iban { get; private set; } = default!;
     public string? MaskedPan { get; private set; }
     public string? BankName { get; private set; }
 
-    public Account? Account { get; private set; }
+    public FinanceAccount? FinanceAccount { get; private set; }
 
     private BankAccountDetail()
     {
     }
 
     public BankAccountDetail(
-        long accountId,
+        long financeAccountId,
         string iban,
         string? maskedPan,
         string? bankName)
     {
-        Guard<InvalidAccountIdException>.IsTrue(accountId <= 0);
+        Guard<InvalidFinanceAccountIdException>.IsTrue(financeAccountId <= 0);
         Guard<InvalidIbanException>.AgainstNullOrEmpty(iban);
 
-        AccountId = accountId;
+        FinanceAccountId = financeAccountId;
         Iban = iban;
         MaskedPan = maskedPan;
         BankName = bankName;

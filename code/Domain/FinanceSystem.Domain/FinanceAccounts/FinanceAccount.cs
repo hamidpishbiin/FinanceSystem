@@ -1,40 +1,40 @@
 using FinanceSystem.Domain.AccountEntries;
 using FinanceSystem.Domain.AccountEntries.Enums;
-using FinanceSystem.Domain.Accounts.Enums;
-using FinanceSystem.Domain.Accounts.Exceptions;
+using FinanceSystem.Domain.FinanceAccounts.Enums;
+using FinanceSystem.Domain.FinanceAccounts.Exceptions;
 using FinanceSystem.Domain.Payments;
 using FinanceSystem.Domain.Payments.Enums;
 using Shared.Domain.Exceptions;
 
-namespace FinanceSystem.Domain.Accounts;
+namespace FinanceSystem.Domain.FinanceAccounts;
 
-public class Account : EntityBase<long>
+public class FinanceAccount : EntityBase<long>
 {
-    public AccountType Type { get; private set; }
-    public AccountStatus Status { get; private set; }
+    public FinanceAccountType Type { get; private set; }
+    public FinanceAccountStatus Status { get; private set; }
     public Guid UserId { get; private set; }
     public decimal CachedBalance { get; private set; }
     public DateTimeOffset BalanceCalculatedAt { get; private set; }
     public bool AllowNegativeBalance { get; private set; }
 
-    private Account()
+    private FinanceAccount()
     {
     }
 
-    public Account(
-        AccountType type,
-        AccountStatus status,
-        Guid ownerId,
+    public FinanceAccount(
+        FinanceAccountType type,
+        FinanceAccountStatus status,
+        Guid userId,
         Money cachedBalance,
         DateTimeOffset balanceCalculatedAt,
         bool allowNegativeBalance)
     {
-        Guard<InvalidIdException>.IsTrue(ownerId == Guid.Empty);
+        Guard<InvalidIdException>.IsTrue(userId == Guid.Empty);
         Guard<NullEntryException>.AgainstNull(cachedBalance);
 
         Type = type;
         Status = status;
-        UserId = ownerId;
+        UserId = userId;
         CachedBalance = cachedBalance.Value;
         BalanceCalculatedAt = balanceCalculatedAt;
         AllowNegativeBalance = allowNegativeBalance;
@@ -43,9 +43,9 @@ public class Account : EntityBase<long>
     public void ApplyEntry(AccountEntry entry, DateTimeOffset occurredAt)
     {
         Guard<NullEntryException>.AgainstNull(entry);
-        Guard<EntryAccountMismatchException>.IsTrue(entry.AccountId != Id);
-        Guard<AccountClosedException>.IsTrue(Status == AccountStatus.Closed);
-        Guard<AccountDirectionNotAllowedException>.IsFalse(Allows(entry.Direction));
+        Guard<EntryFinanceAccountMismatchException>.IsTrue(entry.FinanceAccountId != Id);
+        Guard<FinanceAccountClosedException>.IsTrue(Status == FinanceAccountStatus.Closed);
+        Guard<FinanceAccountDirectionNotAllowedException>.IsFalse(Allows(entry.Direction));
 
         var newBalance = CachedBalance + entry.SignedAmount;
 
@@ -57,11 +57,11 @@ public class Account : EntityBase<long>
 
     private bool Allows(EntryDirection direction) => Status switch
     {
-        AccountStatus.Active => true,
-        AccountStatus.InboundFrozen => direction == EntryDirection.Out,
-        AccountStatus.OutboundFrozen => direction == EntryDirection.In,
-        AccountStatus.CompletelyFrozen => false,
-        AccountStatus.Closed => false,
+        FinanceAccountStatus.Active => true,
+        FinanceAccountStatus.InboundFrozen => direction == EntryDirection.Out,
+        FinanceAccountStatus.OutboundFrozen => direction == EntryDirection.In,
+        FinanceAccountStatus.CompletelyFrozen => false,
+        FinanceAccountStatus.Closed => false,
         _ => false
     };
 }

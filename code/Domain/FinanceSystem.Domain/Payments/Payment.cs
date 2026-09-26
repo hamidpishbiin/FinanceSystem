@@ -1,5 +1,5 @@
 using FinanceSystem.Domain.Contract.Payments;
-using FinanceSystem.Domain.Accounts;
+using FinanceSystem.Domain.FinanceAccounts;
 using FinanceSystem.Domain.RequestsToPay;
 using FinanceSystem.Domain.Payments.Enums;
 using FinanceSystem.Domain.Payments.Exceptions;
@@ -15,15 +15,15 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
     public PaymentPurpose Purpose { get; private set; }
     public PaymentChannel Channel { get; private set; }
     public decimal Amount { get; private set; }
-    public long SourceAccountId { get; private set; }
-    public long DestinationAccountId { get; private set; }
+    public long SourceFinanceAccountId { get; private set; }
+    public long DestinationFinanceAccountId { get; private set; }
     public string OriginServiceId { get; private set; }
     public string ExternalReferenceId { get; private set; }
     public string ExternalTag { get; private set; }
     public long? RequestToPayId { get; private set; }
 
-    public Account? SourceAccount { get; private set; }
-    public Account? DestinationAccount { get; private set; }
+    public FinanceAccount? SourceFinanceAccount { get; private set; }
+    public FinanceAccount? DestinationFinanceAccount { get; private set; }
     public RequestToPay? RequestToPay { get; private set; }
 
     private Payment()
@@ -35,8 +35,8 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
         PaymentPurpose purpose,
         PaymentChannel channel,
         Money amount,
-        long sourceAccountId,
-        long destinationAccountId,
+        long sourceFinanceAccountId,
+        long destinationFinanceAccountId,
         string originServiceId,
         string externalReferenceId,
         string externalTag,
@@ -49,9 +49,9 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
         Guard<NullEntryException>.AgainstNull(amount);
         Guard<InvalidPaymentAmountException>.IsTrue(amount.Value <= 0);
 
-        Guard<InvalidSourceAccountIdException>.IsTrue(sourceAccountId <= 0);
-        Guard<InvalidDestinationAccountIdException>.IsTrue(destinationAccountId <= 0);
-        Guard<SameSourceAndDestinationAccountException>.IsTrue(sourceAccountId == destinationAccountId);
+        Guard<InvalidSourceFinanceAccountIdException>.IsTrue(sourceFinanceAccountId <= 0);
+        Guard<InvalidDestinationFinanceAccountIdException>.IsTrue(destinationFinanceAccountId <= 0);
+        Guard<SameSourceAndDestinationFinanceAccountException>.IsTrue(sourceFinanceAccountId == destinationFinanceAccountId);
 
         Guard<InvalidOriginServiceIdException>.AgainstNullOrEmpty(originServiceId);
         Guard<InvalidExternalReferenceIdException>.AgainstNullOrEmpty(externalReferenceId);
@@ -67,8 +67,8 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
             Purpose = purpose,
             Channel = channel,
             Amount = amount.Value,
-            SourceAccountId = sourceAccountId,
-            DestinationAccountId = destinationAccountId,
+            SourceFinanceAccountId = sourceFinanceAccountId,
+            DestinationFinanceAccountId = destinationFinanceAccountId,
             OriginServiceId = originServiceId,
             ExternalReferenceId = externalReferenceId,
             ExternalTag = externalTag,

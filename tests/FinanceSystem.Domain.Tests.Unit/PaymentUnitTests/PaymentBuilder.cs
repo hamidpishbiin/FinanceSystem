@@ -10,8 +10,8 @@ public class PaymentBuilder
     public const PaymentPurpose DefaultPurpose = PaymentPurpose.Purchase;
     public const PaymentChannel DefaultChannel = PaymentChannel.Wallet;
     public const decimal DefaultAmount = 250_000;
-    public const long DefaultSourceAccountId = 11;
-    public const long DefaultDestinationAccountId = 22;
+    public const long DefaultSourceFinanceAccountId = 11;
+    public const long DefaultDestinationFinanceAccountId = 22;
     public const string DefaultOriginServiceId = "checkout-service";
     public const string DefaultExternalReferenceId = "ext-ref-9931";
     public const string DefaultExternalTag = "order:9931";
@@ -20,8 +20,8 @@ public class PaymentBuilder
     private PaymentPurpose Purpose { get; set; } = DefaultPurpose;
     private PaymentChannel Channel { get; set; } = DefaultChannel;
     private Money Amount { get; set; } = new(DefaultAmount);
-    private long SourceAccountId { get; set; } = DefaultSourceAccountId;
-    private long DestinationAccountId { get; set; } = DefaultDestinationAccountId;
+    private long SourceFinanceAccountId { get; set; } = DefaultSourceFinanceAccountId;
+    private long DestinationFinanceAccountId { get; set; } = DefaultDestinationFinanceAccountId;
     private string OriginServiceId { get; set; } = DefaultOriginServiceId;
     private string ExternalReferenceId { get; set; } = DefaultExternalReferenceId;
     private string ExternalTag { get; set; } = DefaultExternalTag;
@@ -35,8 +35,8 @@ public class PaymentBuilder
             Purpose,
             Channel,
             Amount,
-            SourceAccountId,
-            DestinationAccountId,
+            SourceFinanceAccountId,
+            DestinationFinanceAccountId,
             OriginServiceId,
             ExternalReferenceId,
             ExternalTag,
@@ -62,15 +62,15 @@ public class PaymentBuilder
         return this;
     }
 
-    public PaymentBuilder WithSourceAccountId(long sourceAccountId)
+    public PaymentBuilder WithSourceFinanceAccountId(long sourceFinanceAccountId)
     {
-        SourceAccountId = sourceAccountId;
+        SourceFinanceAccountId = sourceFinanceAccountId;
         return this;
     }
 
-    public PaymentBuilder WithDestinationAccountId(long destinationAccountId)
+    public PaymentBuilder WithDestinationFinanceAccountId(long destinationFinanceAccountId)
     {
-        DestinationAccountId = destinationAccountId;
+        DestinationFinanceAccountId = destinationFinanceAccountId;
         return this;
     }
 

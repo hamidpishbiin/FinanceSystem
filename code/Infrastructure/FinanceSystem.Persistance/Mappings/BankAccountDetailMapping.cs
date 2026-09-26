@@ -1,4 +1,4 @@
-using FinanceSystem.Domain.Accounts;
+using FinanceSystem.Domain.FinanceAccounts;
 using FinanceSystem.Domain.BankAccountDetails;
 
 namespace FinanceSystem.Persistance.Mappings;
@@ -15,19 +15,19 @@ public class BankAccountDetailMapping() : EntityBaseMap<BankAccountDetail, long>
             .ValueGeneratedOnAdd();
 
         builder
-            .Property(p => p.AccountId)
-            .HasColumnName("AccountId");
+            .Property(p => p.FinanceAccountId)
+            .HasColumnName("FinanceAccountId");
 
         builder
-            .HasIndex(p => p.AccountId)
-            .HasDatabaseName("IX_BankAccountDetails_AccountId");
+            .HasIndex(p => p.FinanceAccountId)
+            .HasDatabaseName("IX_BankAccountDetails_FinanceAccountId");
 
         builder
-            .HasOne(p => p.Account)
+            .HasOne(p => p.FinanceAccount)
             .WithMany()
-            .HasForeignKey(p => p.AccountId)
+            .HasForeignKey(p => p.FinanceAccountId)
             .OnDelete(DeleteBehavior.Restrict)
-            .HasConstraintName("FK_BankAccountDetails_Accounts_AccountId");
+            .HasConstraintName("FK_BankAccountDetails_FinanceAccounts_FinanceAccountId");
 
         builder
             .Property(p => p.Iban)

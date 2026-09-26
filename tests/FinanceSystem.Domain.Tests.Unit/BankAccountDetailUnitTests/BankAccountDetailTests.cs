@@ -17,7 +17,7 @@ public class BankAccountDetailTests
     {
         var bad = _builder.Build();
 
-        bad.AccountId.Should().Be(BankAccountDetailBuilder.DefaultAccountId);
+        bad.FinanceAccountId.Should().Be(BankAccountDetailBuilder.DefaultFinanceAccountId);
         bad.Iban.Should().Be(BankAccountDetailBuilder.DefaultIban);
         bad.MaskedPan.Should().Be(BankAccountDetailBuilder.DefaultMaskedPan);
         bad.BankName.Should().Be(BankAccountDetailBuilder.DefaultBankName);
@@ -26,11 +26,11 @@ public class BankAccountDetailTests
     [Theory]
     [InlineData(0)]
     [InlineData(-1)]
-    public void Create_should_throw_when_accountId_is_not_positive(long accountId)
+    public void Create_should_throw_when_financeAccountId_is_not_positive(long financeAccountId)
     {
-        Action bad = () => _builder.WithAccountId(accountId).Build();
+        Action bad = () => _builder.WithFinanceAccountId(financeAccountId).Build();
 
-        bad.Should().Throw<InvalidAccountIdException>();
+        bad.Should().Throw<InvalidFinanceAccountIdException>();
     }
 
     [Theory]

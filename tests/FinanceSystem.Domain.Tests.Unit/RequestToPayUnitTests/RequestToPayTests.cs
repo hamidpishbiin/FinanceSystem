@@ -23,7 +23,7 @@ public class RequestToPayTests
         bpd.Status.Should().Be(RequestToPayStatus.Initiated);
         bpd.RequestAmount.Should().Be(RequestToPayBuilder.DefaultRequestAmount);
         bpd.RedirectedAmount.Should().BeNull();
-        bpd.TargetAccountId.Should().Be(RequestToPayBuilder.DefaultTargetAccountId);
+        bpd.TargetFinanceAccountId.Should().Be(RequestToPayBuilder.DefaultTargetFinanceAccountId);
         bpd.Token.Should().BeNull();
         bpd.RRN.Should().BeNull();
         bpd.RefNum.Should().BeNull();
@@ -50,11 +50,11 @@ public class RequestToPayTests
     [Theory]
     [InlineData(0)]
     [InlineData(-1)]
-    public void Create_should_throw_when_accountId_is_not_positive(long accountId)
+    public void Create_should_throw_when_financeAccountId_is_not_positive(long financeAccountId)
     {
-        Action bpd = () => _builder.WithTargetAccountId(accountId).Build();
+        Action bpd = () => _builder.WithTargetFinanceAccountId(financeAccountId).Build();
 
-        bpd.Should().Throw<InvalidTargetAccountIdException>();
+        bpd.Should().Throw<InvalidTargetFinanceAccountIdException>();
     }
 
     [Fact]

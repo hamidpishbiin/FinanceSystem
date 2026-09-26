@@ -1,6 +1,6 @@
 using FinanceSystem.Domain.AccountEntries;
 using FinanceSystem.Domain.AccountEntries.Enums;
-using FinanceSystem.Domain.Accounts;
+using FinanceSystem.Domain.FinanceAccounts;
 using FinanceSystem.Domain.Payments;
 
 namespace FinanceSystem.Persistance.Mappings;
@@ -33,20 +33,20 @@ public class AccountEntryMapping() : EntityBaseMap<AccountEntry, long>("AccountE
             .HasConstraintName("FK_AccountEntries_Payments_PaymentId");
 
         builder
-            .Property(p => p.AccountId)
-            .HasColumnName("AccountId");
+            .Property(p => p.FinanceAccountId)
+            .HasColumnName("FinanceAccountId");
 
         builder
-            .HasIndex(p => p.AccountId)
+            .HasIndex(p => p.FinanceAccountId)
             .IncludeProperties(p => new { p.Amount, p.Direction })
-            .HasDatabaseName("IX_AccountEntries_AccountId");
+            .HasDatabaseName("IX_AccountEntries_FinanceAccountId");
 
         builder
-            .HasOne(p => p.Account)
+            .HasOne(p => p.FinanceAccount)
             .WithMany()
-            .HasForeignKey(p => p.AccountId)
+            .HasForeignKey(p => p.FinanceAccountId)
             .OnDelete(DeleteBehavior.Restrict)
-            .HasConstraintName("FK_AccountEntries_Accounts_AccountId");
+            .HasConstraintName("FK_AccountEntries_FinanceAccounts_FinanceAccountId");
 
         builder
             .Property(p => p.Amount)

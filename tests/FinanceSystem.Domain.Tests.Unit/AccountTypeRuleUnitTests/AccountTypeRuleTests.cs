@@ -1,4 +1,4 @@
-using FinanceSystem.Domain.Accounts.Enums;
+using FinanceSystem.Domain.FinanceAccounts.Enums;
 using FinanceSystem.Domain.AccountTypeRules.Exceptions;
 using FinanceSystem.Domain.Payments.Enums;
 using FluentAssertions;
@@ -29,13 +29,13 @@ public class AccountTypeRuleTests
     }
 
     [Theory]
-    [InlineData((AccountType)0)]
-    [InlineData((AccountType)10)]
-    public void Create_should_throw_when_accountType_is_not_defined(AccountType accountType)
+    [InlineData((FinanceAccountType)0)]
+    [InlineData((FinanceAccountType)10)]
+    public void Create_should_throw_when_financeAccountType_is_not_defined(FinanceAccountType financeAccountType)
     {
-        Action atr = () => _builder.WithType(accountType).Build();
+        Action atr = () => _builder.WithType(financeAccountType).Build();
 
-        atr.Should().Throw<InvalidAccountTypeException>();
+        atr.Should().Throw<InvalidFinanceAccountTypeException>();
     }
 
     [Theory]

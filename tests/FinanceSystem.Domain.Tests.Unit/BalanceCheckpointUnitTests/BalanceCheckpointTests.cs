@@ -20,7 +20,7 @@ public class BalanceCheckpointTests
     {
         var bc = _builder.Build();
 
-        bc.AccountId.Should().Be(BalanceCheckpointBuilder.DefaultAccountId);
+        bc.FinanceAccountId.Should().Be(BalanceCheckpointBuilder.DefaultFinanceAccountId);
         bc.UpToEntryId.Should().Be(BalanceCheckpointBuilder.DefaultUpToEntryId);
         bc.Balance.Should().Be(BalanceCheckpointBuilder.DefaultBalance);
     }
@@ -28,11 +28,11 @@ public class BalanceCheckpointTests
     [Theory]
     [InlineData(0)]
     [InlineData(-1)]
-    public void Create_should_throw_when_accountId_is_not_positive(long accountId)
+    public void Create_should_throw_when_financeAccountId_is_not_positive(long financeAccountId)
     {
-        Action bc = () => _builder.WithAccountId(accountId).Build();
+        Action bc = () => _builder.WithFinanceAccountId(financeAccountId).Build();
 
-        bc.Should().Throw<InvalidAccountIdException>();
+        bc.Should().Throw<InvalidFinanceAccountIdException>();
     }
 
     [Theory]

@@ -1,6 +1,6 @@
-namespace FinanceSystem.Domain.Accounts.Enums;
+namespace FinanceSystem.Domain.FinanceAccounts.Enums;
 
-public enum AccountStatus : byte
+public enum FinanceAccountStatus : byte
 {
     Active = 1,
     CompletelyFrozen = 2,

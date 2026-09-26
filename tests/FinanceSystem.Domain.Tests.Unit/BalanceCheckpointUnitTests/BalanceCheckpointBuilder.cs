@@ -6,22 +6,22 @@ namespace FinanceSystem.Domain.Tests.Unit.BalanceCheckpointUnitTests;
 
 public class BalanceCheckpointBuilder
 {
-    public const long DefaultAccountId = 1234;
+    public const long DefaultFinanceAccountId = 1234;
     public const long DefaultUpToEntryId = 5678;
     public const decimal DefaultBalance = 9086131;
 
-    private long AccountId { get; set; } = DefaultAccountId;
+    private long FinanceAccountId { get; set; } = DefaultFinanceAccountId;
     private long UpToEntryId { get; set; } = DefaultUpToEntryId;
     private Money BalanceAmount { get; set; } = new Money(DefaultBalance);
 
     public BalanceCheckpoint Build()
     {
-        return new BalanceCheckpoint(AccountId, UpToEntryId, BalanceAmount);
+        return new BalanceCheckpoint(FinanceAccountId, UpToEntryId, BalanceAmount);
     }
 
-    public BalanceCheckpointBuilder WithAccountId(long accountId)
+    public BalanceCheckpointBuilder WithFinanceAccountId(long financeAccountId)
     {
-        AccountId = accountId;
+        FinanceAccountId = financeAccountId;
         return this;
     }
 

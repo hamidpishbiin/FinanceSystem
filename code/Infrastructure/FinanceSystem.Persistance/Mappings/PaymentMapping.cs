@@ -1,4 +1,4 @@
-using FinanceSystem.Domain.Accounts;
+using FinanceSystem.Domain.FinanceAccounts;
 using FinanceSystem.Domain.RequestsToPay;
 using FinanceSystem.Domain.Payments;
 
@@ -30,12 +30,12 @@ public class PaymentMapping() : EntityBaseMap<Payment, long>("Payments")
             .HasColumnName("Amount");
 
         builder
-            .Property(p => p.SourceAccountId)
-            .HasColumnName("SourceAccountId");
+            .Property(p => p.SourceFinanceAccountId)
+            .HasColumnName("SourceFinanceAccountId");
 
         builder
-            .Property(p => p.DestinationAccountId)
-            .HasColumnName("DestinationAccountId");
+            .Property(p => p.DestinationFinanceAccountId)
+            .HasColumnName("DestinationFinanceAccountId");
 
         builder
             .Property(p => p.OriginServiceId)
@@ -72,18 +72,18 @@ public class PaymentMapping() : EntityBaseMap<Payment, long>("Payments")
             .HasConstraintName("FK_Payments_RequestsToPay_RequestToPayId");
 
         builder
-            .HasOne(p => p.SourceAccount)
+            .HasOne(p => p.SourceFinanceAccount)
             .WithMany()
-            .HasForeignKey(p => p.SourceAccountId)
+            .HasForeignKey(p => p.SourceFinanceAccountId)
             .OnDelete(DeleteBehavior.Restrict)
-            .HasConstraintName("FK_Payments_Accounts_SourceAccountId");
+            .HasConstraintName("FK_Payments_FinanceAccounts_SourceFinanceAccountId");
 
         builder
-            .HasOne(p => p.DestinationAccount)
+            .HasOne(p => p.DestinationFinanceAccount)
             .WithMany()
-            .HasForeignKey(p => p.DestinationAccountId)
+            .HasForeignKey(p => p.DestinationFinanceAccountId)
             .OnDelete(DeleteBehavior.Restrict)
-            .HasConstraintName("FK_Payments_Accounts_DestinationAccountId");
+            .HasConstraintName("FK_Payments_FinanceAccounts_DestinationFinanceAccountId");
 
         builder.Ignore(p => p.Publisher);
     }

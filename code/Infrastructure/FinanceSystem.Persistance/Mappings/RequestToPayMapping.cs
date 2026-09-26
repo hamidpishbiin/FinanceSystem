@@ -1,4 +1,4 @@
-using FinanceSystem.Domain.Accounts;
+using FinanceSystem.Domain.FinanceAccounts;
 using FinanceSystem.Domain.RequestsToPay;
 using FinanceSystem.Domain.PaymentServiceProviders;
 
@@ -46,19 +46,19 @@ public class RequestToPayMapping() : EntityBaseMap<RequestToPay, long>("Requests
             .HasPrecision(18, 0);
 
         builder
-            .Property(p => p.TargetAccountId)
-            .HasColumnName("TargetAccountId");
+            .Property(p => p.TargetFinanceAccountId)
+            .HasColumnName("TargetFinanceAccountId");
 
         builder
-            .HasOne(p => p.TargetAccount)
+            .HasOne(p => p.TargetFinanceAccount)
             .WithMany()
-            .HasForeignKey(p => p.TargetAccountId)
+            .HasForeignKey(p => p.TargetFinanceAccountId)
             .OnDelete(DeleteBehavior.Restrict)
-            .HasConstraintName("FK_RequestsToPay_Accounts_TargetAccountId");
+            .HasConstraintName("FK_RequestsToPay_FinanceAccounts_TargetFinanceAccountId");
 
         builder
-            .HasIndex(p => p.TargetAccountId)
-            .HasDatabaseName("IX_RequestsToPay_TargetAccountId");
+            .HasIndex(p => p.TargetFinanceAccountId)
+            .HasDatabaseName("IX_RequestsToPay_TargetFinanceAccountId");
 
         builder
             .Property(p => p.ReferenceNumber)

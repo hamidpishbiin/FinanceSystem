@@ -1,0 +1,6 @@
+namespace FinanceSystem.Domain.FinanceAccounts.Exceptions;
+
+public class InsufficientBalanceException : BusinessException
+{
+    protected override int DefaultCode => FinanceAccountExceptionCodes.InsufficientBalance;
+}

@@ -1,5 +1,5 @@
 using FinanceSystem.Domain.AccountEntries;
-using FinanceSystem.Domain.Accounts;
+using FinanceSystem.Domain.FinanceAccounts;
 using FinanceSystem.Domain.BalanceCheckpoints;
 
 namespace FinanceSystem.Persistance.Mappings;
@@ -16,16 +16,16 @@ public class BalanceCheckpointMapping() : EntityBaseMap<BalanceCheckpoint, long>
             .ValueGeneratedOnAdd();
 
         builder
-            .Property(p => p.AccountId)
+            .Property(p => p.FinanceAccountId)
             .IsRequired()
-            .HasColumnName("AccountId");
+            .HasColumnName("FinanceAccountId");
 
         builder
-            .HasOne(p => p.Account)
+            .HasOne(p => p.FinanceAccount)
             .WithMany()
-            .HasForeignKey(p => p.AccountId)
+            .HasForeignKey(p => p.FinanceAccountId)
             .OnDelete(DeleteBehavior.Restrict)
-            .HasConstraintName("FK_BalanceCheckpoints_Accounts_AccountId");
+            .HasConstraintName("FK_BalanceCheckpoints_FinanceAccounts_FinanceAccountId");
 
         builder
             .Property(p => p.UpToEntryId)
@@ -45,8 +45,8 @@ public class BalanceCheckpointMapping() : EntityBaseMap<BalanceCheckpoint, long>
             .HasPrecision(18, 0);
 
         builder
-            .HasIndex(p => new { p.AccountId, p.UpToEntryId })
+            .HasIndex(p => new { p.FinanceAccountId, p.UpToEntryId })
             .IncludeProperties(p => p.Balance)
-            .HasDatabaseName("IX_BalanceCheckpoints_AccountId_UpToEntryId");
+            .HasDatabaseName("IX_BalanceCheckpoints_FinanceAccountId_UpToEntryId");
     }
 }

@@ -21,8 +21,8 @@ public class PaymentTests
         payment.Purpose.Should().Be(PaymentBuilder.DefaultPurpose);
         payment.Channel.Should().Be(PaymentBuilder.DefaultChannel);
         payment.Amount.Should().Be(PaymentBuilder.DefaultAmount);
-        payment.SourceAccountId.Should().Be(PaymentBuilder.DefaultSourceAccountId);
-        payment.DestinationAccountId.Should().Be(PaymentBuilder.DefaultDestinationAccountId);
+        payment.SourceFinanceAccountId.Should().Be(PaymentBuilder.DefaultSourceFinanceAccountId);
+        payment.DestinationFinanceAccountId.Should().Be(PaymentBuilder.DefaultDestinationFinanceAccountId);
         payment.OriginServiceId.Should().Be(PaymentBuilder.DefaultOriginServiceId);
         payment.ExternalReferenceId.Should().Be(PaymentBuilder.DefaultExternalReferenceId);
         payment.ExternalTag.Should().Be(PaymentBuilder.DefaultExternalTag);
@@ -81,32 +81,32 @@ public class PaymentTests
     [Theory]
     [InlineData(0)]
     [InlineData(-1)]
-    public async Task Create_should_throw_when_sourceAccountId_is_not_positive(long sourceAccountId)
+    public async Task Create_should_throw_when_sourceFinanceAccountId_is_not_positive(long sourceFinanceAccountId)
     {
-        Func<Task> act = () => _builder.WithSourceAccountId(sourceAccountId).Build();
+        Func<Task> act = () => _builder.WithSourceFinanceAccountId(sourceFinanceAccountId).Build();
 
-        await act.Should().ThrowAsync<InvalidSourceAccountIdException>();
+        await act.Should().ThrowAsync<InvalidSourceFinanceAccountIdException>();
     }
 
     [Theory]
     [InlineData(0)]
     [InlineData(-1)]
-    public async Task Create_should_throw_when_destinationAccountId_is_not_positive(long destinationAccountId)
+    public async Task Create_should_throw_when_destinationFinanceAccountId_is_not_positive(long destinationFinanceAccountId)
     {
-        Func<Task> act = () => _builder.WithDestinationAccountId(destinationAccountId).Build();
+        Func<Task> act = () => _builder.WithDestinationFinanceAccountId(destinationFinanceAccountId).Build();
 
-        await act.Should().ThrowAsync<InvalidDestinationAccountIdException>();
+        await act.Should().ThrowAsync<InvalidDestinationFinanceAccountIdException>();
     }
 
     [Fact]
-    public async Task Create_should_throw_when_source_and_destination_accounts_are_the_same()
+    public async Task Create_should_throw_when_source_and_destination_finance_accounts_are_the_same()
     {
         Func<Task> act = () => _builder
-            .WithSourceAccountId(PaymentBuilder.DefaultSourceAccountId)
-            .WithDestinationAccountId(PaymentBuilder.DefaultSourceAccountId)
+            .WithSourceFinanceAccountId(PaymentBuilder.DefaultSourceFinanceAccountId)
+            .WithDestinationFinanceAccountId(PaymentBuilder.DefaultSourceFinanceAccountId)
             .Build();
 
-        await act.Should().ThrowAsync<SameSourceAndDestinationAccountException>();
+        await act.Should().ThrowAsync<SameSourceAndDestinationFinanceAccountException>();
     }
 
     [Theory]

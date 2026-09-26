@@ -1,11 +1,11 @@
-using FinanceSystem.Domain.Accounts;
+using FinanceSystem.Domain.FinanceAccounts;
 using FinanceSystem.Domain.Users;
 
 namespace FinanceSystem.Persistance.Mappings;
 
-public class AccountMapping() : EntityBaseMap<Account, long>("Accounts")
+public class FinanceAccountMapping() : EntityBaseMap<FinanceAccount, long>("FinanceAccounts")
 {
-    override protected void ConfigureMap(EntityTypeBuilder<Account> builder)
+    override protected void ConfigureMap(EntityTypeBuilder<FinanceAccount> builder)
     {
         builder.HasKey(p => p.Id);
 
@@ -16,14 +16,14 @@ public class AccountMapping() : EntityBaseMap<Account, long>("Accounts")
 
         builder
             .Property(p => p.UserId)
-            .HasColumnName("OwnerId");
+            .HasColumnName("UserId");
 
         builder
             .HasOne<User>()
             .WithMany()
             .HasForeignKey(p => p.UserId)
             .OnDelete(DeleteBehavior.Restrict)
-            .HasConstraintName("FK_Accounts_Users_OwnerId");
+            .HasConstraintName("FK_FinanceAccounts_Users_UserId");
 
         builder
             .Property(p => p.AllowNegativeBalance)
