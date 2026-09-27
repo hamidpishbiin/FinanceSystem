@@ -1,4 +1,4 @@
-using FinanceSystem.Domain.RequestsToPay.Enums;
+using FinanceSystem.Domain.Payments.Enums;
 
 namespace FinanceSystem.Application.Payments.Gateways;
 

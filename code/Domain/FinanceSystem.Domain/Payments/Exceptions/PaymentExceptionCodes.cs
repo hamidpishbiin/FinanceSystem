@@ -11,6 +11,8 @@ public static class PaymentExceptionCodes
     public const int InvalidExternalTag = 207;
     public const int InvalidPaymentPurpose = 208;
     public const int InvalidPaymentChannel = 209;
-    public const int MissingRequestToPay = 210;
-    public const int UnexpectedRequestToPay = 211;
+    public const int MissingPspCode = 210;
+    public const int UnexpectedPspCode = 211;
+    public const int InvalidToken = 212;
+    public const int InvalidPaymentState = 213;
 }

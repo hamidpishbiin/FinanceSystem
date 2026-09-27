@@ -1,6 +1,5 @@
 using FinanceSystem.Application.Contracts.Payments.Command;
 using FinanceSystem.Domain.Contract.Payments;
-using FinanceSystem.Domain.Contract.RequestsToPay;
 using FinanceSystem.Interface.Contracts.Payments.Models;
 using FinanceSystem.Interface.Contracts.Payments.Services;
 using Shared.Core;
@@ -30,7 +29,7 @@ public class WalletFacadeService(
             OriginServiceId = model.OriginServiceId,
             ExternalReferenceId = model.ExternalReferenceId,
             ExternalTag = model.ExternalTag,
-            RequestToPayId = model.RequestToPayId
+            PspCode = model.PspCode
         });
 
         return JsonResponse<string>.Success(externalReferenceId);
@@ -40,7 +39,7 @@ public class WalletFacadeService(
     {
         var ipgUrl = string.Empty;
 
-        await listener.Subscribe(new EventHandlerAction<RequestToPayTokenReceivedEvent>(a =>
+        await listener.Subscribe(new EventHandlerAction<PaymentTokenReceivedEvent>(a =>
         {
             ipgUrl = a.IpgUrl;
         }));

@@ -10,5 +10,5 @@ public class CreatePaymentCommand : PaymentCommand
     public string OriginServiceId { get; set; }
     public string ExternalReferenceId { get; set; }
     public string ExternalTag { get; set; }
-    public long? RequestToPayId { get; set; }
+    public int? PspCode { get; set; }
 }

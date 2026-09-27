@@ -1,5 +1,4 @@
 using FinanceSystem.Domain.FinanceAccounts;
-using FinanceSystem.Domain.RequestsToPay;
 using FinanceSystem.Domain.Payments;
 
 namespace FinanceSystem.Persistance.Mappings;
@@ -56,20 +55,87 @@ public class PaymentMapping() : EntityBaseMap<Payment, long>("Payments")
             .HasColumnName("ExternalTag");
 
         builder
-            .Property(p => p.RequestToPayId)
-            .HasColumnName("RequestToPayId");
+            .Property(p => p.Status)
+            .IsRequired()
+            .HasColumnName("Status");
 
         builder
-            .HasIndex(p => p.RequestToPayId)
-            .IsUnique()
-            .HasDatabaseName("UX_Payments_RequestToPayId");
+            .Property(p => p.PspCode)
+            .HasColumnName("PspCode");
 
         builder
-            .HasOne(p => p.RequestToPay)
-            .WithOne()
-            .HasForeignKey<Payment>(p => p.RequestToPayId)
+            .HasOne(p => p.Psp)
+            .WithMany()
+            .HasForeignKey(p => p.PspCode)
+            .HasPrincipalKey(psp => psp.Code)
             .OnDelete(DeleteBehavior.Restrict)
-            .HasConstraintName("FK_Payments_RequestsToPay_RequestToPayId");
+            .HasConstraintName("FK_Payments_PaymentServiceProviders_PspCode");
+
+        builder
+            .HasIndex(p => p.PspCode)
+            .HasDatabaseName("IX_Payments_PspCode");
+
+        builder
+            .Property(p => p.RedirectedAmount)
+            .HasColumnName("RedirectedAmount")
+            .HasPrecision(18, 0);
+
+        builder
+            .Property(p => p.Token)
+            .HasColumnName("Token")
+            .HasMaxLength(20);
+
+        builder
+            .Property(p => p.RRN)
+            .HasColumnName("RRN")
+            .HasMaxLength(20);
+
+        builder
+            .HasIndex(p => p.RRN)
+            .IsUnique()
+            .HasDatabaseName("UX_Payments_RRN");
+
+        builder
+            .Property(p => p.RefNum)
+            .HasColumnName("RefNum")
+            .HasMaxLength(20);
+
+        builder
+            .HasIndex(p => p.RefNum)
+            .IsUnique()
+            .HasDatabaseName("UX_Payments_RefNum");
+
+        builder
+            .Property(p => p.TraceNumber)
+            .HasColumnName("TraceNumber")
+            .HasMaxLength(20);
+
+        builder
+            .Property(p => p.MaskedPan)
+            .HasMaxLength(20)
+            .HasColumnName("MaskedPan");
+
+        builder
+            .Property(p => p.FailureReason)
+            .HasColumnName("FailureReason");
+
+        builder
+            .Property(p => p.RawStatus)
+            .HasColumnName("RawStatus")
+            .HasMaxLength(20);
+
+        builder
+            .Property(p => p.RawErrorCode)
+            .HasColumnName("RawErrorCode")
+            .HasMaxLength(20);
+
+        builder
+            .Property(p => p.RawDescription)
+            .HasColumnName("RawDescription");
+
+        builder
+            .Property(p => p.VerifiedAtUtc)
+            .HasColumnName("VerifiedAtUtc");
 
         builder
             .HasOne(p => p.SourceFinanceAccount)

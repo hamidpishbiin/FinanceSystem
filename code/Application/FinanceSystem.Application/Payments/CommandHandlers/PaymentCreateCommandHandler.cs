@@ -2,6 +2,7 @@ using FinanceSystem.Application.Contracts.Payments.Command;
 using FinanceSystem.Domain.Contract.Payments;
 using FinanceSystem.Domain.Payments;
 using FinanceSystem.Domain.Payments.Enums;
+using FinanceSystem.Domain.PaymentServiceProviders.Enums;
 
 namespace FinanceSystem.Application.Payments.CommandHandlers;
 
@@ -27,7 +28,7 @@ public class PaymentCreateCommandHandler : PaymentCommandHandler<CreatePaymentCo
             command.OriginServiceId,
             command.ExternalReferenceId,
             command.ExternalTag,
-            command.RequestToPayId,
+            (PspCode?)command.PspCode,
             Publisher);
 
         await Repository.AddAsync(model);

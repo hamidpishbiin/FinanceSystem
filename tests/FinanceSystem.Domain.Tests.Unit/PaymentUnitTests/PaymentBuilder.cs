@@ -1,5 +1,6 @@
 using FinanceSystem.Domain.Payments;
 using FinanceSystem.Domain.Payments.Enums;
+using FinanceSystem.Domain.PaymentServiceProviders.Enums;
 using NSubstitute;
 using Shared.Core.Events;
 
@@ -15,7 +16,7 @@ public class PaymentBuilder
     public const string DefaultOriginServiceId = "checkout-service";
     public const string DefaultExternalReferenceId = "ext-ref-9931";
     public const string DefaultExternalTag = "order:9931";
-    public const long DefaultRequestToPayId = 77;
+    public const PspCode DefaultPspCode = Domain.PaymentServiceProviders.Enums.PspCode.Saman;
 
     private PaymentPurpose Purpose { get; set; } = DefaultPurpose;
     private PaymentChannel Channel { get; set; } = DefaultChannel;
@@ -25,7 +26,7 @@ public class PaymentBuilder
     private string OriginServiceId { get; set; } = DefaultOriginServiceId;
     private string ExternalReferenceId { get; set; } = DefaultExternalReferenceId;
     private string ExternalTag { get; set; } = DefaultExternalTag;
-    private long? RequestToPayId { get; set; }
+    private PspCode? PspCode { get; set; }
 
     public IEventPublisher EventPublisher { get; private set; } = Substitute.For<IEventPublisher>();
 
@@ -40,7 +41,7 @@ public class PaymentBuilder
             OriginServiceId,
             ExternalReferenceId,
             ExternalTag,
-            RequestToPayId,
+            PspCode,
             EventPublisher);
     }
 
@@ -92,9 +93,9 @@ public class PaymentBuilder
         return this;
     }
 
-    public PaymentBuilder WithRequestToPayId(long? requestToPayId)
+    public PaymentBuilder WithPspCode(PspCode? pspCode)
     {
-        RequestToPayId = requestToPayId;
+        PspCode = pspCode;
         return this;
     }
 

@@ -1,10 +1,9 @@
 using FinanceSystem.Application.Contracts.Payments.Command;
 using FinanceSystem.Application.Payments.Gateways;
-using FinanceSystem.Domain.RequestsToPay;
 using FinanceSystem.Domain.Payments;
+using FinanceSystem.Domain.Payments.Enums;
 using FinanceSystem.Domain.PaymentServiceProviders.Enums;
 using FinanceSystem.Domain.PaymentServiceProviders.Services;
-using FinanceSystem.Domain.RequestsToPay.Enums;
 
 namespace FinanceSystem.Application.Payments.CommandHandlers;
 
@@ -12,14 +11,18 @@ public class TopUpCommandHandler(
     IPaymentRepository repository,
     IEventPublisher publisher,
     IEventListener listener,
-    IRequestToPayRepository requestToPayRepository,
     PspSelector pspSelector,
     IPspGatewayFactory pspGatewayFactory,
+    IGuidGenerator guidGenerator,
     IUnitOfWork unitOfWork)
     : PaymentCommandHandler<TopUpCommand>(repository, publisher, listener)
 {
+    private const string OriginServiceId = "FinanceSystem";
+    private const string ExternalTag = "TopUp";
+
     public override async Task Handle(TopUpCommand command, CancellationToken cancellationToken = default)
     {
+        var sourceFinanceAccountId = 1;
         var targetFinanceAccountId = 12;
 
         var amount = new Money(command.Amount);
@@ -28,13 +31,19 @@ public class TopUpCommandHandler(
 
         var pspCode = psp.Code;
 
-        var requestToPay = new RequestToPay(
-            pspCode,
-            targetFinanceAccountId,
+        var payment = await Payment.Create(
+            PaymentPurpose.TopUp,
+            PaymentChannel.Psp,
             amount,
-            publisher);
+            sourceFinanceAccountId,
+            targetFinanceAccountId,
+            OriginServiceId,
+            guidGenerator.New().ToString(),
+            ExternalTag,
+            pspCode,
+            Publisher);
 
-        await requestToPayRepository.AddAsync(requestToPay, cancellationToken);
+        await Repository.AddAsync(payment);
 
         await unitOfWork.SaveChangesAsync();
 
@@ -43,14 +52,14 @@ public class TopUpCommandHandler(
         var pspPaymentRequest = new PspTokenRequest()
         {
             Amount = amount.Value,
-            ReferenceNumber = requestToPay.ReferenceNumber,
+            ReferenceNumber = payment.Id,
         };
 
         var paymentTokenResponse = await pspGateway.RequestTokenAsync(pspPaymentRequest, cancellationToken);
 
         if (!paymentTokenResponse.IsSuccess)
         {
-            await requestToPay.MarkTokenRequestFailed(
+            await payment.MarkTokenRequestFailed(
                 paymentTokenResponse.FailureReason ?? PspFailureReason.Unknown,
                 paymentTokenResponse.RawStatus,
                 paymentTokenResponse.RawErrorCode,
@@ -58,7 +67,7 @@ public class TopUpCommandHandler(
         }
         else
         {
-            await requestToPay.MarkTokenReceived(
+            await payment.MarkTokenReceived(
                 paymentTokenResponse.PaymentToken,
                 paymentTokenResponse.IpgUrl);
         }

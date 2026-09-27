@@ -1,4 +1,4 @@
-namespace FinanceSystem.Domain.RequestsToPay.Enums;
+namespace FinanceSystem.Domain.Payments.Enums;
 
 public enum PspFailureReason
 {

@@ -1,7 +1,7 @@
 using System.Net.Http.Json;
 using FinanceSystem.Application.Payments.Gateways;
 using FinanceSystem.Domain.PaymentServiceProviders.Enums;
-using FinanceSystem.Domain.RequestsToPay.Enums;
+using FinanceSystem.Domain.Payments.Enums;
 using Microsoft.Extensions.Options;
 using Shared.Core;
 
