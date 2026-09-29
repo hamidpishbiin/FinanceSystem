@@ -9,4 +9,5 @@ public static class FinanceAccountExceptionCodes
     public const int InsufficientBalance = 304;
     public const int SystemFinanceAccountOwnerMismatch = 305;
     public const int SystemFinanceAccountNotFound = 306;
+    public const int FinanceAccountNotFound = 306;
 }

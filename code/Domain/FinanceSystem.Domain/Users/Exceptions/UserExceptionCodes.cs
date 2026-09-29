@@ -6,4 +6,5 @@ public static class UserExceptionCodes
     public const int InvalidLastName = 1101;
     public const int InvalidPhoneNumber = 1102;
     public const int InvalidNationalCode = 1103;
+    public const int UserNotFound = 1104;
 }

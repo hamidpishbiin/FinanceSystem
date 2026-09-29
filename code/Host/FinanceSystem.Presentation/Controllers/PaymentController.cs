@@ -15,8 +15,10 @@ public class PaymentController(IPaymentFacadeService facadeService) : Controller
     }
 
     [HttpPost("topUp")]
-    public async Task<JsonResponse<string>> TopUp(TopUpModel model, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> TopUp(TopUpModel model, CancellationToken cancellationToken = default)
     {
-        return await facadeService.TopUpAsync(model, cancellationToken);
+        var response = await facadeService.TopUpAsync(model, cancellationToken);
+
+        return Redirect(response.Data);
     }
 }

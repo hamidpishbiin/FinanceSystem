@@ -88,8 +88,7 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
             OriginServiceId = originServiceId,
             ExternalReferenceId = externalReferenceId,
             ExternalTag = externalTag,
-            PspCode = pspCode,
-            Publisher = eventPublisher
+            PspCode = pspCode
         };
 
         var paymentCreatedEvent = new PaymentCreatedEvent(payment.ExternalReferenceId, amount.Value);
