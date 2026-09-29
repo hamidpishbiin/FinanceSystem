@@ -7,4 +7,6 @@ public static class FinanceAccountExceptionCodes
     public const int FinanceAccountClosed = 302;
     public const int FinanceAccountDirectionNotAllowed = 303;
     public const int InsufficientBalance = 304;
+    public const int SystemFinanceAccountOwnerMismatch = 305;
+    public const int SystemFinanceAccountNotFound = 306;
 }

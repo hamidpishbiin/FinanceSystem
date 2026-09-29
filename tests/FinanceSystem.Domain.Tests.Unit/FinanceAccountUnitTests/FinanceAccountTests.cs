@@ -1,4 +1,6 @@
+using FinanceSystem.Domain.FinanceAccounts;
 using FinanceSystem.Domain.FinanceAccounts.Enums;
+using FinanceSystem.Domain.FinanceAccounts.Exceptions;
 using FinanceSystem.Domain.Payments;
 using FinanceSystem.Domain.Payments.Enums;
 using FluentAssertions;
@@ -43,5 +45,38 @@ public class FinanceAccountTests
         Action financeAccount = () => _financeAccountBuilder.WithAmount(null!).Build();
 
         financeAccount.Should().Throw<NullEntryException>();
+    }
+
+    [Fact]
+    public void Create_should_succeed_when_company_wallet_is_owned_by_company()
+    {
+        var financeAccount = _financeAccountBuilder
+            .WithType(FinanceAccountType.CompanyWallet)
+            .WithUserId(SystemFinanceAccounts.CompanyUserId)
+            .Build();
+
+        financeAccount.Type.Should().Be(FinanceAccountType.CompanyWallet);
+        financeAccount.UserId.Should().Be(SystemFinanceAccounts.CompanyUserId);
+    }
+
+    [Fact]
+    public void Create_should_throw_when_company_wallet_is_not_owned_by_company()
+    {
+        Action act = () => _financeAccountBuilder.WithType(FinanceAccountType.CompanyWallet).Build();
+
+        act.Should().Throw<SystemFinanceAccountOwnerMismatchException>();
+    }
+
+    [Theory]
+    [InlineData(FinanceAccountType.UserWallet)]
+    [InlineData(FinanceAccountType.CreditWallet)]
+    public void Create_should_throw_when_user_type_is_owned_by_company(FinanceAccountType type)
+    {
+        Action act = () => _financeAccountBuilder
+            .WithType(type)
+            .WithUserId(SystemFinanceAccounts.CompanyUserId)
+            .Build();
+
+        act.Should().Throw<SystemFinanceAccountOwnerMismatchException>();
     }
 }

@@ -31,6 +31,8 @@ public class FinanceAccount : EntityBase<long>
     {
         Guard<InvalidIdException>.IsTrue(userId == Guid.Empty);
         Guard<NullEntryException>.AgainstNull(cachedBalance);
+        Guard<SystemFinanceAccountOwnerMismatchException>.IsTrue(
+            (type == FinanceAccountType.CompanyWallet) != (userId == SystemFinanceAccounts.CompanyUserId));
 
         Type = type;
         Status = status;

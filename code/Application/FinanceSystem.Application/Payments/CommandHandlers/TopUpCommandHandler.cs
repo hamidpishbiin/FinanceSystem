@@ -1,5 +1,7 @@
 using FinanceSystem.Application.Contracts.Payments.Command;
 using FinanceSystem.Application.Payments.Gateways;
+using FinanceSystem.Domain.FinanceAccounts;
+using FinanceSystem.Domain.FinanceAccounts.Exceptions;
 using FinanceSystem.Domain.Payments;
 using FinanceSystem.Domain.Payments.Enums;
 using FinanceSystem.Domain.PaymentServiceProviders.Enums;
@@ -9,6 +11,7 @@ namespace FinanceSystem.Application.Payments.CommandHandlers;
 
 public class TopUpCommandHandler(
     IPaymentRepository repository,
+    IFinanceAccountRepository financeAccountRepository,
     IEventPublisher publisher,
     IEventListener listener,
     PspSelector pspSelector,
@@ -22,7 +25,6 @@ public class TopUpCommandHandler(
 
     public override async Task Handle(TopUpCommand command, CancellationToken cancellationToken = default)
     {
-        var sourceFinanceAccountId = 1;
         var targetFinanceAccountId = 12;
 
         var amount = new Money(command.Amount);
@@ -31,11 +33,15 @@ public class TopUpCommandHandler(
 
         var pspCode = psp.Code;
 
+        var sourceFinanceAccountId = await financeAccountRepository.GetCompanyWalletIdAsync(cancellationToken);
+
+        Guard<SystemFinanceAccountNotFoundException>.IsTrue(sourceFinanceAccountId is null);
+
         var payment = await Payment.Create(
             PaymentPurpose.TopUp,
             PaymentChannel.Psp,
             amount,
-            sourceFinanceAccountId,
+            sourceFinanceAccountId.Value,
             targetFinanceAccountId,
             OriginServiceId,
             guidGenerator.New().ToString(),
