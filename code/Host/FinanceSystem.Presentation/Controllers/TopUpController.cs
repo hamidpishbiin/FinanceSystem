@@ -6,7 +6,7 @@ namespace FinanceSystem.Presentation.Controllers;
 [Route("api/payment")]
 [ApiController]
 //[Authorize]
-public class PaymentController(IPaymentFacadeService facadeService) : ControllerBase
+public class TopUpController(IPaymentFacadeService facadeService) : ControllerBase
 {
     [HttpPost("create")]
     public async Task<JsonResponse<string>> Create(CreatePaymentModel model)

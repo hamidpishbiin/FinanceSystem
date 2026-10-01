@@ -248,7 +248,7 @@ public class PaymentTests
         payment.Status.Should().Be(PaymentStatus.TokenReceived);
         await _builder.EventPublisher
             .Received(1)
-            .Publish(Arg.Is<PaymentTokenReceivedEvent>(e =>
+            .Publish(Arg.Is<PspTokenReceivedEvent>(e =>
                 e.ExternalReferenceId == PaymentBuilder.DefaultExternalReferenceId &&
                 e.Amount == PaymentBuilder.DefaultAmount &&
                 e.IpgUrl == "https://ipg.example/pay"));

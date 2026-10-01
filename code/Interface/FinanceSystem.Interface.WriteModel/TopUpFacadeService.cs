@@ -6,7 +6,7 @@ using Shared.Core;
 
 namespace FinanceSystem.Interface.WriteModel;
 
-public class WalletFacadeService(
+public class TopUpFacadeService(
     ICommandBus commandBus,
     IEventListener listener,
     IUserResolver userResolver) : IPaymentFacadeService
@@ -39,7 +39,7 @@ public class WalletFacadeService(
     {
         var ipgUrl = string.Empty;
 
-        await listener.Subscribe(new EventHandlerAction<PaymentTokenReceivedEvent>(a =>
+        await listener.Subscribe(new EventHandlerAction<PspTokenReceivedEvent>(a =>
         {
             ipgUrl = a.IpgUrl;
         }));

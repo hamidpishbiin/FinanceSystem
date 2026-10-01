@@ -123,6 +123,6 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
         Token = token;
         Status = PaymentStatus.TokenReceived;
 
-        await Publisher.Publish(new PaymentTokenReceivedEvent(ExternalReferenceId, Amount, ipgUrl));
+        await Publisher.Publish(new PspTokenReceivedEvent(ExternalReferenceId, Amount, ipgUrl));
     }
 }
