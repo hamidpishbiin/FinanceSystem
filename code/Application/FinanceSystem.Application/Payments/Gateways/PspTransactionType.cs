@@ -1,6 +1,7 @@
 namespace FinanceSystem.Application.Payments.Gateways;
 
-public class PspVerifyRequest
+public enum PspTransactionType
 {
-    
+    Verify,
+    Reverse
 }

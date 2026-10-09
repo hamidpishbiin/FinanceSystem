@@ -25,24 +25,23 @@ public class PaymentTests
         payment.Amount.Should().Be(PaymentBuilder.DefaultAmount);
         payment.SourceFinanceAccountId.Should().Be(PaymentBuilder.DefaultSourceFinanceAccountId);
         payment.DestinationFinanceAccountId.Should().Be(PaymentBuilder.DefaultDestinationFinanceAccountId);
-        payment.OriginServiceId.Should().Be(PaymentBuilder.DefaultOriginServiceId);
+        payment.ExternalServiceId.Should().Be(PaymentBuilder.DefaultExternalServiceId);
         payment.ExternalReferenceId.Should().Be(PaymentBuilder.DefaultExternalReferenceId);
         payment.ExternalTag.Should().Be(PaymentBuilder.DefaultExternalTag);
-        payment.Status.Should().Be(PaymentStatus.Initiated);
+        payment.State.Should().Be(PaymentState.Initiated);
         payment.PspCode.Should().BeNull();
         payment.Publisher.Should().BeSameAs(_builder.EventPublisher);
     }
 
     [Fact]
-    public async Task Create_should_publish_paymentCreatedEvent_carrying_externalReferenceId_and_amount()
+    public async Task Create_should_publish_paymentCreatedEvent_carrying_externalReferenceId()
     {
         await _builder.Build();
 
         await _builder.EventPublisher
             .Received(1)
             .Publish(Arg.Is<PaymentCreatedEvent>(e =>
-                e.ExternalReferenceId == PaymentBuilder.DefaultExternalReferenceId &&
-                e.Amount == PaymentBuilder.DefaultAmount));
+                e.ExternalReferenceId == PaymentBuilder.DefaultExternalReferenceId));
     }
 
     [Theory]
@@ -116,11 +115,11 @@ public class PaymentTests
     [InlineData("")]
     [InlineData("   ")]
     [InlineData(null)]
-    public async Task Create_should_throw_when_originServiceId_is_null_or_empty_or_whiteSpace(string? originServiceId)
+    public async Task Create_should_throw_when_externalServiceId_is_null_or_empty_or_whiteSpace(string? externalServiceId)
     {
-        Func<Task> act = () => _builder.WithOriginServiceId(originServiceId).Build();
+        Func<Task> act = () => _builder.WithExternalServiceId(externalServiceId).Build();
 
-        await act.Should().ThrowAsync<InvalidOriginServiceIdException>();
+        await act.Should().ThrowAsync<InvalidExternalServiceIdException>();
     }
 
     [Theory]
@@ -188,7 +187,7 @@ public class PaymentTests
 
         payment.Channel.Should().Be(PaymentChannel.Psp);
         payment.PspCode.Should().Be(PaymentBuilder.DefaultPspCode);
-        payment.Status.Should().Be(PaymentStatus.Initiated);
+        payment.State.Should().Be(PaymentState.Initiated);
     }
 
     [Fact]
@@ -224,33 +223,32 @@ public class PaymentTests
     }
 
     [Fact]
-    public void PaymentStatus_values_are_persisted_contract_and_should_not_change()
+    public void PaymentState_values_are_persisted_contract_and_should_not_change()
     {
-        ((byte)PaymentStatus.Initiated).Should().Be(1);
-        ((byte)PaymentStatus.TokenReceived).Should().Be(2);
-        ((byte)PaymentStatus.CallbackReceived).Should().Be(3);
-        ((byte)PaymentStatus.Verified).Should().Be(4);
-        ((byte)PaymentStatus.Failed).Should().Be(5);
-        ((byte)PaymentStatus.Expired).Should().Be(6);
-        ((byte)PaymentStatus.Reversed).Should().Be(7);
+        ((byte)PaymentState.Initiated).Should().Be(1);
+        ((byte)PaymentState.TokenReceived).Should().Be(2);
+        ((byte)PaymentState.CallbackReceived).Should().Be(3);
+        ((byte)PaymentState.Verified).Should().Be(4);
+        ((byte)PaymentState.Failed).Should().Be(5);
+        ((byte)PaymentState.Expired).Should().Be(6);
+        ((byte)PaymentState.Reversed).Should().Be(7);
 
-        Enum.GetValues<PaymentStatus>().Should().HaveCount(7);
+        Enum.GetValues<PaymentState>().Should().HaveCount(7);
     }
 
     [Fact]
-    public async Task MarkTokenReceived_should_store_token_set_status_and_publish_event()
+    public async Task MarkTokenReceived_should_store_token_set_state_and_publish_event()
     {
         var payment = await BuildPspPayment();
 
         await payment.MarkTokenReceived("token-123", "https://ipg.example/pay");
 
         payment.Token.Should().Be("token-123");
-        payment.Status.Should().Be(PaymentStatus.TokenReceived);
+        payment.State.Should().Be(PaymentState.TokenReceived);
         await _builder.EventPublisher
             .Received(1)
             .Publish(Arg.Is<PspTokenReceivedEvent>(e =>
                 e.ExternalReferenceId == PaymentBuilder.DefaultExternalReferenceId &&
-                e.Amount == PaymentBuilder.DefaultAmount &&
                 e.IpgUrl == "https://ipg.example/pay"));
     }
 
@@ -268,22 +266,21 @@ public class PaymentTests
     }
 
     [Fact]
-    public async Task MarkTokenRequestFailed_should_store_failure_details_set_status_and_publish_event()
+    public async Task MarkTokenRequestFailed_should_store_failure_details_set_state_and_publish_event()
     {
         var payment = await BuildPspPayment();
 
-        await payment.MarkTokenRequestFailed(PspFailureReason.InvalidAmount, "-3", "E3", "invalid amount");
+        await payment.MarkTokenRequestFailed(PspFailureReason.InvalidAmount, "-3", 3, "invalid amount");
 
-        payment.Status.Should().Be(PaymentStatus.Failed);
+        payment.State.Should().Be(PaymentState.Failed);
         payment.FailureReason.Should().Be(PspFailureReason.InvalidAmount);
         payment.RawStatus.Should().Be("-3");
-        payment.RawErrorCode.Should().Be("E3");
+        payment.RawStatusCode.Should().Be(3);
         payment.RawDescription.Should().Be("invalid amount");
         await _builder.EventPublisher
             .Received(1)
             .Publish(Arg.Is<PaymentTokenRequestFailedEvent>(e =>
-                e.ExternalReferenceId == PaymentBuilder.DefaultExternalReferenceId &&
-                e.Amount == PaymentBuilder.DefaultAmount));
+                e.ExternalReferenceId == PaymentBuilder.DefaultExternalReferenceId));
     }
 
     [Fact]
@@ -307,7 +304,7 @@ public class PaymentTests
     }
 
     [Fact]
-    public async Task MarkTokenReceived_should_throw_when_status_is_not_initiated()
+    public async Task MarkTokenReceived_should_throw_when_state_is_not_initiated()
     {
         var payment = await BuildPspPayment();
         await payment.MarkTokenRequestFailed(PspFailureReason.Unknown, null, null, null);
@@ -318,7 +315,7 @@ public class PaymentTests
     }
 
     [Fact]
-    public async Task MarkTokenRequestFailed_should_throw_when_status_is_not_initiated()
+    public async Task MarkTokenRequestFailed_should_throw_when_state_is_not_initiated()
     {
         var payment = await BuildPspPayment();
         await payment.MarkTokenReceived("token-123", "https://ipg.example/pay");

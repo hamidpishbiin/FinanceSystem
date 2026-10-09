@@ -3,8 +3,7 @@ namespace FinanceSystem.Domain.Payments;
 
 public interface IPaymentRepository : IRepository
 {
-    Task<Payment?> GetByIdAsync(long id);
+    Task<Payment?> GetByIdAsync(long id, CancellationToken cancellationToken);
     Task AddAsync(Payment payment);
-    void Update(Payment payment);
-    void Delete(Payment payment);
+    Task<Payment?> GetByReferenceNumberAsync(string referenceNumber, CancellationToken cancellationToken);
 }

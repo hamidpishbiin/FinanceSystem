@@ -1,6 +1,6 @@
 namespace FinanceSystem.Domain.Payments.Enums;
 
-public enum PaymentStatus : byte
+public enum PaymentState : byte
 {
     Initiated = 1,
     TokenReceived = 2,

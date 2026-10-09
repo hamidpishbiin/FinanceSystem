@@ -25,7 +25,7 @@ public class PaymentCreateCommandHandler : PaymentCommandHandler<CreatePaymentCo
             new Money(command.Amount),
             command.SourceFinanceAccountId,
             command.DestinationFinanceAccountId,
-            command.OriginServiceId,
+            command.ExternalServiceId,
             command.ExternalReferenceId,
             command.ExternalTag,
             (PspCode?)command.PspCode,

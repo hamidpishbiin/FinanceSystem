@@ -20,7 +20,7 @@ internal class BehPardakhtGateway(
         throw new NotImplementedException();
     }
 
-    public Task<PspVerifyResponse> VerifyPaymentAsync(PspVerifyRequest request, CancellationToken cancellationToken)
+    public Task<PaymentVerificationResponse> VerifyPaymentAsync(PaymentVerificationRequest request, CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
     }

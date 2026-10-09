@@ -20,7 +20,6 @@ public class PaymentEventModel
         EventBody = System.Text.Json.JsonSerializer.Serialize(new
         {
             domainEvent.ExternalReferenceId,
-            domainEvent.Amount,
         });
     }
 }

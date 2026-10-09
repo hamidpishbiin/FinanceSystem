@@ -1,4 +1,3 @@
 namespace FinanceSystem.Domain.Contract.Payments;
 
-public record PspTokenReceivedEvent(string ExternalReferenceId, decimal Amount, string IpgUrl)
-    : PaymentEventBase(ExternalReferenceId, Amount);
+public record PspTokenReceivedEvent(string ExternalReferenceId, string IpgUrl) : PaymentEventBase(ExternalReferenceId);

@@ -9,6 +9,6 @@ public class PspTokenResponse
     public string IpgUrl { get; set; } = string.Empty;
     public PspFailureReason? FailureReason { get; set; }
     public string RawStatus { get; set; } = string.Empty;
-    public string RawErrorCode { get; set; } = string.Empty;
+    public int RawStatusCode { get; set; }
     public string RawDescription { get; set; } = string.Empty;
 }

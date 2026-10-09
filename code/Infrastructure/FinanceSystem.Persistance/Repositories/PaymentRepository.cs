@@ -11,18 +11,13 @@ public class PaymentRepository(IDbContext context) : IPaymentRepository
         await DbSet.AddAsync(payment);
     }
 
-    public void Delete(Payment payment)
+    public async Task<Payment?> GetByIdAsync(long id, CancellationToken cancellationToken)
     {
-        DbSet.Remove(payment);
+        return await DbSet.FirstOrDefaultAsync(a => a.Id == id, cancellationToken);
     }
 
-    public async Task<Payment?> GetByIdAsync(long id)
+    public async Task<Payment?> GetByReferenceNumberAsync(string referenceNumber, CancellationToken cancellationToken)
     {
-        return await DbSet.FirstOrDefaultAsync(a => a.Id == id);
-    }
-
-    public void Update(Payment payment)
-    {
-        DbSet.Update(payment);
+        return await DbSet.FirstOrDefaultAsync(p => p.ReferenceNumber == referenceNumber, cancellationToken);
     }
 }

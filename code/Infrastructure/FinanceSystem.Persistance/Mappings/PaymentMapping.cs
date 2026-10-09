@@ -37,10 +37,10 @@ public class PaymentMapping() : EntityBaseMap<Payment, long>("Payments")
             .HasColumnName("DestinationFinanceAccountId");
 
         builder
-            .Property(p => p.OriginServiceId)
+            .Property(p => p.ExternalServiceId)
             .HasMaxLength(50)
             .IsRequired()
-            .HasColumnName("OriginServiceId");
+            .HasColumnName("ExternalServiceId");
 
         builder
             .Property(p => p.ExternalReferenceId)
@@ -55,9 +55,9 @@ public class PaymentMapping() : EntityBaseMap<Payment, long>("Payments")
             .HasColumnName("ExternalTag");
 
         builder
-            .Property(p => p.Status)
+            .Property(p => p.State)
             .IsRequired()
-            .HasColumnName("Status");
+            .HasColumnName("State");
 
         builder
             .Property(p => p.PspCode)
@@ -96,14 +96,14 @@ public class PaymentMapping() : EntityBaseMap<Payment, long>("Payments")
             .HasDatabaseName("UX_Payments_RRN");
 
         builder
-            .Property(p => p.RefNum)
-            .HasColumnName("RefNum")
+            .Property(p => p.ReferenceNumber)
+            .HasColumnName("ReferenceNumber")
             .HasMaxLength(20);
 
         builder
-            .HasIndex(p => p.RefNum)
+            .HasIndex(p => p.ReferenceNumber)
             .IsUnique()
-            .HasDatabaseName("UX_Payments_RefNum");
+            .HasDatabaseName("UX_Payments_ReferenceNumber");
 
         builder
             .Property(p => p.TraceNumber)
@@ -125,9 +125,8 @@ public class PaymentMapping() : EntityBaseMap<Payment, long>("Payments")
             .HasMaxLength(20);
 
         builder
-            .Property(p => p.RawErrorCode)
-            .HasColumnName("RawErrorCode")
-            .HasMaxLength(20);
+            .Property(p => p.RawStatusCode)
+            .HasColumnName("RawStatusCode");
 
         builder
             .Property(p => p.RawDescription)

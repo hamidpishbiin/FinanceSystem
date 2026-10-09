@@ -7,7 +7,7 @@ public class CreatePaymentCommand : PaymentCommand
     public decimal Amount { get; set; }
     public long SourceFinanceAccountId { get; set; }
     public long DestinationFinanceAccountId { get; set; }
-    public string OriginServiceId { get; set; }
+    public string ExternalServiceId { get; set; }
     public string ExternalReferenceId { get; set; }
     public string ExternalTag { get; set; }
     public int? PspCode { get; set; }

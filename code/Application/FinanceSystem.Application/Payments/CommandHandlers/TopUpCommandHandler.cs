@@ -23,7 +23,7 @@ public class TopUpCommandHandler(
     IUserRepository userRepository)
     : PaymentCommandHandler<TopUpCommand>(paymentRepository, publisher, listener)
 {
-    private const string _originServiceId = "FinanceSystem";
+    private const string _externalServiceId = "FinanceSystem";
     private const string _externalTag = "TopUp";
 
     public override async Task Handle(TopUpCommand command, CancellationToken cancellationToken = default)
@@ -50,7 +50,7 @@ public class TopUpCommandHandler(
             amount,
             targetFinanceAccountId!.Value,
             userFinanceAccount!.Id,
-            _originServiceId,
+            _externalServiceId,
             guidGenerator.New().ToString(),
             _externalTag,
             psp.Code,
@@ -75,7 +75,7 @@ public class TopUpCommandHandler(
             await payment.MarkTokenRequestFailed(
                 paymentTokenResponse.FailureReason ?? PspFailureReason.Unknown,
                 paymentTokenResponse.RawStatus,
-                paymentTokenResponse.RawErrorCode,
+                paymentTokenResponse.RawStatusCode,
                 paymentTokenResponse.RawDescription);
         }
         else

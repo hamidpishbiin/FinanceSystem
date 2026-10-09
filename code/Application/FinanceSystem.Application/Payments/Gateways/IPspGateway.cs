@@ -6,5 +6,5 @@ public interface IPspGateway
 {
     PspCode Code { get; }
     Task<PspTokenResponse> RequestTokenAsync(PspTokenRequest request, CancellationToken cancellationToken);
-    Task<PspVerifyResponse> VerifyPaymentAsync(PspVerifyRequest request, CancellationToken cancellationToken);
+    Task<PaymentVerificationResponse> VerifyPaymentAsync(PaymentVerificationRequest request, CancellationToken cancellationToken);
 }

@@ -14,28 +14,28 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
 
     public IEventPublisher Publisher { get; set; }
 
+    public decimal Amount { get; private set; }
     public PaymentPurpose Purpose { get; private set; }
     public PaymentChannel Channel { get; private set; }
-    public PaymentStatus Status { get; private set; }
-    public decimal Amount { get; private set; }
-    public decimal? RedirectedAmount { get; private set; }
+    public PaymentState State { get; private set; }
+
     public long SourceFinanceAccountId { get; private set; }
     public long DestinationFinanceAccountId { get; private set; }
-    public string OriginServiceId { get; private set; }
+    public string ExternalServiceId { get; private set; }
     public string ExternalReferenceId { get; private set; }
     public string ExternalTag { get; private set; }
     public PspCode? PspCode { get; private set; }
     public string? Token { get; private set; }
     public string? RRN { get; private set; }
-    public string? RefNum { get; private set; }
+    public decimal? RedirectedAmount { get; private set; }
+    public string? ReferenceNumber { get; private set; }
     public string? TraceNumber { get; private set; }
     public string? MaskedPan { get; private set; }
-    public PspFailureReason? FailureReason { get; private set; }
     public string? RawStatus { get; private set; }
-    public string? RawErrorCode { get; private set; }
+    public int? RawStatusCode { get; private set; }
     public string? RawDescription { get; private set; }
     public DateTimeOffset? VerifiedAtUtc { get; private set; }
-
+    public PspFailureReason? FailureReason { get; private set; }
     public FinanceAccount? SourceFinanceAccount { get; private set; }
     public FinanceAccount? DestinationFinanceAccount { get; private set; }
     public PaymentServiceProvider? Psp { get; private set; }
@@ -51,7 +51,7 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
         Money amount,
         long sourceFinanceAccountId,
         long destinationFinanceAccountId,
-        string originServiceId,
+        string externalServiceId,
         string externalReferenceId,
         string externalTag,
         PspCode? pspCode,
@@ -67,7 +67,7 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
         Guard<InvalidDestinationFinanceAccountIdException>.IsTrue(destinationFinanceAccountId <= 0);
         Guard<SameSourceAndDestinationFinanceAccountException>.IsTrue(sourceFinanceAccountId == destinationFinanceAccountId);
 
-        Guard<InvalidOriginServiceIdException>.AgainstNullOrEmpty(originServiceId);
+        Guard<InvalidExternalServiceIdException>.AgainstNullOrEmpty(externalServiceId);
         Guard<InvalidExternalReferenceIdException>.AgainstNullOrEmpty(externalReferenceId);
         Guard<InvalidExternalTagException>.AgainstNullOrEmpty(externalTag);
 
@@ -81,19 +81,18 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
         {
             Purpose = purpose,
             Channel = channel,
-            Status = PaymentStatus.Initiated,
+            State = PaymentState.Initiated,
             Amount = amount.Value,
             SourceFinanceAccountId = sourceFinanceAccountId,
             DestinationFinanceAccountId = destinationFinanceAccountId,
-            OriginServiceId = originServiceId,
+            ExternalServiceId = externalServiceId,
             ExternalReferenceId = externalReferenceId,
             ExternalTag = externalTag,
-            PspCode = pspCode
+            PspCode = pspCode,
+            Publisher = eventPublisher
         };
 
-        var paymentCreatedEvent = new PaymentCreatedEvent(payment.ExternalReferenceId, amount.Value);
-
-        await eventPublisher.Publish(paymentCreatedEvent);
+        await eventPublisher.Publish(new PaymentCreatedEvent(payment.ExternalReferenceId));
 
         return payment;
     }
@@ -101,28 +100,57 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
     public async Task MarkTokenRequestFailed(
         PspFailureReason failureReason,
         string? rawStatus,
-        string? rawErrorCode,
+        int? rawStatusCode,
         string? rawDescription)
     {
-        Guard<InvalidPaymentStateException>.IsTrue(Channel != PaymentChannel.Psp || Status != PaymentStatus.Initiated);
+        Guard<InvalidPaymentStateException>.IsTrue(Channel != PaymentChannel.Psp || State != PaymentState.Initiated);
 
-        Status = PaymentStatus.Failed;
+        State = PaymentState.Failed;
         FailureReason = failureReason;
         RawStatus = rawStatus;
-        RawErrorCode = rawErrorCode;
+        RawStatusCode = rawStatusCode;
         RawDescription = rawDescription;
 
-        await Publisher.Publish(new PaymentTokenRequestFailedEvent(ExternalReferenceId, Amount));
+        await Publisher.Publish(new PaymentTokenRequestFailedEvent(ExternalReferenceId));
     }
 
     public async Task MarkTokenReceived(string token, string ipgUrl)
     {
-        Guard<InvalidPaymentStateException>.IsTrue(Channel != PaymentChannel.Psp || Status != PaymentStatus.Initiated);
+        Guard<InvalidPaymentStateException>.IsTrue(Channel != PaymentChannel.Psp || State != PaymentState.Initiated);
         Guard<InvalidTokenException>.AgainstNullOrEmpty(token);
 
         Token = token;
-        Status = PaymentStatus.TokenReceived;
+        State = PaymentState.TokenReceived;
 
-        await Publisher.Publish(new PspTokenReceivedEvent(ExternalReferenceId, Amount, ipgUrl));
+        await Publisher.Publish(new PspTokenReceivedEvent(ExternalReferenceId, ipgUrl));
+    }
+
+    public async Task MarkFailed(string rawStatus, int? rawStatusCode)
+    {
+        Guard<InvalidPaymentStateException>.IsTrue(State != PaymentState.TokenReceived);
+        Guard<InvalidRawStatusException>.AgainstNullOrEmpty(rawStatus);
+
+        State = PaymentState.Failed;
+        FailureReason = PspFailureReason.Rejected;
+        RawStatus = rawStatus;
+        RawStatusCode = rawStatusCode;
+
+        await Publisher.Publish(new PaymentFailedEvent(ExternalReferenceId));
+    }
+
+    public void SetCallbackData(
+        string referenceNumber,
+        decimal redirectedAmount,
+        string maskedPan,
+        int rawStatusCode,
+        string rrn,
+        string traceNumber)
+    {
+        ReferenceNumber = referenceNumber;
+        RedirectedAmount = redirectedAmount;
+        MaskedPan = maskedPan;
+        RawStatusCode = rawStatusCode;
+        RRN = rrn;
+        TraceNumber = traceNumber;
     }
 }

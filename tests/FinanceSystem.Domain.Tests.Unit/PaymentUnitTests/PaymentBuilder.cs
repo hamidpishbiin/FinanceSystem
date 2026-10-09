@@ -13,7 +13,7 @@ public class PaymentBuilder
     public const decimal DefaultAmount = 250_000;
     public const long DefaultSourceFinanceAccountId = 11;
     public const long DefaultDestinationFinanceAccountId = 22;
-    public const string DefaultOriginServiceId = "checkout-service";
+    public const string DefaultExternalServiceId = "checkout-service";
     public const string DefaultExternalReferenceId = "ext-ref-9931";
     public const string DefaultExternalTag = "order:9931";
     public const PspCode DefaultPspCode = Domain.PaymentServiceProviders.Enums.PspCode.Saman;
@@ -23,7 +23,7 @@ public class PaymentBuilder
     private Money Amount { get; set; } = new(DefaultAmount);
     private long SourceFinanceAccountId { get; set; } = DefaultSourceFinanceAccountId;
     private long DestinationFinanceAccountId { get; set; } = DefaultDestinationFinanceAccountId;
-    private string OriginServiceId { get; set; } = DefaultOriginServiceId;
+    private string ExternalServiceId { get; set; } = DefaultExternalServiceId;
     private string ExternalReferenceId { get; set; } = DefaultExternalReferenceId;
     private string ExternalTag { get; set; } = DefaultExternalTag;
     private PspCode? PspCode { get; set; }
@@ -38,7 +38,7 @@ public class PaymentBuilder
             Amount,
             SourceFinanceAccountId,
             DestinationFinanceAccountId,
-            OriginServiceId,
+            ExternalServiceId,
             ExternalReferenceId,
             ExternalTag,
             PspCode,
@@ -75,9 +75,9 @@ public class PaymentBuilder
         return this;
     }
 
-    public PaymentBuilder WithOriginServiceId(string? originServiceId)
+    public PaymentBuilder WithExternalServiceId(string? externalServiceId)
     {
-        OriginServiceId = originServiceId!;
+        ExternalServiceId = externalServiceId!;
         return this;
     }
 

@@ -1,5 +1,6 @@
 using FinanceSystem.Application.Contracts.Payments.Command;
 using FinanceSystem.Domain.Contract.Payments;
+using FinanceSystem.Domain.PaymentServiceProviders.Enums;
 using FinanceSystem.Interface.Contracts.Payments.Models;
 using FinanceSystem.Interface.Contracts.Payments.Services;
 using Shared.Core;
@@ -9,7 +10,7 @@ namespace FinanceSystem.Interface.WriteModel;
 public class TopUpFacadeService(
     ICommandBus commandBus,
     IEventListener listener,
-    IUserResolver userResolver) : IPaymentFacadeService
+    IUserResolver userResolver) : ITopUpFacadeService
 {
     public async Task<JsonResponse<string>> Create(CreatePaymentModel model)
     {
@@ -26,7 +27,7 @@ public class TopUpFacadeService(
             Amount = model.Amount,
             SourceFinanceAccountId = model.SourceFinanceAccountId,
             DestinationFinanceAccountId = model.DestinationFinanceAccountId,
-            OriginServiceId = model.OriginServiceId,
+            ExternalServiceId = model.ExternalServiceId,
             ExternalReferenceId = model.ExternalReferenceId,
             ExternalTag = model.ExternalTag,
             PspCode = model.PspCode
@@ -52,5 +53,27 @@ public class TopUpFacadeService(
         }, cancellationToken);
 
         return JsonResponse<string>.Success(ipgUrl);
+    }
+
+    public async Task<JsonResponse<string>> CompleteTopUpProcess(SepCallbackModel callbackModel, CancellationToken cancellationToken = default)
+    {
+        long.TryParse(callbackModel.ResNum, out var reservationNumber);
+
+        await commandBus.Dispatch(new CompleteTopUpProcessCommand()
+        {
+            PspCode = (int)PspCode.Saman,
+            ReservationNumber = reservationNumber,
+            Amount = callbackModel.Amount,
+            IsSuccess = callbackModel.State == "OK",
+            Token = callbackModel.Token,
+            RRN = callbackModel.RRN,
+            MaskedPan = callbackModel.SecurePan,
+            RawStatus = callbackModel.State,
+            RawStatusCode = callbackModel.Status,
+            TraceNumber = callbackModel.TraceNo,
+            ReferenceNumber = callbackModel.RefNum
+        }, cancellationToken);
+
+        return JsonResponse<string>.Success(string.Empty);
     }
 }
