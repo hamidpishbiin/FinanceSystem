@@ -133,8 +133,8 @@ public class PaymentMapping() : EntityBaseMap<Payment, long>("Payments")
             .HasColumnName("RawDescription");
 
         builder
-            .Property(p => p.VerifiedAtUtc)
-            .HasColumnName("VerifiedAtUtc");
+            .Property(p => p.SucceededAtUtc)
+            .HasColumnName("SucceededAtUtc");
 
         builder
             .HasOne(p => p.SourceFinanceAccount)

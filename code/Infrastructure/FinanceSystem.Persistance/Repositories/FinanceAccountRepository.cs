@@ -19,4 +19,9 @@ public class FinanceAccountRepository(IDbContext dbContext) : IFinanceAccountRep
     {
         return await DbSet.FirstOrDefaultAsync(fa => fa.UserId == userId, cancellationToken);
     }
+
+    public async Task<FinanceAccount?> GetByIdAsync(long id, CancellationToken cancellationToken)
+    {
+        return await DbSet.FirstOrDefaultAsync(fa => fa.Id == id, cancellationToken);
+    }
 }

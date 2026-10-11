@@ -11,4 +11,10 @@ public enum PspFailureReason
     Rejected = 6,
     Unknown = 7,
     HttpException = 8,
+    CanceledByUser = 9,
+    AmountMismatch = 10,
+    VerificationFailed = 11,
+    SessionExpired = 12,
+    InvalidRequest = 13,
+    MerchantConfigurationError = 14,
 }

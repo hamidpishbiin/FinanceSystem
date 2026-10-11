@@ -25,6 +25,16 @@ internal class BehPardakhtGateway(
         throw new NotImplementedException();
     }
 
+    public Task<PaymentVerificationResponse> ReversePaymentAsync(PaymentVerificationRequest request, CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
+    }
+
+    public PspCallback ParseCallback(IReadOnlyDictionary<string, string> fields)
+    {
+        throw new NotImplementedException();
+    }
+
     private static PspFailureReason MapFailureReason(string resCode)
     {
         return resCode switch

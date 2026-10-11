@@ -9,6 +9,8 @@ namespace FinanceSystem.Saman;
 
 internal class SamanGateway : IPspGateway
 {
+    private const int SamanCallbackOkStatus = 2;
+
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly ILoggerService _loggerService;
     private readonly PspSettings _settings;
@@ -90,7 +92,21 @@ internal class SamanGateway : IPspGateway
         }
     }
 
-    public async Task<PaymentVerificationResponse> VerifyPaymentAsync(PaymentVerificationRequest request, CancellationToken cancellationToken)
+    public Task<PaymentVerificationResponse> VerifyPaymentAsync(PaymentVerificationRequest request, CancellationToken cancellationToken)
+    {
+        return SendTransactionAsync("/verifyTxnRandomSessionKey/ipg/VerifyTransaction", PspTransactionType.Verify, request, cancellationToken);
+    }
+
+    public Task<PaymentVerificationResponse> ReversePaymentAsync(PaymentVerificationRequest request, CancellationToken cancellationToken)
+    {
+        return SendTransactionAsync("/verifyTxnRandomSessionKey/ipg/ReverseTransaction", PspTransactionType.Reverse, request, cancellationToken);
+    }
+
+    private async Task<PaymentVerificationResponse> SendTransactionAsync(
+        string path,
+        PspTransactionType transactionType,
+        PaymentVerificationRequest request,
+        CancellationToken cancellationToken)
     {
         try
         {
@@ -102,21 +118,18 @@ internal class SamanGateway : IPspGateway
 
             var httpClient = _httpClientFactory.CreateClient(nameof(PspCode.Saman));
 
-            var response = await httpClient.PostAsJsonAsync("/verifyTxnRandomSessionKey/ipg/VerifyTransaction", payload, cancellationToken);
+            var response = await httpClient.PostAsJsonAsync(path, payload, cancellationToken);
 
             response.EnsureSuccessStatusCode();
 
             var responseBody = await response.Content.ReadFromJsonAsync<SamanPaymentVerificationResponse>(cancellationToken);
 
-            if (responseBody?.Success != true || responseBody.TransactionDetail is null)
-            {
-                // Reverse Payment
-            }
-
             return new PaymentVerificationResponse()
             {
-                PspTransactionType = PspTransactionType.Verify,
+                HasResponse = responseBody is not null,
                 IsSuccess = responseBody?.Success ?? false,
+                Amount = responseBody?.TransactionDetail?.OrginalAmount,
+                PspTransactionType = transactionType,
                 Code = responseBody?.ResultCode?.ToString() ?? string.Empty,
                 Description = responseBody?.ResultDescription ?? string.Empty,
                 RawData = responseBody
@@ -128,22 +141,67 @@ internal class SamanGateway : IPspGateway
         }
         catch (OperationCanceledException ex)
         {
-            _loggerService.Error(ex, $"{Code} verify request timed out after {_settings.TimeoutInSeconds} seconds");
+            _loggerService.Error(ex, $"{Code} {transactionType} request timed out after {_settings.TimeoutInSeconds} seconds");
 
-            return MakeGenericFailedVerificationResponse();
+            return MakeNoResponse(transactionType);
         }
         catch (HttpRequestException ex)
         {
-            _loggerService.Error(ex, $"{Code} verify request failed.");
+            _loggerService.Error(ex, $"{Code} {transactionType} request failed.");
 
-            return MakeGenericFailedVerificationResponse();
+            return MakeNoResponse(transactionType);
         }
         catch (Exception ex)
         {
-            _loggerService.Error(ex, $"{Code} verify request failed unexpectedly");
+            _loggerService.Error(ex, $"{Code} {transactionType} request failed unexpectedly");
 
-            return MakeGenericFailedVerificationResponse();
+            return MakeNoResponse(transactionType);
         }
+    }
+
+    public PspCallback ParseCallback(IReadOnlyDictionary<string, string> fields)
+    {
+        var status = ParseInt(fields, "Status");
+        var isSuccess = status == SamanCallbackOkStatus;
+
+        return new PspCallback()
+        {
+            ReservationNumber = long.TryParse(Get(fields, "ResNum"), out var reservationNumber) ? reservationNumber : 0,
+            IsSuccess = isSuccess,
+            FailureReason = isSuccess ? null : MapCallbackFailureReason(status),
+            RawStatus = Get(fields, "State") ?? string.Empty,
+            RawStatusCode = status,
+            Token = Get(fields, "Token"),
+            ReferenceNumber = Get(fields, "RefNum"),
+            Amount = decimal.TryParse(Get(fields, "Amount"), out var amount) ? amount : null,
+            MaskedPan = Get(fields, "SecurePan"),
+            RRN = Get(fields, "RRN"),
+            TraceNumber = Get(fields, "TraceNo")
+        };
+    }
+
+    private static PspFailureReason MapCallbackFailureReason(int? samanCallbackStatus)
+    {
+        return samanCallbackStatus switch
+        {
+            1 => PspFailureReason.CanceledByUser,
+            3 => PspFailureReason.Rejected,
+            4 => PspFailureReason.SessionExpired,
+            5 or 10 or 11 => PspFailureReason.InvalidRequest,
+            8 or 21 => PspFailureReason.MerchantConfigurationError,
+            12 => PspFailureReason.InvalidTerminal,
+            _ => PspFailureReason.Unknown
+        };
+    }
+
+    private static string? Get(IReadOnlyDictionary<string, string> fields, string key)
+    {
+        return fields.TryGetValue(key, out var value) && !string.IsNullOrWhiteSpace(value) ? value : null;
+    }
+
+    private static int? ParseInt(IReadOnlyDictionary<string, string> fields, string key)
+    {
+        return int.TryParse(Get(fields, key), out var value) ? value : null;
     }
 
     private static PspFailureReason MapFailureReason(int samanStatus)
@@ -167,12 +225,13 @@ internal class SamanGateway : IPspGateway
         };
     }
 
-    private static PaymentVerificationResponse MakeGenericFailedVerificationResponse()
+    private static PaymentVerificationResponse MakeNoResponse(PspTransactionType transactionType)
     {
         return new PaymentVerificationResponse()
         {
+            HasResponse = false,
             IsSuccess = false,
-            PspTransactionType = PspTransactionType.Verify
+            PspTransactionType = transactionType
         };
     }
 }

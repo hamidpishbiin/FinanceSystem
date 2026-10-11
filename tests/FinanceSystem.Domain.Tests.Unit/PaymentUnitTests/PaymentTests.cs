@@ -228,12 +228,13 @@ public class PaymentTests
         ((byte)PaymentState.Initiated).Should().Be(1);
         ((byte)PaymentState.TokenReceived).Should().Be(2);
         ((byte)PaymentState.CallbackReceived).Should().Be(3);
-        ((byte)PaymentState.Verified).Should().Be(4);
+        ((byte)PaymentState.Succeeded).Should().Be(4);
         ((byte)PaymentState.Failed).Should().Be(5);
         ((byte)PaymentState.Expired).Should().Be(6);
         ((byte)PaymentState.Reversed).Should().Be(7);
+        ((byte)PaymentState.Verifying).Should().Be(8);
 
-        Enum.GetValues<PaymentState>().Should().HaveCount(7);
+        Enum.GetValues<PaymentState>().Should().HaveCount(8);
     }
 
     [Fact]
@@ -323,6 +324,180 @@ public class PaymentTests
         Func<Task> act = () => payment.MarkTokenRequestFailed(PspFailureReason.Unknown, null, null, null);
 
         await act.Should().ThrowAsync<InvalidPaymentStateException>();
+    }
+
+    [Fact]
+    public async Task StoreCallback_should_store_callback_data_and_set_state_to_callbackReceived()
+    {
+        var payment = await BuildPaymentWithToken();
+
+        payment.StoreCallback("OK", 2, "ref-1", PaymentBuilder.DefaultAmount, "6037-****-1234", "rrn-1", "trace-1");
+
+        payment.State.Should().Be(PaymentState.CallbackReceived);
+        payment.RawStatus.Should().Be("OK");
+        payment.RawStatusCode.Should().Be(2);
+        payment.ReferenceNumber.Should().Be("ref-1");
+        payment.RedirectedAmount.Should().Be(PaymentBuilder.DefaultAmount);
+        payment.MaskedPan.Should().Be("6037-****-1234");
+        payment.RRN.Should().Be("rrn-1");
+        payment.TraceNumber.Should().Be("trace-1");
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData(" ")]
+    [InlineData(null)]
+    public async Task StoreCallback_should_store_null_when_referenceNumber_is_empty(string? referenceNumber)
+    {
+        var payment = await BuildPaymentWithToken();
+
+        payment.StoreCallback("CanceledByUser", 1, referenceNumber, null, null, null, null);
+
+        payment.ReferenceNumber.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task StoreCallback_should_throw_when_state_is_not_tokenReceived()
+    {
+        var payment = await BuildPspPayment();
+
+        Action act = () => payment.StoreCallback("OK", 2, "ref-1", PaymentBuilder.DefaultAmount, null, null, null);
+
+        act.Should().Throw<InvalidPaymentStateException>();
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData(null)]
+    public async Task StoreCallback_should_throw_when_rawStatus_is_null_or_empty(string? rawStatus)
+    {
+        var payment = await BuildPaymentWithToken();
+
+        Action act = () => payment.StoreCallback(rawStatus!, 2, "ref-1", PaymentBuilder.DefaultAmount, null, null, null);
+
+        act.Should().Throw<InvalidRawStatusException>();
+    }
+
+    [Fact]
+    public async Task MarkFailed_should_set_state_and_failure_reason_and_publish_event()
+    {
+        var payment = await BuildPaymentWithCallback();
+
+        await payment.MarkFailed(PspFailureReason.CanceledByUser);
+
+        payment.State.Should().Be(PaymentState.Failed);
+        payment.FailureReason.Should().Be(PspFailureReason.CanceledByUser);
+        await _builder.EventPublisher
+            .Received(1)
+            .Publish(Arg.Is<PaymentFailedEvent>(e =>
+                e.ExternalReferenceId == PaymentBuilder.DefaultExternalReferenceId));
+    }
+
+    [Fact]
+    public async Task MarkFailed_should_be_allowed_while_verifying()
+    {
+        var payment = await BuildPaymentWithCallback();
+        payment.MarkVerifying();
+
+        await payment.MarkFailed(PspFailureReason.VerificationFailed);
+
+        payment.State.Should().Be(PaymentState.Failed);
+        payment.FailureReason.Should().Be(PspFailureReason.VerificationFailed);
+    }
+
+    [Fact]
+    public async Task MarkFailed_should_throw_when_callback_is_not_received()
+    {
+        var payment = await BuildPaymentWithToken();
+
+        Func<Task> act = () => payment.MarkFailed(PspFailureReason.CanceledByUser);
+
+        await act.Should().ThrowAsync<InvalidPaymentStateException>();
+    }
+
+    [Fact]
+    public async Task MarkVerifying_should_set_state_to_verifying()
+    {
+        var payment = await BuildPaymentWithCallback();
+
+        payment.MarkVerifying();
+
+        payment.State.Should().Be(PaymentState.Verifying);
+    }
+
+    [Fact]
+    public async Task MarkVerifying_should_throw_when_callback_is_not_received()
+    {
+        var payment = await BuildPaymentWithToken();
+
+        Action act = () => payment.MarkVerifying();
+
+        act.Should().Throw<InvalidPaymentStateException>();
+    }
+
+    [Fact]
+    public async Task MarkSucceeded_should_set_state_and_success_time_and_publish_event()
+    {
+        var payment = await BuildPaymentWithCallback();
+        payment.MarkVerifying();
+
+        await payment.MarkSucceeded();
+
+        payment.State.Should().Be(PaymentState.Succeeded);
+        payment.SucceededAtUtc.Should().BeCloseTo(DateTimeOffset.UtcNow, TimeSpan.FromSeconds(5));
+        await _builder.EventPublisher
+            .Received(1)
+            .Publish(Arg.Is<PaymentSucceededEvent>(e =>
+                e.ExternalReferenceId == PaymentBuilder.DefaultExternalReferenceId));
+    }
+
+    [Fact]
+    public async Task MarkSucceeded_should_throw_when_state_is_not_verifying()
+    {
+        var payment = await BuildPaymentWithCallback();
+
+        Func<Task> act = () => payment.MarkSucceeded();
+
+        await act.Should().ThrowAsync<InvalidPaymentStateException>();
+    }
+
+    [Fact]
+    public async Task MarkReversed_should_set_state_and_publish_event()
+    {
+        var payment = await BuildPaymentWithCallback();
+        payment.MarkVerifying();
+
+        await payment.MarkReversed();
+
+        payment.State.Should().Be(PaymentState.Reversed);
+        await _builder.EventPublisher
+            .Received(1)
+            .Publish(Arg.Is<PaymentReversedEvent>(e =>
+                e.ExternalReferenceId == PaymentBuilder.DefaultExternalReferenceId));
+    }
+
+    [Fact]
+    public async Task MarkReversed_should_throw_when_state_is_not_verifying()
+    {
+        var payment = await BuildPaymentWithCallback();
+
+        Func<Task> act = () => payment.MarkReversed();
+
+        await act.Should().ThrowAsync<InvalidPaymentStateException>();
+    }
+
+    private async Task<Payment> BuildPaymentWithToken()
+    {
+        var payment = await BuildPspPayment();
+        await payment.MarkTokenReceived("token-123", "https://ipg.example/pay");
+        return payment;
+    }
+
+    private async Task<Payment> BuildPaymentWithCallback()
+    {
+        var payment = await BuildPaymentWithToken();
+        payment.StoreCallback("OK", 2, "ref-1", PaymentBuilder.DefaultAmount, null, null, null);
+        return payment;
     }
 
     private Task<Payment> BuildPspPayment()

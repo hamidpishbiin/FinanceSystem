@@ -16,7 +16,7 @@ public static class PaymentExceptionCodes
     public const int InvalidToken = 212;
     public const int InvalidPaymentState = 213;
     public const int InvalidRawStatus = 214;
-    public const int DuplicateReferenceNumber = 215;
     public const int PaymentNotFound = 216;
     public const int PspCodeMismatch = 217;
+    public const int CallbackTokenMismatch = 218;
 }

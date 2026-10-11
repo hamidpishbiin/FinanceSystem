@@ -1,9 +1,11 @@
 using FinanceSystem.Application.Contracts.Payments.Command;
+using FinanceSystem.Application.Contracts.Payments.Events;
 using FinanceSystem.Domain.Contract.Payments;
 using FinanceSystem.Domain.PaymentServiceProviders.Enums;
 using FinanceSystem.Interface.Contracts.Payments.Models;
 using FinanceSystem.Interface.Contracts.Payments.Services;
 using Shared.Core;
+using Shared.Core.Exceptions;
 
 namespace FinanceSystem.Interface.WriteModel;
 
@@ -39,10 +41,16 @@ public class TopUpFacadeService(
     public async Task<JsonResponse<string>> TopUpAsync(TopUpModel model, CancellationToken cancellationToken = default)
     {
         var ipgUrl = string.Empty;
+        var tokenRequestFailed = false;
 
         await listener.Subscribe(new EventHandlerAction<PspTokenReceivedEvent>(a =>
         {
             ipgUrl = a.IpgUrl;
+        }));
+
+        await listener.Subscribe(new EventHandlerAction<PaymentTokenRequestFailedEvent>(_ =>
+        {
+            tokenRequestFailed = true;
         }));
 
         await commandBus.Dispatch(new TopUpCommand()
@@ -52,28 +60,41 @@ public class TopUpFacadeService(
             UserId = Guid.Parse(userResolver.GetUserId())
         }, cancellationToken);
 
+        if (tokenRequestFailed)
+        {
+            return JsonResponse<string>.Failure("Payment gateway token request failed. Please try again.");
+        }
+
         return JsonResponse<string>.Success(ipgUrl);
     }
 
-    public async Task<JsonResponse<string>> CompleteTopUpProcess(SepCallbackModel callbackModel, CancellationToken cancellationToken = default)
+    public async Task<JsonResponse<string>> CompleteTopUpProcess(string psp, IReadOnlyDictionary<string, string> fields, CancellationToken cancellationToken = default)
     {
-        long.TryParse(callbackModel.ResNum, out var reservationNumber);
+        var outcome = TopUpOutcome.Failure;
 
-        await commandBus.Dispatch(new CompleteTopUpProcessCommand()
+        if (!Enum.TryParse<PspCode>(psp, ignoreCase: true, out var pspCode) || !Enum.IsDefined(pspCode))
         {
-            PspCode = (int)PspCode.Saman,
-            ReservationNumber = reservationNumber,
-            Amount = callbackModel.Amount,
-            IsSuccess = callbackModel.State == "OK",
-            Token = callbackModel.Token,
-            RRN = callbackModel.RRN,
-            MaskedPan = callbackModel.SecurePan,
-            RawStatus = callbackModel.State,
-            RawStatusCode = callbackModel.Status,
-            TraceNumber = callbackModel.TraceNo,
-            ReferenceNumber = callbackModel.RefNum
-        }, cancellationToken);
+            return JsonResponse<string>.Success(outcome.ToString().ToLowerInvariant());
+        }
 
-        return JsonResponse<string>.Success(string.Empty);
+        await listener.Subscribe(new EventHandlerAction<TopUpCallbackHandledEvent>(a =>
+        {
+            outcome = a.Outcome;
+        }));
+
+        try
+        {
+            await commandBus.Dispatch(new CompleteTopUpProcessCommand()
+            {
+                PspCode = (int)pspCode,
+                Fields = fields
+            }, cancellationToken);
+        }
+        catch (BusinessException)
+        {
+            outcome = TopUpOutcome.Failure;
+        }
+
+        return JsonResponse<string>.Success(outcome.ToString().ToLowerInvariant());
     }
 }

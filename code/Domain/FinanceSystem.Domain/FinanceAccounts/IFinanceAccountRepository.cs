@@ -4,4 +4,5 @@ public interface IFinanceAccountRepository : IRepository
 {
     Task<long?> GetCompanyWalletIdAsync(CancellationToken cancellationToken);
     Task<FinanceAccount?> GetByUserId(Guid userId, CancellationToken cancellationToken);
+    Task<FinanceAccount?> GetByIdAsync(long id, CancellationToken cancellationToken);
 }

@@ -42,7 +42,7 @@ public class TopUpCommandHandler(
 
         var amount = new Money(command.Amount);
 
-        var psp = await pspSelector.SelectAsync((PspCode)command.PspCode, cancellationToken);
+        var psp = await pspSelector.SelectAsync((PspCode?)command.PspCode, cancellationToken);
 
         var payment = await Payment.Create(
             PaymentPurpose.TopUp,

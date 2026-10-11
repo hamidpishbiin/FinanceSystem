@@ -61,6 +61,12 @@ try
             c => !string.IsNullOrWhiteSpace(c.ReadOnlyConnection),
             $"{ConnectionStrings.SectionName}:ReadOnlyConnection is required.")
         .ValidateOnStart();
+    builder.Services.AddOptions<TopUpResultPage>()
+        .Bind(builder.Configuration.GetSection(TopUpResultPage.SectionName))
+        .Validate(
+            o => Uri.TryCreate(o.Url, UriKind.Absolute, out _),
+            $"{TopUpResultPage.SectionName}:Url must be an absolute URL.")
+        .ValidateOnStart();
     builder.Services.AddOptions<PspOptions>()
         .Bind(builder.Configuration.GetSection(PspOptions.SectionName))
         .Validate(

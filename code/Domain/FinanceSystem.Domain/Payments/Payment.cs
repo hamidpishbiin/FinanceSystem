@@ -34,7 +34,7 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
     public string? RawStatus { get; private set; }
     public int? RawStatusCode { get; private set; }
     public string? RawDescription { get; private set; }
-    public DateTimeOffset? VerifiedAtUtc { get; private set; }
+    public DateTimeOffset? SucceededAtUtc { get; private set; }
     public PspFailureReason? FailureReason { get; private set; }
     public FinanceAccount? SourceFinanceAccount { get; private set; }
     public FinanceAccount? DestinationFinanceAccount { get; private set; }
@@ -125,32 +125,61 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
         await Publisher.Publish(new PspTokenReceivedEvent(ExternalReferenceId, ipgUrl));
     }
 
-    public async Task MarkFailed(string rawStatus, int? rawStatusCode)
+    public void StoreCallback(
+        string rawStatus,
+        int? rawStatusCode,
+        string? referenceNumber,
+        decimal? redirectedAmount,
+        string? maskedPan,
+        string? rrn,
+        string? traceNumber)
     {
         Guard<InvalidPaymentStateException>.IsTrue(State != PaymentState.TokenReceived);
         Guard<InvalidRawStatusException>.AgainstNullOrEmpty(rawStatus);
 
-        State = PaymentState.Failed;
-        FailureReason = PspFailureReason.Rejected;
         RawStatus = rawStatus;
         RawStatusCode = rawStatusCode;
+        ReferenceNumber = string.IsNullOrWhiteSpace(referenceNumber) ? null : referenceNumber;
+        RedirectedAmount = redirectedAmount;
+        MaskedPan = maskedPan;
+        RRN = rrn;
+        TraceNumber = traceNumber;
+        State = PaymentState.CallbackReceived;
+    }
+
+    public async Task MarkFailed(PspFailureReason failureReason)
+    {
+        Guard<InvalidPaymentStateException>.IsTrue(State is not (PaymentState.CallbackReceived or PaymentState.Verifying));
+
+        State = PaymentState.Failed;
+        FailureReason = failureReason;
 
         await Publisher.Publish(new PaymentFailedEvent(ExternalReferenceId));
     }
 
-    public void SetCallbackData(
-        string referenceNumber,
-        decimal redirectedAmount,
-        string maskedPan,
-        int rawStatusCode,
-        string rrn,
-        string traceNumber)
+    public void MarkVerifying()
     {
-        ReferenceNumber = referenceNumber;
-        RedirectedAmount = redirectedAmount;
-        MaskedPan = maskedPan;
-        RawStatusCode = rawStatusCode;
-        RRN = rrn;
-        TraceNumber = traceNumber;
+        Guard<InvalidPaymentStateException>.IsTrue(State != PaymentState.CallbackReceived);
+
+        State = PaymentState.Verifying;
+    }
+
+    public async Task MarkSucceeded()
+    {
+        Guard<InvalidPaymentStateException>.IsTrue(State != PaymentState.Verifying);
+
+        State = PaymentState.Succeeded;
+        SucceededAtUtc = DateTimeOffset.UtcNow;
+
+        await Publisher.Publish(new PaymentSucceededEvent(ExternalReferenceId));
+    }
+
+    public async Task MarkReversed()
+    {
+        Guard<InvalidPaymentStateException>.IsTrue(State != PaymentState.Verifying);
+
+        State = PaymentState.Reversed;
+
+        await Publisher.Publish(new PaymentReversedEvent(ExternalReferenceId));
     }
 }
