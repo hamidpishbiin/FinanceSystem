@@ -19,4 +19,6 @@ public static class PaymentExceptionCodes
     public const int PaymentNotFound = 216;
     public const int PspCodeMismatch = 217;
     public const int CallbackTokenMismatch = 218;
+    public const int DuplicateReferenceNumber = 219;
+    public const int PaymentReverseFailed = 220;
 }

@@ -28,11 +28,11 @@ public class TopUpCommandHandler(
 
     public override async Task Handle(TopUpCommand command, CancellationToken cancellationToken = default)
     {
-        var userExist = await userRepository.ExistsAsync(command.UserId, cancellationToken);
+        var user = await userRepository.GetByIdAsync(command.UserId, cancellationToken);
 
-        Guard<UserNotFoundException>.IsFalse(userExist);
+        Guard<UserNotFoundException>.AgainstNull(user);
 
-        var userFinanceAccount = await financeAccountRepository.GetByUserId(command.UserId, cancellationToken);
+        var userFinanceAccount = await financeAccountRepository.GetByUserId(user!.Id, cancellationToken);
 
         Guard<FinanceAccountNotFoundException>.AgainstNull(userFinanceAccount);
 
@@ -73,10 +73,10 @@ public class TopUpCommandHandler(
         if (!paymentTokenResponse.IsSuccess)
         {
             await payment.MarkTokenRequestFailed(
-                paymentTokenResponse.FailureReason ?? PspFailureReason.Unknown,
-                paymentTokenResponse.RawStatus,
-                paymentTokenResponse.RawStatusCode,
-                paymentTokenResponse.RawDescription);
+                PaymentFailureReason.Unknown,
+                paymentTokenResponse.Status,
+                paymentTokenResponse.StatusCode,
+                paymentTokenResponse.Description);
         }
         else
         {

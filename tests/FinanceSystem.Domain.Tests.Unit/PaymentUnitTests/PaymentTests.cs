@@ -271,12 +271,12 @@ public class PaymentTests
     {
         var payment = await BuildPspPayment();
 
-        await payment.MarkTokenRequestFailed(PspFailureReason.InvalidAmount, "-3", 3, "invalid amount");
+        await payment.MarkTokenRequestFailed(PaymentFailureReason.Unknown, "-3", 3, "invalid amount");
 
         payment.State.Should().Be(PaymentState.Failed);
-        payment.FailureReason.Should().Be(PspFailureReason.InvalidAmount);
-        payment.RawStatus.Should().Be("-3");
-        payment.RawStatusCode.Should().Be(3);
+        payment.FailureReason.Should().Be(PaymentFailureReason.Unknown);
+        payment.Status.Should().Be("-3");
+        payment.StatusCode.Should().Be(3);
         payment.RawDescription.Should().Be("invalid amount");
         await _builder.EventPublisher
             .Received(1)
@@ -299,7 +299,7 @@ public class PaymentTests
     {
         var payment = await _builder.Build();
 
-        Func<Task> act = () => payment.MarkTokenRequestFailed(PspFailureReason.Unknown, null, null, null);
+        Func<Task> act = () => payment.MarkTokenRequestFailed(PaymentFailureReason.Unknown, null, null, null);
 
         await act.Should().ThrowAsync<InvalidPaymentStateException>();
     }
@@ -308,7 +308,7 @@ public class PaymentTests
     public async Task MarkTokenReceived_should_throw_when_state_is_not_initiated()
     {
         var payment = await BuildPspPayment();
-        await payment.MarkTokenRequestFailed(PspFailureReason.Unknown, null, null, null);
+        await payment.MarkTokenRequestFailed(PaymentFailureReason.Unknown, null, null, null);
 
         Func<Task> act = () => payment.MarkTokenReceived("token-123", "https://ipg.example/pay");
 
@@ -321,7 +321,7 @@ public class PaymentTests
         var payment = await BuildPspPayment();
         await payment.MarkTokenReceived("token-123", "https://ipg.example/pay");
 
-        Func<Task> act = () => payment.MarkTokenRequestFailed(PspFailureReason.Unknown, null, null, null);
+        Func<Task> act = () => payment.MarkTokenRequestFailed(PaymentFailureReason.Unknown, null, null, null);
 
         await act.Should().ThrowAsync<InvalidPaymentStateException>();
     }
@@ -334,26 +334,13 @@ public class PaymentTests
         payment.StoreCallback("OK", 2, "ref-1", PaymentBuilder.DefaultAmount, "6037-****-1234", "rrn-1", "trace-1");
 
         payment.State.Should().Be(PaymentState.CallbackReceived);
-        payment.RawStatus.Should().Be("OK");
-        payment.RawStatusCode.Should().Be(2);
+        payment.Status.Should().Be("OK");
+        payment.StatusCode.Should().Be(2);
         payment.ReferenceNumber.Should().Be("ref-1");
         payment.RedirectedAmount.Should().Be(PaymentBuilder.DefaultAmount);
         payment.MaskedPan.Should().Be("6037-****-1234");
         payment.RRN.Should().Be("rrn-1");
         payment.TraceNumber.Should().Be("trace-1");
-    }
-
-    [Theory]
-    [InlineData("")]
-    [InlineData(" ")]
-    [InlineData(null)]
-    public async Task StoreCallback_should_store_null_when_referenceNumber_is_empty(string? referenceNumber)
-    {
-        var payment = await BuildPaymentWithToken();
-
-        payment.StoreCallback("CanceledByUser", 1, referenceNumber, null, null, null, null);
-
-        payment.ReferenceNumber.Should().BeNull();
     }
 
     [Fact]
@@ -383,10 +370,10 @@ public class PaymentTests
     {
         var payment = await BuildPaymentWithCallback();
 
-        await payment.MarkFailed(PspFailureReason.CanceledByUser);
+        await payment.MarkFailed(PaymentFailureReason.CallbackAmountMismatch);
 
         payment.State.Should().Be(PaymentState.Failed);
-        payment.FailureReason.Should().Be(PspFailureReason.CanceledByUser);
+        payment.FailureReason.Should().Be(PaymentFailureReason.CallbackAmountMismatch);
         await _builder.EventPublisher
             .Received(1)
             .Publish(Arg.Is<PaymentFailedEvent>(e =>
@@ -399,10 +386,10 @@ public class PaymentTests
         var payment = await BuildPaymentWithCallback();
         payment.MarkVerifying();
 
-        await payment.MarkFailed(PspFailureReason.VerificationFailed);
+        await payment.MarkFailed(PaymentFailureReason.VerificationFailed);
 
         payment.State.Should().Be(PaymentState.Failed);
-        payment.FailureReason.Should().Be(PspFailureReason.VerificationFailed);
+        payment.FailureReason.Should().Be(PaymentFailureReason.VerificationFailed);
     }
 
     [Fact]
@@ -410,7 +397,7 @@ public class PaymentTests
     {
         var payment = await BuildPaymentWithToken();
 
-        Func<Task> act = () => payment.MarkFailed(PspFailureReason.CanceledByUser);
+        Func<Task> act = () => payment.MarkFailed(PaymentFailureReason.CallbackAmountMismatch);
 
         await act.Should().ThrowAsync<InvalidPaymentStateException>();
     }

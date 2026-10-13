@@ -21,6 +21,7 @@ public class TopUpController(
     public async Task<IActionResult> CompleteTopUpProcess(string psp, CancellationToken cancellationToken = default)
     {
         var form = await Request.ReadFormAsync(cancellationToken);
+
         var fields = form.ToDictionary(f => f.Key, f => f.Value.ToString(), StringComparer.OrdinalIgnoreCase);
 
         var response = await facadeService.CompleteTopUpProcess(psp, fields, cancellationToken);

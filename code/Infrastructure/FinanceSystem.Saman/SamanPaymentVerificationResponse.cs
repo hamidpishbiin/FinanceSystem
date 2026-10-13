@@ -8,7 +8,7 @@ internal class SamanPaymentVerificationResponse
     public int? ResultCode { get; set; }
     public string? ResultDescription { get; set; }
     public bool? Success { get; set; }
-    public PspTransactionType PspTransactionType { get; set; } = PspTransactionType.Verify;
+    public PspTransactionType PspTransactionType { get; set; } = PspTransactionType.Verification;
 }
 
 internal class TransactionDetail

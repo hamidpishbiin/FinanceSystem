@@ -34,15 +34,4 @@ internal class BehPardakhtGateway(
     {
         throw new NotImplementedException();
     }
-
-    private static PspFailureReason MapFailureReason(string resCode)
-    {
-        return resCode switch
-        {
-            "0" => PspFailureReason.None,
-            "21" => PspFailureReason.InvalidTerminal,
-            "61" => PspFailureReason.InvalidAmount,
-            _ => PspFailureReason.Unknown
-        };
-    }
 }

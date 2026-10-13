@@ -120,12 +120,12 @@ public class PaymentMapping() : EntityBaseMap<Payment, long>("Payments")
             .HasColumnName("FailureReason");
 
         builder
-            .Property(p => p.RawStatus)
+            .Property(p => p.Status)
             .HasColumnName("RawStatus")
             .HasMaxLength(20);
 
         builder
-            .Property(p => p.RawStatusCode)
+            .Property(p => p.StatusCode)
             .HasColumnName("RawStatusCode");
 
         builder

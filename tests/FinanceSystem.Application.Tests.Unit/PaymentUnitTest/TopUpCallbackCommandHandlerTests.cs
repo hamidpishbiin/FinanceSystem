@@ -19,7 +19,7 @@ using Shared.Domain;
 
 namespace FinanceSystem.Application.Tests.Unit.PaymentUnitTest;
 
-public class CompleteTopUpProcessCommandHandlerTests
+public class TopUpCallbackCommandHandlerTests
 {
     private const long PaymentId = 42;
     private const long UserAccountId = 22;
@@ -35,15 +35,15 @@ public class CompleteTopUpProcessCommandHandlerTests
     private readonly IUnitOfWork _unitOfWork = Substitute.For<IUnitOfWork>();
     private readonly IEventPublisher _publisher = Substitute.For<IEventPublisher>();
     private readonly PspCallback _callback = MakeSuccessfulCallback();
-    private readonly CompleteTopUpProcessCommandHandler _handler;
+    private readonly TopUpCallbackCommandHandler _handler;
 
-    public CompleteTopUpProcessCommandHandlerTests()
+    public TopUpCallbackCommandHandlerTests()
     {
         _pspGateway.Code.Returns(PspCode.Saman);
         _pspGateway.ParseCallback(Arg.Any<IReadOnlyDictionary<string, string>>()).Returns(_ => _callback);
         _pspGatewayFactory.Get(PspCode.Saman).Returns(_pspGateway);
 
-        _handler = new CompleteTopUpProcessCommandHandler(
+        _handler = new TopUpCallbackCommandHandler(
             _paymentRepository,
             _financeAccountRepository,
             _accountEntryRepository,
@@ -71,7 +71,7 @@ public class CompleteTopUpProcessCommandHandlerTests
         otherGateway.ParseCallback(Arg.Any<IReadOnlyDictionary<string, string>>()).Returns(_callback);
         _pspGatewayFactory.Get(PspCode.BehPardakht).Returns(otherGateway);
         var command = MakeCommand();
-        command.PspCode = (int)PspCode.BehPardakht;
+        command.PspCode = PspCode.BehPardakht;
 
         Func<Task> act = () => _handler.Handle(command);
 
@@ -110,32 +110,29 @@ public class CompleteTopUpProcessCommandHandlerTests
     public async Task Handle_should_throw_and_leave_payment_unchanged_when_state_is_not_token_received()
     {
         var payment = await ArrangePaymentWithToken();
-        payment.StoreCallback("CanceledByUser", 1, null, null, null, null, null);
-        await payment.MarkFailed(PspFailureReason.CanceledByUser);
+        payment.StoreCallback("OK", 2, ReferenceNumber, PaymentBuilder.DefaultAmount - 1, "", "", "");
+        await payment.MarkFailed(PaymentFailureReason.CallbackAmountMismatch);
 
         Func<Task> act = () => _handler.Handle(MakeCommand());
 
         await act.Should().ThrowAsync<InvalidPaymentStateException>();
         payment.State.Should().Be(PaymentState.Failed);
-        payment.FailureReason.Should().Be(PspFailureReason.CanceledByUser);
+        payment.FailureReason.Should().Be(PaymentFailureReason.CallbackAmountMismatch);
     }
 
     [Fact]
-    public async Task Handle_should_mark_payment_failed_with_the_psp_failure_reason_when_callback_is_not_successful()
+    public async Task Handle_should_store_callback_and_report_failure_without_verifying_when_callback_is_not_successful()
     {
         var payment = await ArrangePaymentWithToken();
         _callback.IsSuccess = false;
-        _callback.FailureReason = PspFailureReason.SessionExpired;
-        _callback.RawStatus = "SessionIsNull";
-        _callback.RawStatusCode = 4;
-        _callback.ReferenceNumber = null;
+        _callback.Status = "SessionIsNull";
+        _callback.StatusCode = 4;
+        _callback.ReferenceNumber = string.Empty;
 
         await _handler.Handle(MakeCommand());
 
-        payment.State.Should().Be(PaymentState.Failed);
-        payment.FailureReason.Should().Be(PspFailureReason.SessionExpired);
-        payment.RawStatus.Should().Be("SessionIsNull");
-        payment.RawStatusCode.Should().Be(4);
+        payment.Status.Should().Be("SessionIsNull");
+        payment.StatusCode.Should().Be(4);
         await _pspGateway.DidNotReceiveWithAnyArgs().VerifyPaymentAsync(default!, default);
         await AssertOutcome(TopUpOutcome.Failure);
     }
@@ -149,24 +146,23 @@ public class CompleteTopUpProcessCommandHandlerTests
         await _handler.Handle(MakeCommand());
 
         payment.State.Should().Be(PaymentState.Failed);
-        payment.FailureReason.Should().Be(PspFailureReason.AmountMismatch);
+        payment.FailureReason.Should().Be(PaymentFailureReason.CallbackAmountMismatch);
         await _pspGateway.DidNotReceiveWithAnyArgs().VerifyPaymentAsync(default!, default);
         await AssertOutcome(TopUpOutcome.Failure);
     }
 
     [Fact]
-    public async Task Handle_should_mark_payment_failed_without_storing_reference_number_when_it_is_already_used()
+    public async Task Handle_should_throw_and_leave_payment_unchanged_when_reference_number_is_already_used()
     {
         var payment = await ArrangePaymentWithToken();
         var otherPayment = await new PaymentBuilder().Build();
         _paymentRepository.GetByReferenceNumberAsync(ReferenceNumber, Arg.Any<CancellationToken>()).Returns(otherPayment);
 
-        await _handler.Handle(MakeCommand());
+        Func<Task> act = () => _handler.Handle(MakeCommand());
 
-        payment.State.Should().Be(PaymentState.Failed);
-        payment.FailureReason.Should().Be(PspFailureReason.DuplicateReference);
+        await act.Should().ThrowAsync<DuplicateReferenceNumberException>();
+        payment.State.Should().Be(PaymentState.TokenReceived);
         payment.ReferenceNumber.Should().BeNull();
-        await AssertOutcome(TopUpOutcome.Failure);
     }
 
     [Fact]
@@ -175,7 +171,7 @@ public class CompleteTopUpProcessCommandHandlerTests
         var payment = await ArrangePaymentWithToken();
         PaymentState? stateWhenSaved = null;
         _unitOfWork.When(u => u.SaveChangesAsync()).Do(_ => stateWhenSaved = payment.State);
-        ArrangeVerification(new PaymentVerificationResponse { HasResponse = false });
+        ArrangeVerification(new PaymentVerificationResponse { IsSuccess = false });
 
         await _handler.Handle(MakeCommand());
 
@@ -188,60 +184,16 @@ public class CompleteTopUpProcessCommandHandlerTests
     }
 
     [Fact]
-    public async Task Handle_should_leave_payment_verifying_and_report_pending_when_verify_gets_no_response()
-    {
-        var payment = await ArrangePaymentWithToken();
-        ArrangeVerification(new PaymentVerificationResponse { HasResponse = false });
-
-        await _handler.Handle(MakeCommand());
-
-        payment.State.Should().Be(PaymentState.Verifying);
-        await AssertOutcome(TopUpOutcome.Pending);
-    }
-
-    [Fact]
     public async Task Handle_should_mark_payment_failed_when_psp_rejects_verification()
     {
         var payment = await ArrangePaymentWithToken();
-        ArrangeVerification(new PaymentVerificationResponse { HasResponse = true, IsSuccess = false });
+        ArrangeVerification(new PaymentVerificationResponse { IsSuccess = false });
 
         await _handler.Handle(MakeCommand());
 
         payment.State.Should().Be(PaymentState.Failed);
-        payment.FailureReason.Should().Be(PspFailureReason.VerificationFailed);
+        payment.FailureReason.Should().Be(PaymentFailureReason.VerificationFailed);
         await AssertOutcome(TopUpOutcome.Failure);
-    }
-
-    [Fact]
-    public async Task Handle_should_reverse_and_mark_payment_reversed_when_verified_amount_does_not_match()
-    {
-        var payment = await ArrangePaymentWithToken();
-        ArrangeVerification(VerifiedResponse(PaymentBuilder.DefaultAmount - 1));
-        _pspGateway.ReversePaymentAsync(Arg.Any<PaymentVerificationRequest>(), Arg.Any<CancellationToken>())
-            .Returns(new PaymentVerificationResponse { HasResponse = true, IsSuccess = true });
-
-        await _handler.Handle(MakeCommand());
-
-        payment.State.Should().Be(PaymentState.Reversed);
-        await _pspGateway.Received(1).ReversePaymentAsync(
-            Arg.Is<PaymentVerificationRequest>(r => r.ReferenceNumber == ReferenceNumber),
-            Arg.Any<CancellationToken>());
-        await _accountEntryRepository.DidNotReceiveWithAnyArgs().AddAsync(default!);
-        await AssertOutcome(TopUpOutcome.Failure);
-    }
-
-    [Fact]
-    public async Task Handle_should_leave_payment_verifying_and_report_pending_when_reverse_fails()
-    {
-        var payment = await ArrangePaymentWithToken();
-        ArrangeVerification(VerifiedResponse(PaymentBuilder.DefaultAmount - 1));
-        _pspGateway.ReversePaymentAsync(Arg.Any<PaymentVerificationRequest>(), Arg.Any<CancellationToken>())
-            .Returns(new PaymentVerificationResponse { HasResponse = false });
-
-        await _handler.Handle(MakeCommand());
-
-        payment.State.Should().Be(PaymentState.Verifying);
-        await AssertOutcome(TopUpOutcome.Pending);
     }
 
     [Fact]
@@ -314,14 +266,14 @@ public class CompleteTopUpProcessCommandHandlerTests
 
     private static PaymentVerificationResponse VerifiedResponse(decimal amount)
     {
-        return new PaymentVerificationResponse { HasResponse = true, IsSuccess = true, Amount = amount };
+        return new PaymentVerificationResponse { IsSuccess = true, Amount = amount };
     }
 
-    private static CompleteTopUpProcessCommand MakeCommand()
+    private static TopUpCallbackCommand MakeCommand()
     {
-        return new CompleteTopUpProcessCommand
+        return new TopUpCallbackCommand
         {
-            PspCode = (int)PspCode.Saman
+            PspCode = PspCode.Saman
         };
     }
 
@@ -331,8 +283,8 @@ public class CompleteTopUpProcessCommandHandlerTests
         {
             ReservationNumber = PaymentId,
             IsSuccess = true,
-            RawStatus = "OK",
-            RawStatusCode = 2,
+            Status = "OK",
+            StatusCode = 2,
             Token = Token,
             ReferenceNumber = ReferenceNumber,
             Amount = PaymentBuilder.DefaultAmount

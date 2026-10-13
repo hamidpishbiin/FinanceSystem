@@ -31,11 +31,11 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
     public string? ReferenceNumber { get; private set; }
     public string? TraceNumber { get; private set; }
     public string? MaskedPan { get; private set; }
-    public string? RawStatus { get; private set; }
-    public int? RawStatusCode { get; private set; }
+    public string? Status { get; private set; }
+    public int? StatusCode { get; private set; }
     public string? RawDescription { get; private set; }
     public DateTimeOffset? SucceededAtUtc { get; private set; }
-    public PspFailureReason? FailureReason { get; private set; }
+    public PaymentFailureReason? FailureReason { get; private set; }
     public FinanceAccount? SourceFinanceAccount { get; private set; }
     public FinanceAccount? DestinationFinanceAccount { get; private set; }
     public PaymentServiceProvider? Psp { get; private set; }
@@ -98,17 +98,17 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
     }
 
     public async Task MarkTokenRequestFailed(
-        PspFailureReason failureReason,
+        PaymentFailureReason failureReason,
         string? rawStatus,
         int? rawStatusCode,
         string? rawDescription)
     {
-        Guard<InvalidPaymentStateException>.IsTrue(Channel != PaymentChannel.Psp || State != PaymentState.Initiated);
+        Guard<InvalidPaymentStateException>.IsTrue(Channel != PaymentChannel.Psp);
 
-        State = PaymentState.Failed;
+        SetState(PaymentState.Failed);
         FailureReason = failureReason;
-        RawStatus = rawStatus;
-        RawStatusCode = rawStatusCode;
+        Status = rawStatus;
+        StatusCode = rawStatusCode;
         RawDescription = rawDescription;
 
         await Publisher.Publish(new PaymentTokenRequestFailedEvent(ExternalReferenceId));
@@ -116,59 +116,57 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
 
     public async Task MarkTokenReceived(string token, string ipgUrl)
     {
-        Guard<InvalidPaymentStateException>.IsTrue(Channel != PaymentChannel.Psp || State != PaymentState.Initiated);
+        Guard<InvalidPaymentStateException>.IsTrue(Channel != PaymentChannel.Psp);
         Guard<InvalidTokenException>.AgainstNullOrEmpty(token);
 
+        SetState(PaymentState.TokenReceived);
         Token = token;
-        State = PaymentState.TokenReceived;
 
         await Publisher.Publish(new PspTokenReceivedEvent(ExternalReferenceId, ipgUrl));
     }
 
     public void StoreCallback(
-        string rawStatus,
-        int? rawStatusCode,
-        string? referenceNumber,
-        decimal? redirectedAmount,
-        string? maskedPan,
-        string? rrn,
-        string? traceNumber)
+        string status,
+        int statusCode,
+        string referenceNumber,
+        decimal redirectedAmount,
+        string maskedPan,
+        string rrn,
+        string traceNumber)
     {
-        Guard<InvalidPaymentStateException>.IsTrue(State != PaymentState.TokenReceived);
-        Guard<InvalidRawStatusException>.AgainstNullOrEmpty(rawStatus);
+        Guard<InvalidRawStatusException>.AgainstNullOrEmpty(status);
 
-        RawStatus = rawStatus;
-        RawStatusCode = rawStatusCode;
-        ReferenceNumber = string.IsNullOrWhiteSpace(referenceNumber) ? null : referenceNumber;
+        SetState(PaymentState.CallbackReceived);
+
+        Status = status;
+        StatusCode = statusCode;
+        ReferenceNumber = referenceNumber;
         RedirectedAmount = redirectedAmount;
         MaskedPan = maskedPan;
         RRN = rrn;
         TraceNumber = traceNumber;
-        State = PaymentState.CallbackReceived;
     }
 
-    public async Task MarkFailed(PspFailureReason failureReason)
+    public async Task MarkFailed(PaymentFailureReason? failureReason = null)
     {
-        Guard<InvalidPaymentStateException>.IsTrue(State is not (PaymentState.CallbackReceived or PaymentState.Verifying));
+        SetState(PaymentState.Failed);
 
-        State = PaymentState.Failed;
-        FailureReason = failureReason;
+        if (failureReason != null)
+        {
+            FailureReason = failureReason;
+        }
 
         await Publisher.Publish(new PaymentFailedEvent(ExternalReferenceId));
     }
 
     public void MarkVerifying()
     {
-        Guard<InvalidPaymentStateException>.IsTrue(State != PaymentState.CallbackReceived);
-
-        State = PaymentState.Verifying;
+        SetState(PaymentState.Verifying);
     }
 
     public async Task MarkSucceeded()
     {
-        Guard<InvalidPaymentStateException>.IsTrue(State != PaymentState.Verifying);
-
-        State = PaymentState.Succeeded;
+        SetState(PaymentState.Succeeded);
         SucceededAtUtc = DateTimeOffset.UtcNow;
 
         await Publisher.Publish(new PaymentSucceededEvent(ExternalReferenceId));
@@ -176,10 +174,28 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
 
     public async Task MarkReversed()
     {
-        Guard<InvalidPaymentStateException>.IsTrue(State != PaymentState.Verifying);
-
-        State = PaymentState.Reversed;
+        SetState(PaymentState.Reversed);
 
         await Publisher.Publish(new PaymentReversedEvent(ExternalReferenceId));
+    }
+
+    private void SetState(PaymentState newState)
+    {
+        var isAllowed = State switch
+        {
+            PaymentState.Initiated => newState is PaymentState.TokenReceived or PaymentState.Failed,
+            PaymentState.TokenReceived => newState is PaymentState.CallbackReceived,
+            PaymentState.CallbackReceived => newState is PaymentState.Verifying or PaymentState.Failed,
+            PaymentState.Succeeded => false,
+            PaymentState.Failed => false,
+            PaymentState.Expired => false,
+            PaymentState.Reversed => false,
+            PaymentState.Verifying => newState is PaymentState.Succeeded or PaymentState.Reversed or PaymentState.Failed,
+            _ => throw new InvalidPaymentStateException()
+        };
+
+        Guard<InvalidPaymentStateException>.IsFalse(isAllowed);
+
+        State = newState;
     }
 }

@@ -10,4 +10,9 @@ public class UserRepository(IDbContext dbContext) : IUserRepository
     {
         return await DbSet.AnyAsync(user => user.Id == id, cancellationToken);
     }
+
+    public async Task<User?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
+    {
+        return await DbSet.FirstOrDefaultAsync(user => user.Id == id, cancellationToken);
+    }
 }

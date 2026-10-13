@@ -74,7 +74,7 @@ public class TopUpFacadeService(
 
         if (!Enum.TryParse<PspCode>(psp, ignoreCase: true, out var pspCode) || !Enum.IsDefined(pspCode))
         {
-            return JsonResponse<string>.Success(outcome.ToString().ToLowerInvariant());
+            return JsonResponse<string>.Failure(outcome.ToString().ToLowerInvariant());
         }
 
         await listener.Subscribe(new EventHandlerAction<TopUpCallbackHandledEvent>(a =>
@@ -82,18 +82,11 @@ public class TopUpFacadeService(
             outcome = a.Outcome;
         }));
 
-        try
+        await commandBus.Dispatch(new TopUpCallbackCommand()
         {
-            await commandBus.Dispatch(new CompleteTopUpProcessCommand()
-            {
-                PspCode = (int)pspCode,
-                Fields = fields
-            }, cancellationToken);
-        }
-        catch (BusinessException)
-        {
-            outcome = TopUpOutcome.Failure;
-        }
+            PspCode = pspCode,
+            Fields = fields
+        }, cancellationToken);
 
         return JsonResponse<string>.Success(outcome.ToString().ToLowerInvariant());
     }

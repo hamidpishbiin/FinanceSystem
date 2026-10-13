@@ -8,22 +8,21 @@ using FinanceSystem.Domain.FinanceAccounts.Exceptions;
 using FinanceSystem.Domain.Payments;
 using FinanceSystem.Domain.Payments.Enums;
 using FinanceSystem.Domain.Payments.Exceptions;
-using FinanceSystem.Domain.PaymentServiceProviders.Enums;
 
 namespace FinanceSystem.Application.Payments.CommandHandlers;
 
-public class CompleteTopUpProcessCommandHandler(
+public class TopUpCallbackCommandHandler(
     IPaymentRepository repository,
     IFinanceAccountRepository financeAccountRepository,
     IAccountEntryRepository accountEntryRepository,
     IPspGatewayFactory pspGatewayFactory,
     IUnitOfWork unitOfWork,
     IEventPublisher publisher,
-    IEventListener listener) : PaymentCommandHandler<CompleteTopUpProcessCommand>(repository, publisher, listener)
+    IEventListener listener) : PaymentCommandHandler<TopUpCallbackCommand>(repository, publisher, listener)
 {
-    public override async Task Handle(CompleteTopUpProcessCommand command, CancellationToken cancellationToken = default)
+    public override async Task Handle(TopUpCallbackCommand command, CancellationToken cancellationToken = default)
     {
-        var pspGateway = pspGatewayFactory.Get((PspCode)command.PspCode);
+        var pspGateway = pspGatewayFactory.Get(command.PspCode);
 
         var callback = pspGateway.ParseCallback(command.Fields);
 
@@ -31,10 +30,7 @@ public class CompleteTopUpProcessCommandHandler(
 
         Guard<PaymentNotFoundException>.AgainstNull(payment);
 
-        payment!.Publisher = Publisher;
-
-        Guard<PspCodeMismatchException>.IsTrue(payment.PspCode != pspGateway.Code);
-        Guard<CallbackTokenMismatchException>.IsTrue(payment.Token != callback.Token);
+        payment!.Publisher = Publisher; // what is this line for???
 
         if (payment.State == PaymentState.Succeeded)
         {
@@ -42,16 +38,25 @@ public class CompleteTopUpProcessCommandHandler(
             return;
         }
 
+        var isReferenceNumberUsed = callback.IsSuccess && await Repository.GetByReferenceNumberAsync(callback.ReferenceNumber, cancellationToken) is not null;
+
+        if (isReferenceNumberUsed)
+        {
+            await FailAsync(payment, PaymentFailureReason.DuplicateReferenceNumber);
+
+            throw new DuplicateReferenceNumberException();
+        }
+
+
+        Guard<PspCodeMismatchException>.IsTrue(payment.PspCode != pspGateway.Code);
+        Guard<CallbackTokenMismatchException>.IsTrue(payment.Token != callback.Token);
+
         Guard<InvalidPaymentStateException>.IsTrue(payment.State != PaymentState.TokenReceived);
 
-        var isReferenceNumberUsed = callback.IsSuccess
-            && !string.IsNullOrWhiteSpace(callback.ReferenceNumber)
-            && await Repository.GetByReferenceNumberAsync(callback.ReferenceNumber, cancellationToken) is not null;
-
         payment.StoreCallback(
-            callback.RawStatus,
-            callback.RawStatusCode,
-            isReferenceNumberUsed ? null : callback.ReferenceNumber,
+            callback.Status,
+            callback.StatusCode,
+            callback.ReferenceNumber,
             callback.Amount,
             callback.MaskedPan,
             callback.RRN,
@@ -59,19 +64,14 @@ public class CompleteTopUpProcessCommandHandler(
 
         if (!callback.IsSuccess)
         {
-            await FailAsync(payment, callback.FailureReason ?? PspFailureReason.Unknown);
+            await FailAsync(payment);
+            await PublishOutcome(TopUpOutcome.Failure);
             return;
         }
 
         if (callback.Amount != payment.Amount)
         {
-            await FailAsync(payment, PspFailureReason.AmountMismatch);
-            return;
-        }
-
-        if (isReferenceNumberUsed)
-        {
-            await FailAsync(payment, PspFailureReason.DuplicateReference);
+            await FailAsync(payment, PaymentFailureReason.CallbackAmountMismatch);
             return;
         }
 
@@ -88,30 +88,9 @@ public class CompleteTopUpProcessCommandHandler(
 
         var verification = await pspGateway.VerifyPaymentAsync(transactionRequest, cancellationToken);
 
-        if (!verification.HasResponse)
-        {
-            await PublishOutcome(TopUpOutcome.Pending);
-            return;
-        }
-
         if (!verification.IsSuccess)
         {
-            await FailAsync(payment, PspFailureReason.VerificationFailed);
-            return;
-        }
-
-        if (verification.Amount != payment.Amount)
-        {
-            var reversal = await pspGateway.ReversePaymentAsync(transactionRequest, cancellationToken);
-
-            if (!reversal.IsSuccess)
-            {
-                await PublishOutcome(TopUpOutcome.Pending);
-                return;
-            }
-
-            await payment.MarkReversed();
-            await PublishOutcome(TopUpOutcome.Failure);
+            await FailAsync(payment, PaymentFailureReason.VerificationFailed);
             return;
         }
 
@@ -143,7 +122,7 @@ public class CompleteTopUpProcessCommandHandler(
         await accountEntryRepository.AddAsync(companyEntry);
     }
 
-    private async Task FailAsync(Payment payment, PspFailureReason failureReason)
+    private async Task FailAsync(Payment payment, PaymentFailureReason? failureReason = null)
     {
         await payment.MarkFailed(failureReason);
         await PublishOutcome(TopUpOutcome.Failure);
