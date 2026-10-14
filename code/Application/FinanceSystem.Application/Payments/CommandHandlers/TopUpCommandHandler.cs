@@ -1,6 +1,7 @@
 using FinanceSystem.Application.Contracts.Payments.Command;
 using FinanceSystem.Application.Payments.Gateways;
 using FinanceSystem.Domain.FinanceAccounts;
+using FinanceSystem.Domain.FinanceAccounts.DomainServices;
 using FinanceSystem.Domain.FinanceAccounts.Exceptions;
 using FinanceSystem.Domain.Payments;
 using FinanceSystem.Domain.Payments.Enums;
@@ -13,18 +14,17 @@ namespace FinanceSystem.Application.Payments.CommandHandlers;
 
 public class TopUpCommandHandler(
     IPaymentRepository paymentRepository,
-    IFinanceAccountRepository financeAccountRepository,
     IEventPublisher publisher,
     IEventListener listener,
     PspSelector pspSelector,
     IPspGatewayFactory pspGatewayFactory,
     IGuidGenerator guidGenerator,
     IUnitOfWork unitOfWork,
-    IUserRepository userRepository)
+    IUserRepository userRepository,
+    FinanceAccountEligibilityService financeAccountEligibilityService)
     : PaymentCommandHandler<TopUpCommand>(paymentRepository, publisher, listener)
 {
-    private const string _externalServiceId = "FinanceSystem";
-    private const string _externalTag = "TopUp";
+    private const string _serviceId = "FinanceSystem";
 
     public override async Task Handle(TopUpCommand command, CancellationToken cancellationToken = default)
     {
@@ -32,27 +32,19 @@ public class TopUpCommandHandler(
 
         Guard<UserNotFoundException>.AgainstNull(user);
 
-        var userFinanceAccount = await financeAccountRepository.GetByUserId(user!.Id, cancellationToken);
+        var userFinanceAccount = await financeAccountEligibilityService.GetTopUpTargetAccountAsync(user!.Id, cancellationToken);
 
         Guard<FinanceAccountNotFoundException>.AgainstNull(userFinanceAccount);
-
-        var targetFinanceAccountId = await financeAccountRepository.GetCompanyWalletIdAsync(cancellationToken);
-
-        Guard<SystemFinanceAccountNotFoundException>.IsTrue(targetFinanceAccountId is null);
 
         var amount = new Money(command.Amount);
 
         var psp = await pspSelector.SelectAsync((PspCode?)command.PspCode, cancellationToken);
 
-        var payment = await Payment.Create(
-            PaymentPurpose.TopUp,
-            PaymentChannel.Psp,
+        var payment = await Payment.CreateTopUpPayment(
             amount,
-            targetFinanceAccountId!.Value,
             userFinanceAccount!.Id,
-            _externalServiceId,
+            _serviceId,
             guidGenerator.New().ToString(),
-            _externalTag,
             psp.Code,
             Publisher);
 
@@ -68,21 +60,21 @@ public class TopUpCommandHandler(
             ReferenceNumber = payment.Id,
         };
 
-        var paymentTokenResponse = await pspGateway.RequestTokenAsync(pspTokenRequest, cancellationToken);
+        var paymentTokenResponse = await pspGateway.RequestPaymentTokenAsync(pspTokenRequest, cancellationToken);
 
-        if (!paymentTokenResponse.IsSuccess)
+        if (paymentTokenResponse.IsSuccess)
+        {
+            await payment.MarkTokenReceived(
+                paymentTokenResponse.PaymentToken,
+                paymentTokenResponse.IpgUrl);
+        }
+        else
         {
             await payment.MarkTokenRequestFailed(
                 PaymentFailureReason.Unknown,
                 paymentTokenResponse.Status,
                 paymentTokenResponse.StatusCode,
                 paymentTokenResponse.Description);
-        }
-        else
-        {
-            await payment.MarkTokenReceived(
-                paymentTokenResponse.PaymentToken,
-                paymentTokenResponse.IpgUrl);
         }
     }
 }

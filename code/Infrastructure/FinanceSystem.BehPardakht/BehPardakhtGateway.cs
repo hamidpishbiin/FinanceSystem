@@ -15,7 +15,7 @@ internal class BehPardakhtGateway(
 
     private HttpClient CreateClient() => httpClientFactory.CreateClient(nameof(PspCode.BehPardakht));
 
-    public Task<PspTokenResponse> RequestTokenAsync(PspTokenRequest request, CancellationToken cancellationToken)
+    public Task<PspTokenResponse> RequestPaymentTokenAsync(PspTokenRequest request, CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
     }

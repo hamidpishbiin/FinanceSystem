@@ -7,14 +7,6 @@ public class FinanceAccountRepository(IDbContext dbContext) : IFinanceAccountRep
 {
     private DbSet<FinanceAccount> DbSet => dbContext.DbSet<FinanceAccount>();
 
-    public async Task<long?> GetCompanyWalletIdAsync(CancellationToken cancellationToken)
-    {
-        return await DbSet
-            .Where(account => account.Type == FinanceAccountType.CompanyWallet)
-            .Select(account => (long?)account.Id)
-            .FirstOrDefaultAsync(cancellationToken);
-    }
-
     public async Task<FinanceAccount?> GetByUserId(Guid userId, CancellationToken cancellationToken)
     {
         return await DbSet.FirstOrDefaultAsync(fa => fa.UserId == userId, cancellationToken);
@@ -23,5 +15,15 @@ public class FinanceAccountRepository(IDbContext dbContext) : IFinanceAccountRep
     public async Task<FinanceAccount?> GetByIdAsync(long id, CancellationToken cancellationToken)
     {
         return await DbSet.FirstOrDefaultAsync(fa => fa.Id == id, cancellationToken);
+    }
+
+    public async Task<FinanceAccount?> GetTopUpTargetAccountAsync(Guid userId, CancellationToken cancellationToken)
+    {
+        return await DbSet
+            .FirstOrDefaultAsync(fa =>
+                fa.UserId == userId &&
+                fa.Type == FinanceAccountType.UserWallet &&
+                fa.Status != FinanceAccountStatus.InboundFrozen,
+                cancellationToken);
     }
 }

@@ -16,10 +16,10 @@ public class TopUpFacadeService(
 {
     public async Task<JsonResponse<string>> Create(CreatePaymentModel model)
     {
-        string externalReferenceId = string.Empty;
+        string referenceId = string.Empty;
         await listener.Subscribe(new EventHandlerAction<PaymentCreatedEvent>(a =>
         {
-            externalReferenceId = a.ExternalReferenceId;
+            referenceId = a.ReferenceId;
         }));
 
         await commandBus.Dispatch(new CreatePaymentCommand
@@ -27,15 +27,14 @@ public class TopUpFacadeService(
             Purpose = model.Purpose,
             Channel = model.Channel,
             Amount = model.Amount,
-            SourceFinanceAccountId = model.SourceFinanceAccountId,
-            DestinationFinanceAccountId = model.DestinationFinanceAccountId,
-            ExternalServiceId = model.ExternalServiceId,
-            ExternalReferenceId = model.ExternalReferenceId,
-            ExternalTag = model.ExternalTag,
+            FinanceAccountId = model.FinanceAccountId,
+            Direction = model.Direction,
+            ServiceId = model.ServiceId,
+            ReferenceId = model.ReferenceId,
             PspCode = model.PspCode
         });
 
-        return JsonResponse<string>.Success(externalReferenceId);
+        return JsonResponse<string>.Success(referenceId);
     }
 
     public async Task<JsonResponse<string>> TopUpAsync(TopUpModel model, CancellationToken cancellationToken = default)
@@ -77,9 +76,12 @@ public class TopUpFacadeService(
             return JsonResponse<string>.Failure(outcome.ToString().ToLowerInvariant());
         }
 
+        var resultPageUrl = string.Empty;
+
         await listener.Subscribe(new EventHandlerAction<TopUpCallbackHandledEvent>(a =>
         {
             outcome = a.Outcome;
+            resultPageUrl = a.ResultPageUrl;
         }));
 
         await commandBus.Dispatch(new TopUpCallbackCommand()
@@ -88,6 +90,6 @@ public class TopUpFacadeService(
             Fields = fields
         }, cancellationToken);
 
-        return JsonResponse<string>.Success(outcome.ToString().ToLowerInvariant());
+        return JsonResponse<string>.Success($"{resultPageUrl}?status={outcome.ToString().ToLowerInvariant()}");
     }
 }

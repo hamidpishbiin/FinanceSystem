@@ -28,7 +28,7 @@ internal class SamanGateway : IPspGateway
 
     public PspCode Code => PspCode.Saman;
 
-    public async Task<PspTokenResponse> RequestTokenAsync(PspTokenRequest request, CancellationToken cancellationToken)
+    public async Task<PspTokenResponse> RequestPaymentTokenAsync(PspTokenRequest request, CancellationToken cancellationToken)
     {
         try
         {
@@ -51,7 +51,7 @@ internal class SamanGateway : IPspGateway
 
             if (samanResponse is null)
             {
-                throw new InvalidOperationException("Token samanResponse was null.");
+                throw new InvalidOperationException("Saman token response was null.");
             }
 
             var isSamanResponseSuccess = samanResponse.Status == 1;

@@ -8,6 +8,7 @@ using FinanceSystem.Domain.FinanceAccounts.Exceptions;
 using FinanceSystem.Domain.Payments;
 using FinanceSystem.Domain.Payments.Enums;
 using FinanceSystem.Domain.Payments.Exceptions;
+using Microsoft.Extensions.Options;
 
 namespace FinanceSystem.Application.Payments.CommandHandlers;
 
@@ -18,11 +19,14 @@ public class TopUpCallbackCommandHandler(
     IPspGatewayFactory pspGatewayFactory,
     IUnitOfWork unitOfWork,
     IEventPublisher publisher,
-    IEventListener listener) : PaymentCommandHandler<TopUpCallbackCommand>(repository, publisher, listener)
+    IEventListener listener,
+    IOptions<PspOptions> pspOptions) : PaymentCommandHandler<TopUpCallbackCommand>(repository, publisher, listener)
 {
     public override async Task Handle(TopUpCallbackCommand command, CancellationToken cancellationToken = default)
     {
         var pspGateway = pspGatewayFactory.Get(command.PspCode);
+
+        var resultPageUrl = pspOptions.Value.For(pspGateway.Code).TopUpResultPageUrl;
 
         var callback = pspGateway.ParseCallback(command.Fields);
 
@@ -30,23 +34,17 @@ public class TopUpCallbackCommandHandler(
 
         Guard<PaymentNotFoundException>.AgainstNull(payment);
 
-        payment!.Publisher = Publisher; // what is this line for???
+        payment!.Publisher = Publisher;
 
         if (payment.State == PaymentState.Succeeded)
         {
-            await PublishOutcome(TopUpOutcome.Success);
+            await PublishOutcome(TopUpOutcome.Success, resultPageUrl);
             return;
         }
 
         var isReferenceNumberUsed = callback.IsSuccess && await Repository.GetByReferenceNumberAsync(callback.ReferenceNumber, cancellationToken) is not null;
 
-        if (isReferenceNumberUsed)
-        {
-            await FailAsync(payment, PaymentFailureReason.DuplicateReferenceNumber);
-
-            throw new DuplicateReferenceNumberException();
-        }
-
+        Guard<DuplicateReferenceNumberException>.IsTrue(isReferenceNumberUsed);
 
         Guard<PspCodeMismatchException>.IsTrue(payment.PspCode != pspGateway.Code);
         Guard<CallbackTokenMismatchException>.IsTrue(payment.Token != callback.Token);
@@ -64,14 +62,13 @@ public class TopUpCallbackCommandHandler(
 
         if (!callback.IsSuccess)
         {
-            await FailAsync(payment);
-            await PublishOutcome(TopUpOutcome.Failure);
+            await FailAsync(payment, resultPageUrl);
             return;
         }
 
         if (callback.Amount != payment.Amount)
         {
-            await FailAsync(payment, PaymentFailureReason.CallbackAmountMismatch);
+            await FailAsync(payment, resultPageUrl, PaymentFailureReason.CallbackAmountMismatch);
             return;
         }
 
@@ -90,7 +87,7 @@ public class TopUpCallbackCommandHandler(
 
         if (!verification.IsSuccess)
         {
-            await FailAsync(payment, PaymentFailureReason.VerificationFailed);
+            await FailAsync(payment, resultPageUrl, PaymentFailureReason.VerificationFailed);
             return;
         }
 
@@ -98,7 +95,7 @@ public class TopUpCallbackCommandHandler(
 
         await CreditWalletAsync(payment, cancellationToken);
 
-        await PublishOutcome(TopUpOutcome.Success);
+        await PublishOutcome(TopUpOutcome.Success, resultPageUrl);
     }
 
     private async Task CreditWalletAsync(Payment payment, CancellationToken cancellationToken)
@@ -106,30 +103,25 @@ public class TopUpCallbackCommandHandler(
         var amount = new Money(payment.Amount);
         var occurredAt = DateTimeOffset.UtcNow;
 
-        var userAccount = await financeAccountRepository.GetByIdAsync(payment.DestinationFinanceAccountId, cancellationToken);
-        var companyWallet = await financeAccountRepository.GetByIdAsync(payment.SourceFinanceAccountId, cancellationToken);
+        var userAccount = await financeAccountRepository.GetByIdAsync(payment.FinanceAccountId, cancellationToken);
 
         Guard<FinanceAccountNotFoundException>.AgainstNull(userAccount);
-        Guard<SystemFinanceAccountNotFoundException>.AgainstNull(companyWallet);
 
         var userEntry = new AccountEntry(payment.Id, userAccount!.Id, amount, EntryDirection.In);
-        var companyEntry = new AccountEntry(payment.Id, companyWallet!.Id, amount, EntryDirection.Out);
 
         userAccount.ApplyEntry(userEntry, occurredAt);
-        companyWallet.ApplyEntry(companyEntry, occurredAt);
 
         await accountEntryRepository.AddAsync(userEntry);
-        await accountEntryRepository.AddAsync(companyEntry);
     }
 
-    private async Task FailAsync(Payment payment, PaymentFailureReason? failureReason = null)
+    private async Task FailAsync(Payment payment, string resultPageUrl, PaymentFailureReason? failureReason = null)
     {
         await payment.MarkFailed(failureReason);
-        await PublishOutcome(TopUpOutcome.Failure);
+        await PublishOutcome(TopUpOutcome.Failure, resultPageUrl);
     }
 
-    private async Task PublishOutcome(TopUpOutcome outcome)
+    private async Task PublishOutcome(TopUpOutcome outcome, string resultPageUrl)
     {
-        await Publisher.Publish(new TopUpCallbackHandledEvent(outcome));
+        await Publisher.Publish(new TopUpCallbackHandledEvent(outcome, resultPageUrl));
     }
 }

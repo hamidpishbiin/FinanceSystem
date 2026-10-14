@@ -12,6 +12,7 @@ using FinanceSystem.Domain.Payments.Exceptions;
 using FinanceSystem.Domain.PaymentServiceProviders.Enums;
 using FinanceSystem.Domain.Tests.Unit.PaymentUnitTests;
 using FluentAssertions;
+using Microsoft.Extensions.Options;
 using NSubstitute;
 using Shared.Core;
 using Shared.Core.Events;
@@ -23,9 +24,9 @@ public class TopUpCallbackCommandHandlerTests
 {
     private const long PaymentId = 42;
     private const long UserAccountId = 22;
-    private const long CompanyWalletId = 11;
     private const string Token = "token-123";
     private const string ReferenceNumber = "ref-1";
+    private const string ResultPageUrl = "https://result.example/topup";
 
     private readonly IPaymentRepository _paymentRepository = Substitute.For<IPaymentRepository>();
     private readonly IFinanceAccountRepository _financeAccountRepository = Substitute.For<IFinanceAccountRepository>();
@@ -50,7 +51,12 @@ public class TopUpCallbackCommandHandlerTests
             _pspGatewayFactory,
             _unitOfWork,
             _publisher,
-            Substitute.For<IEventListener>());
+            Substitute.For<IEventListener>(),
+            Options.Create(new PspOptions
+            {
+                Saman = new PspSettings { TopUpResultPageUrl = ResultPageUrl },
+                BehPardakht = new PspSettings { TopUpResultPageUrl = ResultPageUrl }
+            }));
     }
 
     [Fact]
@@ -200,7 +206,7 @@ public class TopUpCallbackCommandHandlerTests
     public async Task Handle_should_mark_payment_succeeded_and_credit_user_wallet_when_verification_succeeds()
     {
         var payment = await ArrangePaymentWithToken();
-        var (userAccount, companyWallet) = ArrangeFinanceAccounts();
+        var userAccount = ArrangeUserAccount();
         ArrangeVerification(VerifiedResponse(PaymentBuilder.DefaultAmount));
 
         await _handler.Handle(MakeCommand());
@@ -209,17 +215,12 @@ public class TopUpCallbackCommandHandlerTests
         payment.SucceededAtUtc.Should().NotBeNull();
         payment.ReferenceNumber.Should().Be(ReferenceNumber);
         userAccount.CachedBalance.Should().Be(PaymentBuilder.DefaultAmount);
-        companyWallet.CachedBalance.Should().Be(-PaymentBuilder.DefaultAmount);
+        await _accountEntryRepository.Received(1).AddAsync(Arg.Any<AccountEntry>());
         await _accountEntryRepository.Received(1).AddAsync(Arg.Is<AccountEntry>(e =>
             e.PaymentId == PaymentId &&
             e.FinanceAccountId == UserAccountId &&
             e.Amount == PaymentBuilder.DefaultAmount &&
             e.Direction == EntryDirection.In));
-        await _accountEntryRepository.Received(1).AddAsync(Arg.Is<AccountEntry>(e =>
-            e.PaymentId == PaymentId &&
-            e.FinanceAccountId == CompanyWalletId &&
-            e.Amount == PaymentBuilder.DefaultAmount &&
-            e.Direction == EntryDirection.Out));
         await AssertOutcome(TopUpOutcome.Success);
     }
 
@@ -244,19 +245,15 @@ public class TopUpCallbackCommandHandlerTests
         return payment;
     }
 
-    private (FinanceAccount UserAccount, FinanceAccount CompanyWallet) ArrangeFinanceAccounts()
+    private FinanceAccount ArrangeUserAccount()
     {
         var userAccount = new FinanceAccount(
             FinanceAccountType.UserWallet, FinanceAccountStatus.Active, Guid.NewGuid(), new Money(0), DateTimeOffset.UtcNow, false);
-        var companyWallet = new FinanceAccount(
-            FinanceAccountType.CompanyWallet, FinanceAccountStatus.Active, SystemFinanceAccounts.CompanyUserId, new Money(0), DateTimeOffset.UtcNow, true);
         SetId(userAccount, UserAccountId);
-        SetId(companyWallet, CompanyWalletId);
 
         _financeAccountRepository.GetByIdAsync(UserAccountId, Arg.Any<CancellationToken>()).Returns(userAccount);
-        _financeAccountRepository.GetByIdAsync(CompanyWalletId, Arg.Any<CancellationToken>()).Returns(companyWallet);
 
-        return (userAccount, companyWallet);
+        return userAccount;
     }
 
     private void ArrangeVerification(PaymentVerificationResponse response)
@@ -293,7 +290,7 @@ public class TopUpCallbackCommandHandlerTests
 
     private async Task AssertOutcome(TopUpOutcome outcome)
     {
-        await _publisher.Received(1).Publish(Arg.Is<TopUpCallbackHandledEvent>(e => e.Outcome == outcome));
+        await _publisher.Received(1).Publish(Arg.Is<TopUpCallbackHandledEvent>(e => e.Outcome == outcome && e.ResultPageUrl == ResultPageUrl));
     }
 
     private static void SetId<TKey>(EntityBase<TKey> entity, TKey id)

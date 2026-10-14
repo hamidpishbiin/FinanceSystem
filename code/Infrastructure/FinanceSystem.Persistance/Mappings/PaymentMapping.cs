@@ -29,30 +29,25 @@ public class PaymentMapping() : EntityBaseMap<Payment, long>("Payments")
             .HasColumnName("Amount");
 
         builder
-            .Property(p => p.SourceFinanceAccountId)
-            .HasColumnName("SourceFinanceAccountId");
+            .Property(p => p.FinanceAccountId)
+            .HasColumnName("FinanceAccountId");
 
         builder
-            .Property(p => p.DestinationFinanceAccountId)
-            .HasColumnName("DestinationFinanceAccountId");
+            .Property(p => p.Direction)
+            .IsRequired()
+            .HasColumnName("Direction");
 
         builder
-            .Property(p => p.ExternalServiceId)
+            .Property(p => p.ServiceId)
             .HasMaxLength(50)
             .IsRequired()
-            .HasColumnName("ExternalServiceId");
+            .HasColumnName("ServiceId");
 
         builder
-            .Property(p => p.ExternalReferenceId)
+            .Property(p => p.ReferenceId)
             .IsRequired()
             .HasMaxLength(50)
-            .HasColumnName("ExternalReferenceId");
-
-        builder
-            .Property(p => p.ExternalTag)
-            .IsRequired()
-            .HasMaxLength(50)
-            .HasColumnName("ExternalTag");
+            .HasColumnName("ReferenceId");
 
         builder
             .Property(p => p.State)
@@ -137,18 +132,11 @@ public class PaymentMapping() : EntityBaseMap<Payment, long>("Payments")
             .HasColumnName("SucceededAtUtc");
 
         builder
-            .HasOne(p => p.SourceFinanceAccount)
+            .HasOne(p => p.FinanceAccount)
             .WithMany()
-            .HasForeignKey(p => p.SourceFinanceAccountId)
+            .HasForeignKey(p => p.FinanceAccountId)
             .OnDelete(DeleteBehavior.Restrict)
-            .HasConstraintName("FK_Payments_FinanceAccounts_SourceFinanceAccountId");
-
-        builder
-            .HasOne(p => p.DestinationFinanceAccount)
-            .WithMany()
-            .HasForeignKey(p => p.DestinationFinanceAccountId)
-            .OnDelete(DeleteBehavior.Restrict)
-            .HasConstraintName("FK_Payments_FinanceAccounts_DestinationFinanceAccountId");
+            .HasConstraintName("FK_Payments_FinanceAccounts_FinanceAccountId");
 
         builder.Ignore(p => p.Publisher);
     }

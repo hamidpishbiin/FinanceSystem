@@ -2,13 +2,10 @@ namespace FinanceSystem.Domain.Payments.Exceptions;
 
 public static class PaymentExceptionCodes
 {
-    public const int InvalidSourceFinanceAccountId = 201;
-    public const int InvalidDestinationFinanceAccountId = 202;
-    public const int SameSourceAndDestinationFinanceAccount = 203;
+    public const int InvalidFinanceAccountId = 201;
     public const int InvalidPaymentAmount = 204;
-    public const int InvalidExternalServiceId = 205;
-    public const int InvalidExternalReferenceId = 206;
-    public const int InvalidExternalTag = 207;
+    public const int InvalidServiceId = 205;
+    public const int InvalidReferenceId = 206;
     public const int InvalidPaymentPurpose = 208;
     public const int InvalidPaymentChannel = 209;
     public const int MissingPspCode = 210;
@@ -21,4 +18,5 @@ public static class PaymentExceptionCodes
     public const int CallbackTokenMismatch = 218;
     public const int DuplicateReferenceNumber = 219;
     public const int PaymentReverseFailed = 220;
+    public const int InvalidPaymentDirection = 221;
 }

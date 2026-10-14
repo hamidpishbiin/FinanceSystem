@@ -23,11 +23,10 @@ public class PaymentCreateCommandHandler : PaymentCommandHandler<CreatePaymentCo
             (PaymentPurpose)command.Purpose,
             (PaymentChannel)command.Channel,
             new Money(command.Amount),
-            command.SourceFinanceAccountId,
-            command.DestinationFinanceAccountId,
-            command.ExternalServiceId,
-            command.ExternalReferenceId,
-            command.ExternalTag,
+            command.FinanceAccountId,
+            (PaymentDirection)command.Direction,
+            command.ServiceId,
+            command.ReferenceId,
             (PspCode?)command.PspCode,
             Publisher);
 

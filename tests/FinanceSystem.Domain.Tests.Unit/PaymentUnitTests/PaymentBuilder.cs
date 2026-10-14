@@ -11,21 +11,19 @@ public class PaymentBuilder
     public const PaymentPurpose DefaultPurpose = PaymentPurpose.Purchase;
     public const PaymentChannel DefaultChannel = PaymentChannel.Wallet;
     public const decimal DefaultAmount = 250_000;
-    public const long DefaultSourceFinanceAccountId = 11;
-    public const long DefaultDestinationFinanceAccountId = 22;
-    public const string DefaultExternalServiceId = "checkout-service";
-    public const string DefaultExternalReferenceId = "ext-ref-9931";
-    public const string DefaultExternalTag = "order:9931";
+    public const long DefaultFinanceAccountId = 22;
+    public const PaymentDirection DefaultDirection = PaymentDirection.Inbound;
+    public const string DefaultServiceId = "checkout-service";
+    public const string DefaultReferenceId = "ext-ref-9931";
     public const PspCode DefaultPspCode = Domain.PaymentServiceProviders.Enums.PspCode.Saman;
 
     private PaymentPurpose Purpose { get; set; } = DefaultPurpose;
     private PaymentChannel Channel { get; set; } = DefaultChannel;
     private Money Amount { get; set; } = new(DefaultAmount);
-    private long SourceFinanceAccountId { get; set; } = DefaultSourceFinanceAccountId;
-    private long DestinationFinanceAccountId { get; set; } = DefaultDestinationFinanceAccountId;
-    private string ExternalServiceId { get; set; } = DefaultExternalServiceId;
-    private string ExternalReferenceId { get; set; } = DefaultExternalReferenceId;
-    private string ExternalTag { get; set; } = DefaultExternalTag;
+    private long FinanceAccountId { get; set; } = DefaultFinanceAccountId;
+    private PaymentDirection Direction { get; set; } = DefaultDirection;
+    private string ServiceId { get; set; } = DefaultServiceId;
+    private string ReferenceId { get; set; } = DefaultReferenceId;
     private PspCode? PspCode { get; set; }
 
     public IEventPublisher EventPublisher { get; private set; } = Substitute.For<IEventPublisher>();
@@ -36,11 +34,10 @@ public class PaymentBuilder
             Purpose,
             Channel,
             Amount,
-            SourceFinanceAccountId,
-            DestinationFinanceAccountId,
-            ExternalServiceId,
-            ExternalReferenceId,
-            ExternalTag,
+            FinanceAccountId,
+            Direction,
+            ServiceId,
+            ReferenceId,
             PspCode,
             EventPublisher);
     }
@@ -63,33 +60,27 @@ public class PaymentBuilder
         return this;
     }
 
-    public PaymentBuilder WithSourceFinanceAccountId(long sourceFinanceAccountId)
+    public PaymentBuilder WithFinanceAccountId(long financeAccountId)
     {
-        SourceFinanceAccountId = sourceFinanceAccountId;
+        FinanceAccountId = financeAccountId;
         return this;
     }
 
-    public PaymentBuilder WithDestinationFinanceAccountId(long destinationFinanceAccountId)
+    public PaymentBuilder WithDirection(PaymentDirection direction)
     {
-        DestinationFinanceAccountId = destinationFinanceAccountId;
+        Direction = direction;
         return this;
     }
 
-    public PaymentBuilder WithExternalServiceId(string? externalServiceId)
+    public PaymentBuilder WithServiceId(string? serviceId)
     {
-        ExternalServiceId = externalServiceId!;
+        ServiceId = serviceId!;
         return this;
     }
 
-    public PaymentBuilder WithExternalReferenceId(string? externalReferenceId)
+    public PaymentBuilder WithReferenceId(string? referenceId)
     {
-        ExternalReferenceId = externalReferenceId!;
-        return this;
-    }
-
-    public PaymentBuilder WithExternalTag(string? externalTag)
-    {
-        ExternalTag = externalTag!;
+        ReferenceId = referenceId!;
         return this;
     }
 

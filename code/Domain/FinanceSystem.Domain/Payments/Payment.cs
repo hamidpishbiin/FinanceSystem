@@ -19,11 +19,10 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
     public PaymentChannel Channel { get; private set; }
     public PaymentState State { get; private set; }
 
-    public long SourceFinanceAccountId { get; private set; }
-    public long DestinationFinanceAccountId { get; private set; }
-    public string ExternalServiceId { get; private set; }
-    public string ExternalReferenceId { get; private set; }
-    public string ExternalTag { get; private set; }
+    public long FinanceAccountId { get; private set; }
+    public PaymentDirection Direction { get; private set; }
+    public string ServiceId { get; private set; }
+    public string ReferenceId { get; private set; }
     public PspCode? PspCode { get; private set; }
     public string? Token { get; private set; }
     public string? RRN { get; private set; }
@@ -36,8 +35,7 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
     public string? RawDescription { get; private set; }
     public DateTimeOffset? SucceededAtUtc { get; private set; }
     public PaymentFailureReason? FailureReason { get; private set; }
-    public FinanceAccount? SourceFinanceAccount { get; private set; }
-    public FinanceAccount? DestinationFinanceAccount { get; private set; }
+    public FinanceAccount? FinanceAccount { get; private set; }
     public PaymentServiceProvider? Psp { get; private set; }
 
     private Payment()
@@ -49,27 +47,24 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
         PaymentPurpose purpose,
         PaymentChannel channel,
         Money amount,
-        long sourceFinanceAccountId,
-        long destinationFinanceAccountId,
-        string externalServiceId,
-        string externalReferenceId,
-        string externalTag,
+        long financeAccountId,
+        PaymentDirection direction,
+        string serviceId,
+        string referenceId,
         PspCode? pspCode,
         IEventPublisher eventPublisher)
     {
-        Guard<InvalidPaymentPurposeException>.IsFalse(Enum.IsDefined(purpose));
-        Guard<InvalidPaymentChannelException>.IsFalse(Enum.IsDefined(channel));
+        Guard<InvalidPaymentPurposeException>.IsTrue(!Enum.IsDefined(purpose));
+        Guard<InvalidPaymentChannelException>.IsTrue(!Enum.IsDefined(channel));
 
         Guard<NullEntryException>.AgainstNull(amount);
-        Guard<InvalidPaymentAmountException>.IsTrue(amount.Value <= 0);
+        Guard<InvalidPaymentAmountException>.IsTrue(amount.Value == 0);
 
-        Guard<InvalidSourceFinanceAccountIdException>.IsTrue(sourceFinanceAccountId <= 0);
-        Guard<InvalidDestinationFinanceAccountIdException>.IsTrue(destinationFinanceAccountId <= 0);
-        Guard<SameSourceAndDestinationFinanceAccountException>.IsTrue(sourceFinanceAccountId == destinationFinanceAccountId);
+        Guard<InvalidFinanceAccountIdException>.IsTrue(financeAccountId <= 0); // FinanceAccount validity should be checked by a domain service
+        Guard<InvalidPaymentDirectionException>.IsTrue(!Enum.IsDefined(direction));
 
-        Guard<InvalidExternalServiceIdException>.AgainstNullOrEmpty(externalServiceId);
-        Guard<InvalidExternalReferenceIdException>.AgainstNullOrEmpty(externalReferenceId);
-        Guard<InvalidExternalTagException>.AgainstNullOrEmpty(externalTag);
+        Guard<InvalidServiceIdException>.AgainstNullOrEmpty(serviceId);
+        Guard<InvalidReferenceIdException>.AgainstNullOrEmpty(referenceId);
 
         Guard<MissingPspCodeException>.IsTrue(channel == PaymentChannel.Psp && pspCode == null);
         Guard<UnexpectedPspCodeException>.IsTrue(channel != PaymentChannel.Psp && pspCode != null);
@@ -83,16 +78,54 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
             Channel = channel,
             State = PaymentState.Initiated,
             Amount = amount.Value,
-            SourceFinanceAccountId = sourceFinanceAccountId,
-            DestinationFinanceAccountId = destinationFinanceAccountId,
-            ExternalServiceId = externalServiceId,
-            ExternalReferenceId = externalReferenceId,
-            ExternalTag = externalTag,
+            FinanceAccountId = financeAccountId,
+            Direction = direction,
+            ServiceId = serviceId,
+            ReferenceId = referenceId,
             PspCode = pspCode,
             Publisher = eventPublisher
         };
 
-        await eventPublisher.Publish(new PaymentCreatedEvent(payment.ExternalReferenceId));
+        await eventPublisher.Publish(new PaymentCreatedEvent(payment.ReferenceId));
+
+        return payment;
+    }
+
+    public static async Task<Payment> CreateTopUpPayment(
+        Money amount,
+        long financeAccountId,
+        string serviceId,
+        string referenceId,
+        PspCode pspCode,
+        IEventPublisher eventPublisher)
+    {
+        Guard<NullEntryException>.AgainstNull(amount);
+        Guard<InvalidPaymentAmountException>.IsTrue(amount.Value == 0);
+
+        Guard<InvalidFinanceAccountIdException>.IsTrue(financeAccountId <= 0);
+
+        Guard<InvalidServiceIdException>.AgainstNullOrEmpty(serviceId);
+        Guard<InvalidReferenceIdException>.AgainstNullOrEmpty(referenceId);
+
+        Guard<InvalidPspCodeException>.IsTrue(!Enum.IsDefined(pspCode));
+
+        Guard<NullEntryException>.AgainstNull(eventPublisher);
+
+        var payment = new Payment()
+        {
+            Purpose = PaymentPurpose.TopUp,
+            Channel = PaymentChannel.Psp,
+            State = PaymentState.Initiated,
+            Direction = PaymentDirection.Inbound,
+            Amount = amount.Value,
+            FinanceAccountId = financeAccountId,
+            ServiceId = serviceId,
+            ReferenceId = referenceId,
+            PspCode = pspCode,
+            Publisher = eventPublisher
+        };
+
+        await eventPublisher.Publish(new PaymentCreatedEvent(payment.ReferenceId));
 
         return payment;
     }
@@ -111,7 +144,7 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
         StatusCode = rawStatusCode;
         RawDescription = rawDescription;
 
-        await Publisher.Publish(new PaymentTokenRequestFailedEvent(ExternalReferenceId));
+        await Publisher.Publish(new PaymentTokenRequestFailedEvent(ReferenceId));
     }
 
     public async Task MarkTokenReceived(string token, string ipgUrl)
@@ -122,7 +155,7 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
         SetState(PaymentState.TokenReceived);
         Token = token;
 
-        await Publisher.Publish(new PspTokenReceivedEvent(ExternalReferenceId, ipgUrl));
+        await Publisher.Publish(new PspTokenReceivedEvent(ReferenceId, ipgUrl));
     }
 
     public void StoreCallback(
@@ -156,7 +189,7 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
             FailureReason = failureReason;
         }
 
-        await Publisher.Publish(new PaymentFailedEvent(ExternalReferenceId));
+        await Publisher.Publish(new PaymentFailedEvent(ReferenceId));
     }
 
     public void MarkVerifying()
@@ -169,14 +202,14 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
         SetState(PaymentState.Succeeded);
         SucceededAtUtc = DateTimeOffset.UtcNow;
 
-        await Publisher.Publish(new PaymentSucceededEvent(ExternalReferenceId));
+        await Publisher.Publish(new PaymentSucceededEvent(ReferenceId));
     }
 
     public async Task MarkReversed()
     {
         SetState(PaymentState.Reversed);
 
-        await Publisher.Publish(new PaymentReversedEvent(ExternalReferenceId));
+        await Publisher.Publish(new PaymentReversedEvent(ReferenceId));
     }
 
     private void SetState(PaymentState newState)

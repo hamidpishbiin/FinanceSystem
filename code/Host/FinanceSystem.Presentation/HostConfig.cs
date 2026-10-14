@@ -19,9 +19,4 @@ namespace FinanceSystem.Presentation
         public string DefaultConnection { get; set; } = default!;
         public string ReadOnlyConnection { get; set; } = default!;
     }
-    public sealed class TopUpResultPage
-    {
-        public const string SectionName = "TopUpResultPage";
-        public string Url { get; set; } = default!;
-    }
 }

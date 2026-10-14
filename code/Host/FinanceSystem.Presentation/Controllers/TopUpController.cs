@@ -1,4 +1,3 @@
-using Microsoft.Extensions.Options;
 using FinanceSystem.Interface.Contracts.Payments.Models;
 using FinanceSystem.Interface.Contracts.Payments.Services;
 
@@ -7,9 +6,7 @@ namespace FinanceSystem.Presentation.Controllers;
 [Route("api/topup")]
 [ApiController]
 //[Authorize]
-public class TopUpController(
-    ITopUpFacadeService facadeService,
-    IOptions<TopUpResultPage> resultPage) : ControllerBase
+public class TopUpController(ITopUpFacadeService facadeService) : ControllerBase
 {
     [HttpPost("request")]
     public async Task<JsonResponse<string>> TopUp(TopUpModel model, CancellationToken cancellationToken = default)
@@ -26,6 +23,6 @@ public class TopUpController(
 
         var response = await facadeService.CompleteTopUpProcess(psp, fields, cancellationToken);
 
-        return Redirect($"{resultPage.Value.Url}?status={response.Data}");
+        return response.Status ? Redirect(response.Data) : BadRequest(response);
     }
 }

@@ -23,25 +23,24 @@ public class PaymentTests
         payment.Purpose.Should().Be(PaymentBuilder.DefaultPurpose);
         payment.Channel.Should().Be(PaymentBuilder.DefaultChannel);
         payment.Amount.Should().Be(PaymentBuilder.DefaultAmount);
-        payment.SourceFinanceAccountId.Should().Be(PaymentBuilder.DefaultSourceFinanceAccountId);
-        payment.DestinationFinanceAccountId.Should().Be(PaymentBuilder.DefaultDestinationFinanceAccountId);
-        payment.ExternalServiceId.Should().Be(PaymentBuilder.DefaultExternalServiceId);
-        payment.ExternalReferenceId.Should().Be(PaymentBuilder.DefaultExternalReferenceId);
-        payment.ExternalTag.Should().Be(PaymentBuilder.DefaultExternalTag);
+        payment.FinanceAccountId.Should().Be(PaymentBuilder.DefaultFinanceAccountId);
+        payment.Direction.Should().Be(PaymentBuilder.DefaultDirection);
+        payment.ServiceId.Should().Be(PaymentBuilder.DefaultServiceId);
+        payment.ReferenceId.Should().Be(PaymentBuilder.DefaultReferenceId);
         payment.State.Should().Be(PaymentState.Initiated);
         payment.PspCode.Should().BeNull();
         payment.Publisher.Should().BeSameAs(_builder.EventPublisher);
     }
 
     [Fact]
-    public async Task Create_should_publish_paymentCreatedEvent_carrying_externalReferenceId()
+    public async Task Create_should_publish_paymentCreatedEvent_carrying_referenceId()
     {
         await _builder.Build();
 
         await _builder.EventPublisher
             .Received(1)
             .Publish(Arg.Is<PaymentCreatedEvent>(e =>
-                e.ExternalReferenceId == PaymentBuilder.DefaultExternalReferenceId));
+                e.ReferenceId == PaymentBuilder.DefaultReferenceId));
     }
 
     [Theory]
@@ -83,65 +82,43 @@ public class PaymentTests
     [Theory]
     [InlineData(0)]
     [InlineData(-1)]
-    public async Task Create_should_throw_when_sourceFinanceAccountId_is_not_positive(long sourceFinanceAccountId)
+    public async Task Create_should_throw_when_financeAccountId_is_not_positive(long financeAccountId)
     {
-        Func<Task> act = () => _builder.WithSourceFinanceAccountId(sourceFinanceAccountId).Build();
+        Func<Task> act = () => _builder.WithFinanceAccountId(financeAccountId).Build();
 
-        await act.Should().ThrowAsync<InvalidSourceFinanceAccountIdException>();
+        await act.Should().ThrowAsync<InvalidFinanceAccountIdException>();
     }
 
     [Theory]
-    [InlineData(0)]
-    [InlineData(-1)]
-    public async Task Create_should_throw_when_destinationFinanceAccountId_is_not_positive(long destinationFinanceAccountId)
+    [InlineData((PaymentDirection)0)]
+    [InlineData((PaymentDirection)99)]
+    public async Task Create_should_throw_when_direction_is_not_defined(PaymentDirection direction)
     {
-        Func<Task> act = () => _builder.WithDestinationFinanceAccountId(destinationFinanceAccountId).Build();
+        Func<Task> act = () => _builder.WithDirection(direction).Build();
 
-        await act.Should().ThrowAsync<InvalidDestinationFinanceAccountIdException>();
-    }
-
-    [Fact]
-    public async Task Create_should_throw_when_source_and_destination_finance_accounts_are_the_same()
-    {
-        Func<Task> act = () => _builder
-            .WithSourceFinanceAccountId(PaymentBuilder.DefaultSourceFinanceAccountId)
-            .WithDestinationFinanceAccountId(PaymentBuilder.DefaultSourceFinanceAccountId)
-            .Build();
-
-        await act.Should().ThrowAsync<SameSourceAndDestinationFinanceAccountException>();
+        await act.Should().ThrowAsync<InvalidPaymentDirectionException>();
     }
 
     [Theory]
     [InlineData("")]
     [InlineData("   ")]
     [InlineData(null)]
-    public async Task Create_should_throw_when_externalServiceId_is_null_or_empty_or_whiteSpace(string? externalServiceId)
+    public async Task Create_should_throw_when_serviceId_is_null_or_empty_or_whiteSpace(string? serviceId)
     {
-        Func<Task> act = () => _builder.WithExternalServiceId(externalServiceId).Build();
+        Func<Task> act = () => _builder.WithServiceId(serviceId).Build();
 
-        await act.Should().ThrowAsync<InvalidExternalServiceIdException>();
+        await act.Should().ThrowAsync<InvalidServiceIdException>();
     }
 
     [Theory]
     [InlineData("")]
     [InlineData("   ")]
     [InlineData(null)]
-    public async Task Create_should_throw_when_externalReferenceId_is_null_or_empty_or_whiteSpace(string? externalReferenceId)
+    public async Task Create_should_throw_when_referenceId_is_null_or_empty_or_whiteSpace(string? referenceId)
     {
-        Func<Task> act = () => _builder.WithExternalReferenceId(externalReferenceId).Build();
+        Func<Task> act = () => _builder.WithReferenceId(referenceId).Build();
 
-        await act.Should().ThrowAsync<InvalidExternalReferenceIdException>();
-    }
-
-    [Theory]
-    [InlineData("")]
-    [InlineData("   ")]
-    [InlineData(null)]
-    public async Task Create_should_throw_when_externalTag_is_null_or_empty_or_whiteSpace(string? externalTag)
-    {
-        Func<Task> act = () => _builder.WithExternalTag(externalTag).Build();
-
-        await act.Should().ThrowAsync<InvalidExternalTagException>();
+        await act.Should().ThrowAsync<InvalidReferenceIdException>();
     }
 
     [Fact]
@@ -249,7 +226,7 @@ public class PaymentTests
         await _builder.EventPublisher
             .Received(1)
             .Publish(Arg.Is<PspTokenReceivedEvent>(e =>
-                e.ExternalReferenceId == PaymentBuilder.DefaultExternalReferenceId &&
+                e.ReferenceId == PaymentBuilder.DefaultReferenceId &&
                 e.IpgUrl == "https://ipg.example/pay"));
     }
 
@@ -281,7 +258,7 @@ public class PaymentTests
         await _builder.EventPublisher
             .Received(1)
             .Publish(Arg.Is<PaymentTokenRequestFailedEvent>(e =>
-                e.ExternalReferenceId == PaymentBuilder.DefaultExternalReferenceId));
+                e.ReferenceId == PaymentBuilder.DefaultReferenceId));
     }
 
     [Fact]
@@ -377,7 +354,7 @@ public class PaymentTests
         await _builder.EventPublisher
             .Received(1)
             .Publish(Arg.Is<PaymentFailedEvent>(e =>
-                e.ExternalReferenceId == PaymentBuilder.DefaultExternalReferenceId));
+                e.ReferenceId == PaymentBuilder.DefaultReferenceId));
     }
 
     [Fact]
@@ -435,7 +412,7 @@ public class PaymentTests
         await _builder.EventPublisher
             .Received(1)
             .Publish(Arg.Is<PaymentSucceededEvent>(e =>
-                e.ExternalReferenceId == PaymentBuilder.DefaultExternalReferenceId));
+                e.ReferenceId == PaymentBuilder.DefaultReferenceId));
     }
 
     [Fact]
@@ -460,7 +437,7 @@ public class PaymentTests
         await _builder.EventPublisher
             .Received(1)
             .Publish(Arg.Is<PaymentReversedEvent>(e =>
-                e.ExternalReferenceId == PaymentBuilder.DefaultExternalReferenceId));
+                e.ReferenceId == PaymentBuilder.DefaultReferenceId));
     }
 
     [Fact]
