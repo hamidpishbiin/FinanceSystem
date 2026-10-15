@@ -2,7 +2,7 @@ using FinanceSystem.Domain.PaymentServiceProviders;
 
 namespace FinanceSystem.Persistance.Mappings;
 
-public class PaymentServiceProviderMapping() : EntityBaseMap<PaymentServiceProvider, Guid>("PaymentServiceProviders")
+public class PaymentServiceProviderMapping() : EntityBaseMap<PaymentServiceProvider, long>("PaymentServiceProviders")
 {
     override protected void ConfigureMap(EntityTypeBuilder<PaymentServiceProvider> builder)
     {
@@ -10,7 +10,8 @@ public class PaymentServiceProviderMapping() : EntityBaseMap<PaymentServiceProvi
 
         builder
             .Property(p => p.Id)
-            .HasColumnName("Id");
+            .HasColumnName("Id")
+            .ValueGeneratedOnAdd();
 
         builder
             .Property(p => p.Code)

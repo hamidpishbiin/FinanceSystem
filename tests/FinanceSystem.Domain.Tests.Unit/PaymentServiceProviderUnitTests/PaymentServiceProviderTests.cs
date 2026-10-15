@@ -1,7 +1,6 @@
 using FinanceSystem.Domain.PaymentServiceProviders.Enums;
 using FinanceSystem.Domain.PaymentServiceProviders.Exceptions;
 using FluentAssertions;
-using Shared.Domain.Exceptions;
 
 namespace FinanceSystem.Domain.Tests.Unit.PaymentServiceProviderUnitTests;
 
@@ -14,19 +13,10 @@ public class PaymentServiceProviderTests
     {
         var psp = _builder.Build();
 
-        psp.Id.Should().Be(PaymentServiceProviderBuilder.DefaultId);
         psp.Code.Should().Be(PaymentServiceProviderBuilder.DefaultCode);
         psp.Name.Should().Be(PaymentServiceProviderBuilder.DefaultName);
         psp.IsActive.Should().Be(PaymentServiceProviderBuilder.DefaultIsActive);
         psp.Priority.Should().Be(PaymentServiceProviderBuilder.DefaultPriority);
-    }
-
-    [Fact]
-    public void Create_should_throw_when_id_is_empty_guid()
-    {
-        Action act = () => _builder.WithId(Guid.Empty).Build();
-
-        act.Should().Throw<InvalidIdException>();
     }
 
     [Theory]

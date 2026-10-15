@@ -31,10 +31,12 @@ public class FinanceAccountTests
         financeAccount.AllowNegativeBalance.Should().Be(FinanceAccountBuilder.DefaultAllowNegativeBalance);
     }
 
-    [Fact]
-    public void Create_should_throw_when_userId_is_empty_guid()
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-1)]
+    public void Create_should_throw_when_userId_is_not_positive(long userId)
     {
-        Action act = () => _financeAccountBuilder.WithUserId(Guid.Empty).Build();
+        Action act = () => _financeAccountBuilder.WithUserId(userId).Build();
 
         act.Should().Throw<InvalidIdException>();
     }

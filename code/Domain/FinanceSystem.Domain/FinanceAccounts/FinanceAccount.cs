@@ -12,7 +12,7 @@ public class FinanceAccount : EntityBase<long>
 {
     public FinanceAccountType Type { get; private set; }
     public FinanceAccountStatus Status { get; private set; }
-    public Guid UserId { get; private set; }
+    public long UserId { get; private set; }
     public decimal CachedBalance { get; private set; }
     public DateTimeOffset BalanceCalculatedAt { get; private set; }
     public bool AllowNegativeBalance { get; private set; }
@@ -24,12 +24,12 @@ public class FinanceAccount : EntityBase<long>
     public FinanceAccount(
         FinanceAccountType type,
         FinanceAccountStatus status,
-        Guid userId,
+        long userId,
         Money cachedBalance,
         DateTimeOffset balanceCalculatedAt,
         bool allowNegativeBalance)
     {
-        Guard<InvalidIdException>.IsTrue(userId == Guid.Empty);
+        Guard<InvalidIdException>.IsTrue(userId <= 0);
         Guard<NullEntryException>.AgainstNull(cachedBalance);
 
         Type = type;

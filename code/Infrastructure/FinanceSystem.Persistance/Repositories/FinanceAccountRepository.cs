@@ -7,7 +7,7 @@ public class FinanceAccountRepository(IDbContext dbContext) : IFinanceAccountRep
 {
     private DbSet<FinanceAccount> DbSet => dbContext.DbSet<FinanceAccount>();
 
-    public async Task<FinanceAccount?> GetByUserId(Guid userId, CancellationToken cancellationToken)
+    public async Task<FinanceAccount?> GetByUserId(long userId, CancellationToken cancellationToken)
     {
         return await DbSet.FirstOrDefaultAsync(fa => fa.UserId == userId, cancellationToken);
     }
@@ -17,7 +17,7 @@ public class FinanceAccountRepository(IDbContext dbContext) : IFinanceAccountRep
         return await DbSet.FirstOrDefaultAsync(fa => fa.Id == id, cancellationToken);
     }
 
-    public async Task<FinanceAccount?> GetTopUpTargetAccountAsync(Guid userId, CancellationToken cancellationToken)
+    public async Task<FinanceAccount?> GetTopUpTargetAccountAsync(long userId, CancellationToken cancellationToken)
     {
         return await DbSet
             .FirstOrDefaultAsync(fa =>

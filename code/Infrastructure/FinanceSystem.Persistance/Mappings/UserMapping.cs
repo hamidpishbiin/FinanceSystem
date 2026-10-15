@@ -2,7 +2,7 @@ using FinanceSystem.Domain.Users;
 
 namespace FinanceSystem.Persistance.Mappings;
 
-public class UserMapping() : EntityBaseMap<User, Guid>("Users")
+public class UserMapping() : EntityBaseMap<User, long>("Users")
 {
     override protected void ConfigureMap(EntityTypeBuilder<User> builder)
     {
@@ -11,7 +11,7 @@ public class UserMapping() : EntityBaseMap<User, Guid>("Users")
         builder
             .Property(p => p.Id)
             .HasColumnName("Id")
-            .ValueGeneratedNever();
+            .ValueGeneratedOnAdd();
 
         builder
             .Property(p => p.FirstName)

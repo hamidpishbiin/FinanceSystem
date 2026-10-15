@@ -5,15 +5,11 @@ namespace FinanceSystem.Domain.Tests.Unit.PaymentServiceProviderUnitTests;
 
 public class PaymentServiceProviderBuilder
 {
-    public const string DefaultIdString = "9f1d2c3b-4a5e-6f70-8192-a3b4c5d6e7f8";
     public const PspCode DefaultCode = PspCode.Saman;
     public const string DefaultName = "Saman Bank Gateway";
     public const bool DefaultIsActive = true;
     public const short DefaultPriority = 10;
 
-    public static readonly Guid DefaultId = Guid.Parse(DefaultIdString);
-
-    private Guid Id { get; set; } = DefaultId;
     private PspCode Code { get; set; } = DefaultCode;
     private string Name { get; set; } = DefaultName;
     private bool IsActive { get; set; } = DefaultIsActive;
@@ -22,17 +18,10 @@ public class PaymentServiceProviderBuilder
     public PaymentServiceProvider Build()
     {
         return new PaymentServiceProvider(
-            Id,
             Code,
             Name,
             IsActive,
             Priority);
-    }
-
-    public PaymentServiceProviderBuilder WithId(Guid id)
-    {
-        Id = id;
-        return this;
     }
 
     public PaymentServiceProviderBuilder WithCode(PspCode code)

@@ -70,7 +70,7 @@ namespace FinanceSystem.Security
         {
             var userIdClaim = context.Principal?.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            if (!Guid.TryParse(userIdClaim, out var userId))
+            if (!long.TryParse(userIdClaim, out var userId))
             {
                 context.Fail("Token does not contain a valid user id.");
                 return;

@@ -1,9 +1,8 @@
 using FinanceSystem.Domain.Users.Exceptions;
-using Shared.Domain.Exceptions;
 
 namespace FinanceSystem.Domain.Users;
 
-public class User : EntityBase<Guid>
+public class User : EntityBase<long>
 {
     private const int NationalCodeLength = 10;
 
@@ -17,19 +16,16 @@ public class User : EntityBase<Guid>
     }
 
     public User(
-        Guid id,
         string firstName,
         string lastName,
         string phoneNumber,
         string nationalCode)
     {
-        Guard<InvalidIdException>.IsTrue(id == Guid.Empty);
         Guard<InvalidFirstNameException>.AgainstNullOrEmpty(firstName);
         Guard<InvalidLastNameException>.AgainstNullOrEmpty(lastName);
         Guard<InvalidPhoneNumberException>.AgainstNullOrEmpty(phoneNumber);
         Guard<InvalidNationalCodeException>.IsFalse(IsValidNationalCode(nationalCode));
 
-        Id = id;
         FirstName = firstName;
         LastName = lastName;
         PhoneNumber = phoneNumber;

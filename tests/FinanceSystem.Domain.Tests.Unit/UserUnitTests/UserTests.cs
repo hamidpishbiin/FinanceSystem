@@ -1,6 +1,5 @@
 using FinanceSystem.Domain.Users.Exceptions;
 using FluentAssertions;
-using Shared.Domain.Exceptions;
 
 namespace FinanceSystem.Domain.Tests.Unit.UserUnitTests;
 
@@ -13,19 +12,10 @@ public class UserTests
     {
         var user = _builder.Build();
 
-        user.Id.Should().Be(UserBuilder.DefaultId);
         user.FirstName.Should().Be(UserBuilder.DefaultFirstName);
         user.LastName.Should().Be(UserBuilder.DefaultLastName);
         user.PhoneNumber.Should().Be(UserBuilder.DefaultPhoneNumber);
         user.NationalCode.Should().Be(UserBuilder.DefaultNationalCode);
-    }
-
-    [Fact]
-    public void Create_should_throw_when_id_is_empty_guid()
-    {
-        Action act = () => _builder.WithId(Guid.Empty).Build();
-
-        act.Should().Throw<InvalidIdException>();
     }
 
     [Theory]

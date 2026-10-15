@@ -1,10 +1,9 @@
 using FinanceSystem.Domain.PaymentServiceProviders.Enums;
 using FinanceSystem.Domain.PaymentServiceProviders.Exceptions;
-using Shared.Domain.Exceptions;
 
 namespace FinanceSystem.Domain.PaymentServiceProviders;
 
-public class PaymentServiceProvider : EntityBase<Guid>
+public class PaymentServiceProvider : EntityBase<long>
 {
     public PspCode Code { get; private set; }
     public string Name { get; private set; } = default!;
@@ -16,18 +15,15 @@ public class PaymentServiceProvider : EntityBase<Guid>
     }
 
     public PaymentServiceProvider(
-        Guid id,
         PspCode code,
         string name,
         bool isActive,
         short priority)
     {
-        Guard<InvalidIdException>.IsTrue(id == Guid.Empty);
         Guard<InvalidPspCodeException>.IsFalse(Enum.IsDefined(code));
         Guard<InvalidPspNameException>.AgainstNullOrEmpty(name);
         Guard<InvalidPriorityException>.IsTrue(priority < 0);
 
-        Id = id;
         Code = code;
         Name = name;
         IsActive = isActive;

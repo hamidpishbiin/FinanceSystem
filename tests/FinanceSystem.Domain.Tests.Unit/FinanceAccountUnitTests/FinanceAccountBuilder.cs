@@ -9,16 +9,15 @@ public class FinanceAccountBuilder
 {
     public const FinanceAccountType DefaultType = FinanceAccountType.UserWallet;
     public const FinanceAccountStatus DefaultStatus = FinanceAccountStatus.Active;
-    public const string DefaultUserIdString = "3c9a7e21-5b4d-4f8e-9a1c-2d6e8f0b7a45";
     public const decimal DefaultCachedBalance = 300;
     public static readonly DateTimeOffset DefaultBalanceCalculatedAt = new(2026, 08, 09, 0, 0, 0, TimeSpan.Zero);
     public const bool DefaultAllowNegativeBalance = false;
 
-    public static readonly Guid DefaultUserId = Guid.Parse(DefaultUserIdString);
+    public const long DefaultUserId = 1;
 
     private FinanceAccountType Type { get; set; } = DefaultType;
     private FinanceAccountStatus Status { get; set; } = DefaultStatus;
-    private Guid UserId { get; set; } = DefaultUserId;
+    private long UserId { get; set; } = DefaultUserId;
     private Money CachedAmount { get; set; } = new(DefaultCachedBalance);
     private DateTimeOffset BalanceCalculatedAt { get; set; } = DefaultBalanceCalculatedAt;
     private bool AllowNegativeBalance { get; set; } = DefaultAllowNegativeBalance;
@@ -46,7 +45,7 @@ public class FinanceAccountBuilder
         return this;
     }
 
-    public FinanceAccountBuilder WithUserId(Guid userId)
+    public FinanceAccountBuilder WithUserId(long userId)
     {
         UserId = userId;
         return this;

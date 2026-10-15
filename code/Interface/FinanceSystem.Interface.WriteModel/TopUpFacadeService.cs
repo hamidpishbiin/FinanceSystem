@@ -56,7 +56,7 @@ public class TopUpFacadeService(
         {
             Amount = model.Amount,
             PspCode = model.PspCode,
-            UserId = Guid.Parse(userResolver.GetUserId())
+            UserId = long.Parse(userResolver.GetUserId())
         }, cancellationToken);
 
         if (tokenRequestFailed)
