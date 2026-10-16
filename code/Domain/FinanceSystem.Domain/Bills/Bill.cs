@@ -4,8 +4,6 @@ using FinanceSystem.Domain.FinanceAccounts.Exceptions;
 using FinanceSystem.Domain.Payments;
 using FinanceSystem.Domain.Payments.Exceptions;
 using Shared.Domain.Exceptions;
-using InvalidReferenceIdException = FinanceSystem.Domain.Bills.Exceptions.InvalidReferenceIdException;
-using InvalidServiceIdException = FinanceSystem.Domain.Payments.Exceptions.InvalidServiceIdException;
 
 namespace FinanceSystem.Domain.Bills;
 
@@ -27,7 +25,7 @@ public class Bill : EntityBase<long>, IAggregateRoot
         Money amount)
     {
         Guard<InvalidReferenceIdException>.IsTrue(referenceId <= 0);
-        Guard<Exceptions.InvalidServiceIdException>.IsTrue(serviceId <= 0);
+        Guard<InvalidServiceIdException>.IsTrue(serviceId <= 0);
         Guard<InvalidFinanceAccountIdException>.IsTrue(financeAccountId <= 0);
         Guard<NullEntryException>.AgainstNull(amount);
         Guard<InvalidMoneyAmountException>.IsTrue(amount.Value == 0);

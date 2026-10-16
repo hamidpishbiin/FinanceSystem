@@ -1,3 +1,4 @@
+using FinanceSystem.Domain.FinanceAccounts.Exceptions;
 using FinanceSystem.Domain.AccountEntries.Enums;
 using FinanceSystem.Domain.AccountEntries.Exceptions;
 using FinanceSystem.Domain.FinanceAccounts;
@@ -32,7 +33,7 @@ public class AccountEntry : EntityBase<long>
         Guard<InvalidPaymentIdException>.IsTrue(paymentId <= 0);
         Guard<InvalidFinanceAccountIdException>.IsTrue(financeAccountId <= 0);
         Guard<NullEntryException>.AgainstNull(amount);
-        Guard<InvalidAmountException>.IsTrue(amount.Value == 0);
+        Guard<InvalidMoneyAmountException>.IsTrue(amount.Value == 0);
         Guard<InvalidEntryDirectionException>.IsFalse(Enum.IsDefined(direction));
 
         PaymentId = paymentId;

@@ -1,3 +1,4 @@
+using FinanceSystem.Domain.FinanceAccounts.Exceptions;
 using FinanceSystem.Domain.AccountEntries.Enums;
 using FinanceSystem.Domain.AccountEntries.Exceptions;
 using FinanceSystem.Domain.Payments;
@@ -72,7 +73,7 @@ public class AccountEntryTests
     {
         Action act = () => _builder.WithAmount(new Money(0)).Build();
 
-        act.Should().Throw<InvalidAmountException>();
+        act.Should().Throw<InvalidMoneyAmountException>();
     }
 
     [Theory]

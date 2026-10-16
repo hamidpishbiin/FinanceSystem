@@ -2,7 +2,6 @@ namespace FinanceSystem.Domain.Payments.Exceptions;
 
 public static class PaymentExceptionCodes
 {
-    public const int InvalidFinanceAccountId = 201;
     public const int InvalidPaymentAmount = 204;
     public const int InvalidServiceId = 205;
     public const int InvalidReferenceId = 206;

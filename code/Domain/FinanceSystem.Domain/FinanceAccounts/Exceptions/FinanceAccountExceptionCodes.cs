@@ -8,4 +8,5 @@ public static class FinanceAccountExceptionCodes
     public const int FinanceAccountDirectionNotAllowed = 303;
     public const int InsufficientBalance = 304;
     public const int FinanceAccountNotFound = 306;
+    public const int InvalidFinanceAccountId = 307;
 }

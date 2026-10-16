@@ -5,6 +5,5 @@ public static class PspExceptionCodes
     public const int InvalidPspCode = 800;
     public const int InvalidPspName = 801;
     public const int InvalidPriority = 805;
-    public const int InvalidToken = 806;
     public const int PspNotAvailable = 807;
 }

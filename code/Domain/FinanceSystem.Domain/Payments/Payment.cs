@@ -1,3 +1,4 @@
+using FinanceSystem.Domain.FinanceAccounts.Exceptions;
 using FinanceSystem.Domain.Contract.Payments;
 using FinanceSystem.Domain.FinanceAccounts;
 using FinanceSystem.Domain.PaymentServiceProviders;

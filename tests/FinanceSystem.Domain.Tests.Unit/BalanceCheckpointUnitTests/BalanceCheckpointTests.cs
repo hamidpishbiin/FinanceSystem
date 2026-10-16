@@ -1,3 +1,4 @@
+using FinanceSystem.Domain.FinanceAccounts.Exceptions;
 using FinanceSystem.Domain.BalanceCheckpoints.Exceptions;
 using FinanceSystem.Domain.Payments;
 using FinanceSystem.Domain.Payments.Enums;

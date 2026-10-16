@@ -1,9 +1,8 @@
+using FinanceSystem.Domain.FinanceAccounts.Exceptions;
 using FinanceSystem.Domain.Payments;
 using FinanceSystem.Domain.Payments.Exceptions;
 using FluentAssertions;
 using Shared.Domain.Exceptions;
-using InvalidReferenceIdException = FinanceSystem.Domain.Bills.Exceptions.InvalidReferenceIdException;
-using InvalidServiceIdException = FinanceSystem.Domain.Bills.Exceptions.InvalidServiceIdException;
 
 namespace FinanceSystem.Domain.Tests.Unit.BillUnitTests;
 

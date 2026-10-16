@@ -1,3 +1,4 @@
+using FinanceSystem.Domain.FinanceAccounts.Exceptions;
 using FinanceSystem.Domain.BankAccountDetails.Exceptions;
 using FinanceSystem.Domain.FinanceAccounts;
 
