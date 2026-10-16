@@ -26,4 +26,17 @@ public class FinanceAccountRepository(IDbContext dbContext) : IFinanceAccountRep
                 fa.Status != FinanceAccountStatus.InboundFrozen,
                 cancellationToken);
     }
+
+    public async Task<FinanceAccount?> GetTargetAccount(long userId,
+        FinanceAccountType accountType,
+        List<FinanceAccountStatus> accountStatusList,
+        CancellationToken cancellationToken)
+    {
+        return await DbSet
+            .FirstOrDefaultAsync(fa =>
+                    fa.UserId == userId &&
+                    fa.Type == accountType &&
+                    accountStatusList.Contains(fa.Status),
+                cancellationToken);
+    }
 }
