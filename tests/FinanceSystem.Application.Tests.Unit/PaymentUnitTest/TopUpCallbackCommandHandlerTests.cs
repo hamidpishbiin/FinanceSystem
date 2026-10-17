@@ -161,7 +161,7 @@ public class TopUpCallbackCommandHandlerTests
     public async Task Handle_should_throw_and_leave_payment_unchanged_when_reference_number_is_already_used()
     {
         var payment = await ArrangePaymentWithToken();
-        var otherPayment = await new PaymentBuilder().Build();
+        var otherPayment = new PaymentBuilder().BuildTopUp();
         _paymentRepository.GetByReferenceNumberAsync(ReferenceNumber, Arg.Any<CancellationToken>()).Returns(otherPayment);
 
         Func<Task> act = () => _handler.Handle(MakeCommand());
@@ -224,13 +224,11 @@ public class TopUpCallbackCommandHandlerTests
         await AssertOutcome(TopUpOutcome.Success);
     }
 
-    private async Task<Payment> ArrangePayment()
+    private Payment ArrangePayment()
     {
-        var payment = await new PaymentBuilder()
-            .WithPurpose(PaymentPurpose.TopUp)
-            .WithChannel(PaymentChannel.Psp)
+        var payment = new PaymentBuilder()
             .WithPspCode(PspCode.Saman)
-            .Build();
+            .BuildTopUp();
         SetId(payment, PaymentId);
 
         _paymentRepository.GetByIdAsync(PaymentId, Arg.Any<CancellationToken>()).Returns(payment);
@@ -240,7 +238,7 @@ public class TopUpCallbackCommandHandlerTests
 
     private async Task<Payment> ArrangePaymentWithToken()
     {
-        var payment = await ArrangePayment();
+        var payment = ArrangePayment();
         await payment.MarkTokenReceived(Token, "https://ipg.example/pay");
         return payment;
     }

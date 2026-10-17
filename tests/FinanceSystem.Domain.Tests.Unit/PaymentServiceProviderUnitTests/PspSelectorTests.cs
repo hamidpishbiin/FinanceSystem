@@ -23,18 +23,19 @@ public class PspSelectorTests
         var inactivePsp = new PaymentServiceProviderBuilder().WithIsActive(false).Build();
         _repository.GetByCodeAsync(PspCode.Saman, Arg.Any<CancellationToken>()).Returns(inactivePsp);
 
-        Func<Task> act = () => _selector.SelectAsync(PspCode.Saman, CancellationToken.None);
+        Func<Task> act = () => _selector.SelectAsync((int)PspCode.Saman, CancellationToken.None);
 
         await act.Should().ThrowAsync<PspNotAvailableException>();
     }
 
-    [Fact]
-    public async Task SelectAsync_should_return_highest_priority_active_psp_when_no_code_is_requested()
+    [Theory]
+    [InlineData(100)]
+    public async Task SelectAsync_should_return_highest_priority_active_psp_when_invalid_pspCode_is_sent(int pspCode)
     {
         var psp = new PaymentServiceProviderBuilder().WithCode(PspCode.BehPardakht).Build();
         _repository.GetHighPriorityActiveAsync(Arg.Any<CancellationToken>()).Returns(psp);
 
-        var selected = await _selector.SelectAsync(null, CancellationToken.None);
+        var selected = await _selector.SelectAsync(pspCode, CancellationToken.None);
 
         selected.Should().BeSameAs(psp);
         await _repository.DidNotReceive().GetByCodeAsync(Arg.Any<PspCode>(), Arg.Any<CancellationToken>());
@@ -45,7 +46,7 @@ public class PspSelectorTests
     {
         _repository.GetHighPriorityActiveAsync(Arg.Any<CancellationToken>()).Returns((PaymentServiceProvider?)null);
 
-        Func<Task> act = () => _selector.SelectAsync(null, CancellationToken.None);
+        Func<Task> act = () => _selector.SelectAsync(100, CancellationToken.None);
 
         await act.Should().ThrowAsync<PspNotAvailableException>();
     }

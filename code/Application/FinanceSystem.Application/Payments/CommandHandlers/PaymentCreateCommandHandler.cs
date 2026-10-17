@@ -19,17 +19,6 @@ public class PaymentCreateCommandHandler : PaymentCommandHandler<CreatePaymentCo
 
     public override async Task Execute(CreatePaymentCommand command, CancellationToken cancellationToken = default)
     {
-        var model = await Payment.Create(
-            (PaymentPurpose)command.Purpose,
-            (PaymentChannel)command.Channel,
-            new Money(command.Amount),
-            command.FinanceAccountId,
-            (PaymentDirection)command.Direction,
-            command.ServiceId,
-            command.ReferenceId,
-            (PspCode?)command.PspCode,
-            Publisher);
-
-        await Repository.AddAsync(model);
+        throw new NotImplementedException();
     }
 }

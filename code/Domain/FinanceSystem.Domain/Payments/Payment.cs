@@ -24,6 +24,7 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
     public PaymentDirection Direction { get; private set; }
     public string ServiceId { get; private set; }
     public string ReferenceId { get; private set; }
+    public long? BillId { get; private set; }
     public PspCode? PspCode { get; private set; }
     public string? Token { get; private set; }
     public string? RRN { get; private set; }
@@ -44,7 +45,7 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
 
     }
 
-    public static async Task<Payment> Create(
+    private Payment(
         PaymentPurpose purpose,
         PaymentChannel channel,
         Money amount,
@@ -52,6 +53,7 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
         PaymentDirection direction,
         string serviceId,
         string referenceId,
+        long? billId,
         PspCode? pspCode,
         IEventPublisher eventPublisher)
     {
@@ -61,7 +63,7 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
         Guard<NullEntryException>.AgainstNull(amount);
         Guard<InvalidPaymentAmountException>.IsTrue(amount.Value == 0);
 
-        Guard<InvalidFinanceAccountIdException>.IsTrue(financeAccountId <= 0); // FinanceAccount validity should be checked by a domain service
+        Guard<InvalidFinanceAccountIdException>.IsTrue(financeAccountId <= 0);
         Guard<InvalidPaymentDirectionException>.IsTrue(!Enum.IsDefined(direction));
 
         Guard<InvalidServiceIdException>.AgainstNullOrEmpty(serviceId);
@@ -73,26 +75,42 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
 
         Guard<NullEntryException>.AgainstNull(eventPublisher);
 
-        var payment = new Payment()
-        {
-            Purpose = purpose,
-            Channel = channel,
-            State = PaymentState.Initiated,
-            Amount = amount.Value,
-            FinanceAccountId = financeAccountId,
-            Direction = direction,
-            ServiceId = serviceId,
-            ReferenceId = referenceId,
-            PspCode = pspCode,
-            Publisher = eventPublisher
-        };
-
-        await eventPublisher.Publish(new PaymentCreatedEvent(payment.ReferenceId));
-
-        return payment;
+        Purpose = purpose;
+        Channel = channel;
+        State = PaymentState.Initiated;
+        Amount = amount.Value;
+        FinanceAccountId = financeAccountId;
+        Direction = direction;
+        ServiceId = serviceId;
+        ReferenceId = referenceId;
+        BillId = billId;
+        PspCode = pspCode;
+        Publisher = eventPublisher;
     }
 
-    public static async Task<Payment> CreateTopUpPayment(
+    public static Payment CreatePspPurchasePayment(
+        Money amount,
+        long financeAccountId,
+        string serviceId,
+        string referenceId,
+        long billId,
+        PspCode pspCode,
+        IEventPublisher eventPublisher)
+    {
+        return new Payment(
+            PaymentPurpose.Purchase,
+            PaymentChannel.Psp,
+            amount,
+            financeAccountId,
+            PaymentDirection.Inbound,
+            serviceId,
+            referenceId,
+            billId,
+            pspCode,
+            eventPublisher);
+    }
+
+    public static Payment CreateTopUpPayment(
         Money amount,
         long financeAccountId,
         string serviceId,
@@ -100,35 +118,17 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
         PspCode pspCode,
         IEventPublisher eventPublisher)
     {
-        Guard<NullEntryException>.AgainstNull(amount);
-        Guard<InvalidPaymentAmountException>.IsTrue(amount.Value == 0);
-
-        Guard<InvalidFinanceAccountIdException>.IsTrue(financeAccountId <= 0);
-
-        Guard<InvalidServiceIdException>.AgainstNullOrEmpty(serviceId);
-        Guard<InvalidReferenceIdException>.AgainstNullOrEmpty(referenceId);
-
-        Guard<InvalidPspCodeException>.IsTrue(!Enum.IsDefined(pspCode));
-
-        Guard<NullEntryException>.AgainstNull(eventPublisher);
-
-        var payment = new Payment()
-        {
-            Purpose = PaymentPurpose.TopUp,
-            Channel = PaymentChannel.Psp,
-            State = PaymentState.Initiated,
-            Direction = PaymentDirection.Inbound,
-            Amount = amount.Value,
-            FinanceAccountId = financeAccountId,
-            ServiceId = serviceId,
-            ReferenceId = referenceId,
-            PspCode = pspCode,
-            Publisher = eventPublisher
-        };
-
-        await eventPublisher.Publish(new PaymentCreatedEvent(payment.ReferenceId));
-
-        return payment;
+        return new Payment(
+            PaymentPurpose.TopUp,
+            PaymentChannel.Psp,
+            amount,
+            financeAccountId,
+            PaymentDirection.Inbound,
+            serviceId,
+            referenceId,
+            null,
+            pspCode,
+            eventPublisher);
     }
 
     public async Task MarkTokenRequestFailed(

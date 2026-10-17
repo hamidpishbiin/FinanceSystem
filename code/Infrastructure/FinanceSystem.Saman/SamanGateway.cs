@@ -38,7 +38,7 @@ internal class SamanGateway : IPspGateway
                 redirectUrl = _settings.TopUpCallBackUrl,
                 terminalId = _settings.TerminalId,
                 amount = request.Amount,
-                resNum = request.ReferenceNumber
+                resNum = request.ReservationNumber
             };
 
             var httpClient = _httpClientFactory.CreateClient(nameof(PspCode.Saman));
@@ -59,7 +59,7 @@ internal class SamanGateway : IPspGateway
             return new PspTokenResponse()
             {
                 IsSuccess = isSamanResponseSuccess,
-                PaymentToken = samanResponse.Token,
+                Token = samanResponse.Token,
                 IpgUrl = $"{_settings.BaseUrl}/OnlinePG/SendToken?token={samanResponse.Token}",
                 Status = samanResponse.Status.ToString(),
                 StatusCode = samanResponse.ErrorCode,

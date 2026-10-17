@@ -4,6 +4,6 @@ namespace FinanceSystem.Application.Payments.Gateways;
 public class PspTokenRequest()
 {
     public required decimal Amount { get; set; }
-    public required long ReferenceNumber { get; set; }
+    public required long ReservationNumber { get; set; }
     public string? AdditionalData { get; set; }
 }

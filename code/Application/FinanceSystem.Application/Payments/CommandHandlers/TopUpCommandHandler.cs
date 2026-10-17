@@ -38,9 +38,9 @@ public class TopUpCommandHandler(
 
         var amount = new Money(command.Amount);
 
-        var psp = await pspSelector.SelectAsync((PspCode?)command.PspCode, cancellationToken);
+        var psp = await pspSelector.SelectAsync(command.PspCode!.Value, cancellationToken);
 
-        var payment = await Payment.CreateTopUpPayment(
+        var payment = Payment.CreateTopUpPayment(
             amount,
             userFinanceAccount!.Id,
             _serviceId,
@@ -57,7 +57,7 @@ public class TopUpCommandHandler(
         var pspTokenRequest = new PspTokenRequest()
         {
             Amount = amount.Value,
-            ReferenceNumber = payment.Id,
+            ReservationNumber = payment.Id,
         };
 
         var paymentTokenResponse = await pspGateway.RequestPaymentTokenAsync(pspTokenRequest, cancellationToken);
@@ -65,7 +65,7 @@ public class TopUpCommandHandler(
         if (paymentTokenResponse.IsSuccess)
         {
             await payment.MarkTokenReceived(
-                paymentTokenResponse.PaymentToken,
+                paymentTokenResponse.Token,
                 paymentTokenResponse.IpgUrl);
         }
         else

@@ -1,3 +1,4 @@
+using FinanceSystem.Domain.Bills;
 using FinanceSystem.Domain.FinanceAccounts;
 using FinanceSystem.Domain.Payments;
 
@@ -48,6 +49,22 @@ public class PaymentMapping() : EntityBaseMap<Payment, long>("Payments")
             .IsRequired()
             .HasMaxLength(50)
             .HasColumnName("ReferenceId");
+
+        builder
+            .Property(p => p.BillId)
+            .HasColumnName("BillId");
+
+        builder
+            .HasOne<Bill>()
+            .WithOne()
+            .HasForeignKey<Payment>(p => p.BillId)
+            .OnDelete(DeleteBehavior.NoAction)
+            .HasConstraintName("FK_Payments_Bills_BillId");
+
+        builder
+            .HasIndex(p => p.BillId)
+            .IsUnique()
+            .HasDatabaseName("UX_Payments_BillId");
 
         builder
             .Property(p => p.State)

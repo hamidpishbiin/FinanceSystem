@@ -1,5 +1,4 @@
 using FinanceSystem.Domain.Payments;
-using FinanceSystem.Domain.Payments.Enums;
 using FinanceSystem.Domain.PaymentServiceProviders.Enums;
 using NSubstitute;
 using Shared.Core.Events;
@@ -8,50 +7,43 @@ namespace FinanceSystem.Domain.Tests.Unit.PaymentUnitTests;
 
 public class PaymentBuilder
 {
-    public const PaymentPurpose DefaultPurpose = PaymentPurpose.Purchase;
-    public const PaymentChannel DefaultChannel = PaymentChannel.Wallet;
     public const decimal DefaultAmount = 250_000;
     public const long DefaultFinanceAccountId = 22;
-    public const PaymentDirection DefaultDirection = PaymentDirection.Inbound;
     public const string DefaultServiceId = "checkout-service";
     public const string DefaultReferenceId = "ext-ref-9931";
+    public const long DefaultBillId = 41;
     public const PspCode DefaultPspCode = Domain.PaymentServiceProviders.Enums.PspCode.Saman;
 
-    private PaymentPurpose Purpose { get; set; } = DefaultPurpose;
-    private PaymentChannel Channel { get; set; } = DefaultChannel;
     private Money Amount { get; set; } = new(DefaultAmount);
     private long FinanceAccountId { get; set; } = DefaultFinanceAccountId;
-    private PaymentDirection Direction { get; set; } = DefaultDirection;
     private string ServiceId { get; set; } = DefaultServiceId;
     private string ReferenceId { get; set; } = DefaultReferenceId;
-    private PspCode? PspCode { get; set; }
+    private long BillId { get; set; } = DefaultBillId;
+    private PspCode PspCode { get; set; } = DefaultPspCode;
 
     public IEventPublisher EventPublisher { get; private set; } = Substitute.For<IEventPublisher>();
 
-    public async Task<Payment> Build()
+    public Payment BuildTopUp()
     {
-        return await Payment.Create(
-            Purpose,
-            Channel,
+        return Payment.CreateTopUpPayment(
             Amount,
             FinanceAccountId,
-            Direction,
             ServiceId,
             ReferenceId,
             PspCode,
             EventPublisher);
     }
 
-    public PaymentBuilder WithPurpose(PaymentPurpose purpose)
+    public Payment BuildPspPurchase()
     {
-        Purpose = purpose;
-        return this;
-    }
-
-    public PaymentBuilder WithChannel(PaymentChannel channel)
-    {
-        Channel = channel;
-        return this;
+        return Payment.CreatePspPurchasePayment(
+            Amount,
+            FinanceAccountId,
+            ServiceId,
+            ReferenceId,
+            BillId,
+            PspCode,
+            EventPublisher);
     }
 
     public PaymentBuilder WithAmount(Money amount)
@@ -63,12 +55,6 @@ public class PaymentBuilder
     public PaymentBuilder WithFinanceAccountId(long financeAccountId)
     {
         FinanceAccountId = financeAccountId;
-        return this;
-    }
-
-    public PaymentBuilder WithDirection(PaymentDirection direction)
-    {
-        Direction = direction;
         return this;
     }
 
@@ -84,7 +70,13 @@ public class PaymentBuilder
         return this;
     }
 
-    public PaymentBuilder WithPspCode(PspCode? pspCode)
+    public PaymentBuilder WithBillId(long billId)
+    {
+        BillId = billId;
+        return this;
+    }
+
+    public PaymentBuilder WithPspCode(PspCode pspCode)
     {
         PspCode = pspCode;
         return this;

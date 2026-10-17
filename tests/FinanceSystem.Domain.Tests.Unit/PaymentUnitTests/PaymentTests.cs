@@ -16,164 +16,123 @@ public class PaymentTests
 {
     private readonly PaymentBuilder _builder = new();
 
-    [Fact]
-    public async Task Create_should_properly_create_payment()
-    {
-        var payment = await _builder.Build();
+    private const string TopUp = nameof(PaymentBuilder.BuildTopUp);
+    private const string PspPurchase = nameof(PaymentBuilder.BuildPspPurchase);
 
-        payment.Purpose.Should().Be(PaymentBuilder.DefaultPurpose);
-        payment.Channel.Should().Be(PaymentBuilder.DefaultChannel);
+    [Fact]
+    public void CreateTopUpPayment_should_create_initiated_inbound_psp_topUp_payment()
+    {
+        var payment = _builder.BuildTopUp();
+
+        payment.Purpose.Should().Be(PaymentPurpose.TopUp);
+        payment.Channel.Should().Be(PaymentChannel.Psp);
+        payment.Direction.Should().Be(PaymentDirection.Inbound);
+        payment.State.Should().Be(PaymentState.Initiated);
         payment.Amount.Should().Be(PaymentBuilder.DefaultAmount);
         payment.FinanceAccountId.Should().Be(PaymentBuilder.DefaultFinanceAccountId);
-        payment.Direction.Should().Be(PaymentBuilder.DefaultDirection);
         payment.ServiceId.Should().Be(PaymentBuilder.DefaultServiceId);
         payment.ReferenceId.Should().Be(PaymentBuilder.DefaultReferenceId);
-        payment.State.Should().Be(PaymentState.Initiated);
-        payment.PspCode.Should().BeNull();
+        payment.BillId.Should().BeNull();
+        payment.PspCode.Should().Be(PaymentBuilder.DefaultPspCode);
         payment.Publisher.Should().BeSameAs(_builder.EventPublisher);
     }
 
     [Fact]
-    public async Task Create_should_publish_paymentCreatedEvent_carrying_referenceId()
+    public void CreatePspPurchasePayment_should_create_initiated_inbound_psp_purchase_payment_for_the_bill()
     {
-        await _builder.Build();
+        var payment = _builder.BuildPspPurchase();
 
-        await _builder.EventPublisher
-            .Received(1)
-            .Publish(Arg.Is<PaymentCreatedEvent>(e =>
-                e.ReferenceId == PaymentBuilder.DefaultReferenceId));
-    }
-
-    [Theory]
-    [InlineData((PaymentPurpose)0)]
-    [InlineData((PaymentPurpose)99)]
-    public async Task Create_should_throw_when_purpose_is_not_defined(PaymentPurpose purpose)
-    {
-        Func<Task> act = () => _builder.WithPurpose(purpose).Build();
-
-        await act.Should().ThrowAsync<InvalidPaymentPurposeException>();
-    }
-
-    [Theory]
-    [InlineData((PaymentChannel)0)]
-    [InlineData((PaymentChannel)99)]
-    public async Task Create_should_throw_when_channel_is_not_defined(PaymentChannel channel)
-    {
-        Func<Task> act = () => _builder.WithChannel(channel).Build();
-
-        await act.Should().ThrowAsync<InvalidPaymentChannelException>();
-    }
-
-    [Fact]
-    public async Task Create_should_throw_when_amount_is_null()
-    {
-        Func<Task> act = () => _builder.WithAmount(null!).Build();
-
-        await act.Should().ThrowAsync<NullEntryException>();
-    }
-
-    [Fact]
-    public async Task Create_should_throw_when_amount_is_zero()
-    {
-        Func<Task> act = () => _builder.WithAmount(new Money(0)).Build();
-
-        await act.Should().ThrowAsync<InvalidPaymentAmountException>();
-    }
-
-    [Theory]
-    [InlineData(0)]
-    [InlineData(-1)]
-    public async Task Create_should_throw_when_financeAccountId_is_not_positive(long financeAccountId)
-    {
-        Func<Task> act = () => _builder.WithFinanceAccountId(financeAccountId).Build();
-
-        await act.Should().ThrowAsync<InvalidFinanceAccountIdException>();
-    }
-
-    [Theory]
-    [InlineData((PaymentDirection)0)]
-    [InlineData((PaymentDirection)99)]
-    public async Task Create_should_throw_when_direction_is_not_defined(PaymentDirection direction)
-    {
-        Func<Task> act = () => _builder.WithDirection(direction).Build();
-
-        await act.Should().ThrowAsync<InvalidPaymentDirectionException>();
-    }
-
-    [Theory]
-    [InlineData("")]
-    [InlineData("   ")]
-    [InlineData(null)]
-    public async Task Create_should_throw_when_serviceId_is_null_or_empty_or_whiteSpace(string? serviceId)
-    {
-        Func<Task> act = () => _builder.WithServiceId(serviceId).Build();
-
-        await act.Should().ThrowAsync<InvalidServiceIdException>();
-    }
-
-    [Theory]
-    [InlineData("")]
-    [InlineData("   ")]
-    [InlineData(null)]
-    public async Task Create_should_throw_when_referenceId_is_null_or_empty_or_whiteSpace(string? referenceId)
-    {
-        Func<Task> act = () => _builder.WithReferenceId(referenceId).Build();
-
-        await act.Should().ThrowAsync<InvalidReferenceIdException>();
-    }
-
-    [Fact]
-    public async Task Create_should_throw_when_channel_is_psp_and_pspCode_is_missing()
-    {
-        Func<Task> act = () => _builder
-            .WithChannel(PaymentChannel.Psp)
-            .WithPspCode(null)
-            .Build();
-
-        await act.Should().ThrowAsync<MissingPspCodeException>();
-    }
-
-    [Fact]
-    public async Task Create_should_throw_when_channel_is_not_psp_and_pspCode_is_supplied()
-    {
-        Func<Task> act = () => _builder
-            .WithChannel(PaymentChannel.Wallet)
-            .WithPspCode(PaymentBuilder.DefaultPspCode)
-            .Build();
-
-        await act.Should().ThrowAsync<UnexpectedPspCodeException>();
-    }
-
-    [Fact]
-    public async Task Create_should_throw_when_pspCode_is_not_defined()
-    {
-        Func<Task> act = () => _builder
-            .WithChannel(PaymentChannel.Psp)
-            .WithPspCode((PspCode)99)
-            .Build();
-
-        await act.Should().ThrowAsync<InvalidPspCodeException>();
-    }
-
-    [Fact]
-    public async Task Create_should_succeed_when_channel_is_psp_and_pspCode_is_supplied()
-    {
-        var payment = await _builder
-            .WithChannel(PaymentChannel.Psp)
-            .WithPspCode(PaymentBuilder.DefaultPspCode)
-            .Build();
-
+        payment.Purpose.Should().Be(PaymentPurpose.Purchase);
         payment.Channel.Should().Be(PaymentChannel.Psp);
-        payment.PspCode.Should().Be(PaymentBuilder.DefaultPspCode);
+        payment.Direction.Should().Be(PaymentDirection.Inbound);
         payment.State.Should().Be(PaymentState.Initiated);
+        payment.Amount.Should().Be(PaymentBuilder.DefaultAmount);
+        payment.FinanceAccountId.Should().Be(PaymentBuilder.DefaultFinanceAccountId);
+        payment.ServiceId.Should().Be(PaymentBuilder.DefaultServiceId);
+        payment.ReferenceId.Should().Be(PaymentBuilder.DefaultReferenceId);
+        payment.BillId.Should().Be(PaymentBuilder.DefaultBillId);
+        payment.PspCode.Should().Be(PaymentBuilder.DefaultPspCode);
+        payment.Publisher.Should().BeSameAs(_builder.EventPublisher);
     }
 
-    [Fact]
-    public async Task Create_should_throw_when_eventPublisher_is_null()
+    [Theory]
+    [InlineData(TopUp)]
+    [InlineData(PspPurchase)]
+    public void Factories_should_throw_when_amount_is_null(string factory)
     {
-        Func<Task> act = () => _builder.WithEventPublisher(null!).Build();
+        Action act = () => Build(_builder.WithAmount(null!), factory);
 
-        await act.Should().ThrowAsync<NullEntryException>();
+        act.Should().Throw<NullEntryException>();
+    }
+
+    [Theory]
+    [InlineData(TopUp)]
+    [InlineData(PspPurchase)]
+    public void Factories_should_throw_when_amount_is_zero(string factory)
+    {
+        Action act = () => Build(_builder.WithAmount(new Money(0)), factory);
+
+        act.Should().Throw<InvalidPaymentAmountException>();
+    }
+
+    [Theory]
+    [InlineData(TopUp, 0)]
+    [InlineData(TopUp, -1)]
+    [InlineData(PspPurchase, 0)]
+    [InlineData(PspPurchase, -1)]
+    public void Factories_should_throw_when_financeAccountId_is_not_positive(string factory, long financeAccountId)
+    {
+        Action act = () => Build(_builder.WithFinanceAccountId(financeAccountId), factory);
+
+        act.Should().Throw<InvalidFinanceAccountIdException>();
+    }
+
+    [Theory]
+    [InlineData(TopUp, "")]
+    [InlineData(TopUp, "   ")]
+    [InlineData(TopUp, null)]
+    [InlineData(PspPurchase, "")]
+    [InlineData(PspPurchase, "   ")]
+    [InlineData(PspPurchase, null)]
+    public void Factories_should_throw_when_serviceId_is_null_or_empty_or_whiteSpace(string factory, string? serviceId)
+    {
+        Action act = () => Build(_builder.WithServiceId(serviceId), factory);
+
+        act.Should().Throw<InvalidServiceIdException>();
+    }
+
+    [Theory]
+    [InlineData(TopUp, "")]
+    [InlineData(TopUp, "   ")]
+    [InlineData(TopUp, null)]
+    [InlineData(PspPurchase, "")]
+    [InlineData(PspPurchase, "   ")]
+    [InlineData(PspPurchase, null)]
+    public void Factories_should_throw_when_referenceId_is_null_or_empty_or_whiteSpace(string factory, string? referenceId)
+    {
+        Action act = () => Build(_builder.WithReferenceId(referenceId), factory);
+
+        act.Should().Throw<InvalidReferenceIdException>();
+    }
+
+    [Theory]
+    [InlineData(TopUp)]
+    [InlineData(PspPurchase)]
+    public void Factories_should_throw_when_pspCode_is_not_defined(string factory)
+    {
+        Action act = () => Build(_builder.WithPspCode((PspCode)99), factory);
+
+        act.Should().Throw<InvalidPspCodeException>();
+    }
+
+    [Theory]
+    [InlineData(TopUp)]
+    [InlineData(PspPurchase)]
+    public void Factories_should_throw_when_eventPublisher_is_null(string factory)
+    {
+        Action act = () => Build(_builder.WithEventPublisher(null!), factory);
+
+        act.Should().Throw<NullEntryException>();
     }
 
     [Fact]
@@ -197,7 +156,7 @@ public class PaymentTests
         ((byte)PaymentChannel.Psp).Should().Be(2);
 
         Enum.GetValues<PaymentChannel>().Should().HaveCount(2,
-            "adding a member requires revisiting the Psp/PspCode pairing rules in Payment.Create");
+            "adding a member requires revisiting the Psp/PspCode pairing rules in the Payment constructor");
     }
 
     [Fact]
@@ -218,7 +177,7 @@ public class PaymentTests
     [Fact]
     public async Task MarkTokenReceived_should_store_token_set_state_and_publish_event()
     {
-        var payment = await BuildPspPayment();
+        var payment = _builder.BuildTopUp();
 
         await payment.MarkTokenReceived("token-123", "https://ipg.example/pay");
 
@@ -237,7 +196,7 @@ public class PaymentTests
     [InlineData("   ")]
     public async Task MarkTokenReceived_should_throw_when_token_is_null_or_empty_or_whitespace(string? token)
     {
-        var payment = await BuildPspPayment();
+        var payment = _builder.BuildTopUp();
 
         Func<Task> act = () => payment.MarkTokenReceived(token!, "https://ipg.example/pay");
 
@@ -247,7 +206,7 @@ public class PaymentTests
     [Fact]
     public async Task MarkTokenRequestFailed_should_store_failure_details_set_state_and_publish_event()
     {
-        var payment = await BuildPspPayment();
+        var payment = _builder.BuildTopUp();
 
         await payment.MarkTokenRequestFailed(PaymentFailureReason.Unknown, "-3", 3, "invalid amount");
 
@@ -263,29 +222,9 @@ public class PaymentTests
     }
 
     [Fact]
-    public async Task MarkTokenReceived_should_throw_when_channel_is_not_psp()
-    {
-        var payment = await _builder.Build();
-
-        Func<Task> act = () => payment.MarkTokenReceived("token-123", "https://ipg.example/pay");
-
-        await act.Should().ThrowAsync<InvalidPaymentStateException>();
-    }
-
-    [Fact]
-    public async Task MarkTokenRequestFailed_should_throw_when_channel_is_not_psp()
-    {
-        var payment = await _builder.Build();
-
-        Func<Task> act = () => payment.MarkTokenRequestFailed(PaymentFailureReason.Unknown, null, null, null);
-
-        await act.Should().ThrowAsync<InvalidPaymentStateException>();
-    }
-
-    [Fact]
     public async Task MarkTokenReceived_should_throw_when_state_is_not_initiated()
     {
-        var payment = await BuildPspPayment();
+        var payment = _builder.BuildTopUp();
         await payment.MarkTokenRequestFailed(PaymentFailureReason.Unknown, null, null, null);
 
         Func<Task> act = () => payment.MarkTokenReceived("token-123", "https://ipg.example/pay");
@@ -296,7 +235,7 @@ public class PaymentTests
     [Fact]
     public async Task MarkTokenRequestFailed_should_throw_when_state_is_not_initiated()
     {
-        var payment = await BuildPspPayment();
+        var payment = _builder.BuildTopUp();
         await payment.MarkTokenReceived("token-123", "https://ipg.example/pay");
 
         Func<Task> act = () => payment.MarkTokenRequestFailed(PaymentFailureReason.Unknown, null, null, null);
@@ -322,9 +261,9 @@ public class PaymentTests
     }
 
     [Fact]
-    public async Task StoreCallback_should_throw_when_state_is_not_tokenReceived()
+    public void StoreCallback_should_throw_when_state_is_not_tokenReceived()
     {
-        var payment = await BuildPspPayment();
+        var payment = _builder.BuildTopUp();
 
         Action act = () => payment.StoreCallback("OK", 2, "ref-1", PaymentBuilder.DefaultAmount, null, null, null);
 
@@ -453,7 +392,7 @@ public class PaymentTests
 
     private async Task<Payment> BuildPaymentWithToken()
     {
-        var payment = await BuildPspPayment();
+        var payment = _builder.BuildTopUp();
         await payment.MarkTokenReceived("token-123", "https://ipg.example/pay");
         return payment;
     }
@@ -465,11 +404,8 @@ public class PaymentTests
         return payment;
     }
 
-    private Task<Payment> BuildPspPayment()
+    private static Payment Build(PaymentBuilder builder, string factory)
     {
-        return _builder
-            .WithChannel(PaymentChannel.Psp)
-            .WithPspCode(PaymentBuilder.DefaultPspCode)
-            .Build();
+        return factory == TopUp ? builder.BuildTopUp() : builder.BuildPspPurchase();
     }
 }
