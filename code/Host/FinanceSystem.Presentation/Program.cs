@@ -65,16 +65,18 @@ try
         .Bind(builder.Configuration.GetSection(PspOptions.SectionName))
         .Validate(
             o => IsConfigured(o.Saman),
-            $"{PspOptions.SectionName}:Saman needs absolute TopUpCallBackUrl, TopUpResultPageUrl and BaseUrl, MerchantId, TerminalId, CredentialsRef and a positive TimeoutInSeconds.")
+            $"{PspOptions.SectionName}:Saman needs absolute TopUpCallBackUrl, TopUpResultPageUrl, PaymentCallBackUrl, PaymentResultPageUrl and BaseUrl, MerchantId, TerminalId, CredentialsRef and a positive TimeoutInSeconds.")
         .Validate(
             o => IsConfigured(o.BehPardakht),
-            $"{PspOptions.SectionName}:BehPardakht needs absolute TopUpCallBackUrl, TopUpResultPageUrl and BaseUrl, MerchantId, TerminalId, CredentialsRef and a positive TimeoutInSeconds.")
+            $"{PspOptions.SectionName}:BehPardakht needs absolute TopUpCallBackUrl, TopUpResultPageUrl, PaymentCallBackUrl, PaymentResultPageUrl and BaseUrl, MerchantId, TerminalId, CredentialsRef and a positive TimeoutInSeconds.")
         .ValidateOnStart();
 
     static bool IsConfigured(PspSettings? psp) =>
         psp is not null
         && Uri.TryCreate(psp.TopUpCallBackUrl, UriKind.Absolute, out _)
         && Uri.TryCreate(psp.TopUpResultPageUrl, UriKind.Absolute, out _)
+        && Uri.TryCreate(psp.PaymentCallBackUrl, UriKind.Absolute, out _)
+        && Uri.TryCreate(psp.PaymentResultPageUrl, UriKind.Absolute, out _)
         && Uri.TryCreate(psp.BaseUrl, UriKind.Absolute, out _)
         && !string.IsNullOrWhiteSpace(psp.MerchantId)
         && !string.IsNullOrWhiteSpace(psp.TerminalId)

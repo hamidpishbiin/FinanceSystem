@@ -41,7 +41,8 @@ public class PayWithPspCommandHandler(
         var pspTokenRequest = new PspTokenRequest()
         {
             Amount = bill.Amount,
-            ReservationNumber = payment.Id
+            ReservationNumber = payment.Id,
+            PaymentPurpose = PaymentPurpose.Purchase
         };
 
         var tokenResponse = await pspGateway.RequestPaymentTokenAsync(pspTokenRequest, cancellationToken);

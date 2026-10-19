@@ -18,4 +18,5 @@ public static class PaymentExceptionCodes
     public const int DuplicateReferenceNumber = 219;
     public const int PaymentReverseFailed = 220;
     public const int InvalidPaymentDirection = 221;
+    public const int InvalidPaymentPurchase = 222;
 }

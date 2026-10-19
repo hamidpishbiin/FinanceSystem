@@ -58,6 +58,7 @@ public class TopUpCommandHandler(
         {
             Amount = amount.Value,
             ReservationNumber = payment.Id,
+            PaymentPurpose = PaymentPurpose.TopUp
         };
 
         var paymentTokenResponse = await pspGateway.RequestPaymentTokenAsync(pspTokenRequest, cancellationToken);

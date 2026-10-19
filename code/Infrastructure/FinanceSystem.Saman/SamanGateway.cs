@@ -35,7 +35,7 @@ internal class SamanGateway : IPspGateway
             var payload = new
             {
                 action = "token",
-                redirectUrl = _settings.TopUpCallBackUrl,
+                redirectUrl = SelectRedirectUrl(_settings, request.PaymentPurpose),
                 terminalId = _settings.TerminalId,
                 amount = request.Amount,
                 resNum = request.ReservationNumber
@@ -249,6 +249,16 @@ internal class SamanGateway : IPspGateway
         {
             IsSuccess = false,
             TransactionType = transactionType
+        };
+    }
+
+    private static string SelectRedirectUrl(PspSettings settings, PaymentPurpose paymentPurpose)
+    {
+        return paymentPurpose switch
+        {
+            PaymentPurpose.TopUp => settings.TopUpCallBackUrl,
+            PaymentPurpose.Purchase => settings.PaymentCallBackUrl,
+            _ => throw new InvalidPaymentPurchaseException()
         };
     }
 }

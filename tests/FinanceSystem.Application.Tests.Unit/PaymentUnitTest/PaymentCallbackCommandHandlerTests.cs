@@ -1,0 +1,263 @@
+using FinanceSystem.Application.Contracts.Payments.Command;
+using FinanceSystem.Application.Contracts.Payments.Events;
+using FinanceSystem.Application.Payments.CommandHandlers;
+using FinanceSystem.Application.Payments.Gateways;
+using FinanceSystem.Domain.Payments;
+using FinanceSystem.Domain.Payments.Enums;
+using FinanceSystem.Domain.Payments.Exceptions;
+using FinanceSystem.Domain.PaymentServiceProviders.Enums;
+using FinanceSystem.Domain.Tests.Unit.PaymentUnitTests;
+using FluentAssertions;
+using Microsoft.Extensions.Options;
+using NSubstitute;
+using Shared.Core;
+using Shared.Core.Events;
+using Shared.Domain;
+
+namespace FinanceSystem.Application.Tests.Unit.PaymentUnitTest;
+
+public class PaymentCallbackCommandHandlerTests
+{
+    private const long PaymentId = 42;
+    private const string Token = "token-123";
+    private const string ReferenceNumber = "ref-1";
+    private const string ResultPageUrl = "https://result.example/payment";
+
+    private readonly IPaymentRepository _paymentRepository = Substitute.For<IPaymentRepository>();
+    private readonly IPspGatewayFactory _pspGatewayFactory = Substitute.For<IPspGatewayFactory>();
+    private readonly IPspGateway _pspGateway = Substitute.For<IPspGateway>();
+    private readonly IUnitOfWork _unitOfWork = Substitute.For<IUnitOfWork>();
+    private readonly IEventPublisher _publisher = Substitute.For<IEventPublisher>();
+    private readonly PspCallback _callback = MakeSuccessfulCallback();
+    private readonly PaymentCallbackCommandHandler _handler;
+
+    public PaymentCallbackCommandHandlerTests()
+    {
+        _pspGateway.Code.Returns(PspCode.Saman);
+        _pspGateway.ParseCallback(Arg.Any<IReadOnlyDictionary<string, string>>()).Returns(_ => _callback);
+        _pspGatewayFactory.Get(PspCode.Saman).Returns(_pspGateway);
+
+        _handler = new PaymentCallbackCommandHandler(
+            _paymentRepository,
+            _pspGatewayFactory,
+            _unitOfWork,
+            _publisher,
+            Substitute.For<IEventListener>(),
+            Options.Create(new PspOptions
+            {
+                Saman = new PspSettings { PaymentResultPageUrl = ResultPageUrl },
+                BehPardakht = new PspSettings { PaymentResultPageUrl = ResultPageUrl }
+            }));
+    }
+
+    [Fact]
+    public async Task Handle_should_throw_when_payment_is_not_found()
+    {
+        Func<Task> act = () => _handler.Handle(MakeCommand());
+
+        await act.Should().ThrowAsync<PaymentNotFoundException>();
+        await _unitOfWork.DidNotReceive().SaveChangesAsync();
+    }
+
+    [Fact]
+    public async Task Handle_should_throw_and_leave_payment_unchanged_when_payment_is_not_a_purchase()
+    {
+        var payment = new PaymentBuilder().WithPspCode(PspCode.Saman).BuildTopUp();
+        SetId(payment, PaymentId);
+        _paymentRepository.GetByIdAsync(PaymentId, Arg.Any<CancellationToken>()).Returns(payment);
+        await payment.MarkTokenReceived(Token, "https://ipg.example/pay");
+
+        Func<Task> act = () => _handler.Handle(MakeCommand());
+
+        await act.Should().ThrowAsync<InvalidPaymentPurposeException>();
+        payment.State.Should().Be(PaymentState.TokenReceived);
+    }
+
+    [Fact]
+    public async Task Handle_should_throw_and_leave_payment_unchanged_when_psp_code_does_not_match()
+    {
+        var payment = await ArrangePaymentWithToken();
+        var otherGateway = Substitute.For<IPspGateway>();
+        otherGateway.Code.Returns(PspCode.BehPardakht);
+        otherGateway.ParseCallback(Arg.Any<IReadOnlyDictionary<string, string>>()).Returns(_callback);
+        _pspGatewayFactory.Get(PspCode.BehPardakht).Returns(otherGateway);
+        var command = MakeCommand();
+        command.PspCode = PspCode.BehPardakht;
+
+        Func<Task> act = () => _handler.Handle(command);
+
+        await act.Should().ThrowAsync<PspCodeMismatchException>();
+        payment.State.Should().Be(PaymentState.TokenReceived);
+    }
+
+    [Fact]
+    public async Task Handle_should_throw_and_leave_payment_unchanged_when_token_does_not_match()
+    {
+        var payment = await ArrangePaymentWithToken();
+        _callback.Token = "forged-token";
+
+        Func<Task> act = () => _handler.Handle(MakeCommand());
+
+        await act.Should().ThrowAsync<CallbackTokenMismatchException>();
+        payment.State.Should().Be(PaymentState.TokenReceived);
+    }
+
+    [Fact]
+    public async Task Handle_should_throw_and_leave_payment_unchanged_when_reference_number_is_already_used()
+    {
+        var payment = await ArrangePaymentWithToken();
+        _paymentRepository.GetByReferenceNumberAsync(ReferenceNumber, Arg.Any<CancellationToken>())
+            .Returns(new PaymentBuilder().BuildPspPurchase());
+
+        Func<Task> act = () => _handler.Handle(MakeCommand());
+
+        await act.Should().ThrowAsync<DuplicateReferenceNumberException>();
+        payment.State.Should().Be(PaymentState.TokenReceived);
+        payment.ReferenceNumber.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task Handle_should_report_success_without_verifying_again_when_payment_already_succeeded()
+    {
+        var payment = await ArrangePaymentWithToken();
+        payment.StoreCallback("OK", 0, ReferenceNumber, PaymentBuilder.DefaultAmount, null, null, null);
+        payment.MarkVerifying();
+        await payment.MarkSucceeded();
+
+        await _handler.Handle(MakeCommand());
+
+        payment.State.Should().Be(PaymentState.Succeeded);
+        await _pspGateway.DidNotReceiveWithAnyArgs().VerifyPaymentAsync(default!, default);
+        await AssertOutcome(PaymentOutcome.Success);
+    }
+
+    [Fact]
+    public async Task Handle_should_mark_payment_failed_without_verifying_when_callback_is_not_successful()
+    {
+        var payment = await ArrangePaymentWithToken();
+        _callback.IsSuccess = false;
+        _callback.Status = "SessionIsNull";
+        _callback.StatusCode = 4;
+        _callback.ReferenceNumber = string.Empty;
+
+        await _handler.Handle(MakeCommand());
+
+        payment.State.Should().Be(PaymentState.Failed);
+        payment.Status.Should().Be("SessionIsNull");
+        await _pspGateway.DidNotReceiveWithAnyArgs().VerifyPaymentAsync(default!, default);
+        await AssertOutcome(PaymentOutcome.Failure);
+    }
+
+    [Fact]
+    public async Task Handle_should_mark_payment_failed_when_callback_amount_does_not_match()
+    {
+        var payment = await ArrangePaymentWithToken();
+        _callback.Amount = PaymentBuilder.DefaultAmount - 1;
+
+        await _handler.Handle(MakeCommand());
+
+        payment.State.Should().Be(PaymentState.Failed);
+        payment.FailureReason.Should().Be(PaymentFailureReason.CallbackAmountMismatch);
+        await _pspGateway.DidNotReceiveWithAnyArgs().VerifyPaymentAsync(default!, default);
+        await AssertOutcome(PaymentOutcome.Failure);
+    }
+
+    [Fact]
+    public async Task Handle_should_save_verifying_state_before_sending_verify_request()
+    {
+        var payment = await ArrangePaymentWithToken();
+        PaymentState? stateWhenSaved = null;
+        _unitOfWork.When(u => u.SaveChangesAsync()).Do(_ => stateWhenSaved = payment.State);
+        ArrangeVerification(new PaymentVerificationResponse { IsSuccess = false });
+
+        await _handler.Handle(MakeCommand());
+
+        stateWhenSaved.Should().Be(PaymentState.Verifying);
+        Received.InOrder(() =>
+        {
+            _unitOfWork.SaveChangesAsync();
+            _pspGateway.VerifyPaymentAsync(Arg.Any<PaymentVerificationRequest>(), Arg.Any<CancellationToken>());
+        });
+    }
+
+    [Fact]
+    public async Task Handle_should_mark_payment_failed_when_psp_rejects_verification()
+    {
+        var payment = await ArrangePaymentWithToken();
+        ArrangeVerification(new PaymentVerificationResponse { IsSuccess = false });
+
+        await _handler.Handle(MakeCommand());
+
+        payment.State.Should().Be(PaymentState.Failed);
+        payment.FailureReason.Should().Be(PaymentFailureReason.VerificationFailed);
+        await AssertOutcome(PaymentOutcome.Failure);
+    }
+
+    [Fact]
+    public async Task Handle_should_mark_payment_succeeded_when_verification_succeeds()
+    {
+        var payment = await ArrangePaymentWithToken();
+        ArrangeVerification(new PaymentVerificationResponse { IsSuccess = true, Amount = PaymentBuilder.DefaultAmount });
+
+        await _handler.Handle(MakeCommand());
+
+        payment.State.Should().Be(PaymentState.Succeeded);
+        payment.SucceededAtUtc.Should().NotBeNull();
+        payment.ReferenceNumber.Should().Be(ReferenceNumber);
+        await _pspGateway.Received(1).VerifyPaymentAsync(
+            Arg.Is<PaymentVerificationRequest>(r =>
+                r.ReservationNumber == PaymentId &&
+                r.ReferenceNumber == ReferenceNumber &&
+                r.Amount == PaymentBuilder.DefaultAmount),
+            Arg.Any<CancellationToken>());
+        await AssertOutcome(PaymentOutcome.Success);
+    }
+
+    private async Task<Payment> ArrangePaymentWithToken()
+    {
+        var payment = new PaymentBuilder().WithPspCode(PspCode.Saman).BuildPspPurchase();
+        SetId(payment, PaymentId);
+        _paymentRepository.GetByIdAsync(PaymentId, Arg.Any<CancellationToken>()).Returns(payment);
+
+        await payment.MarkTokenReceived(Token, "https://ipg.example/pay");
+
+        return payment;
+    }
+
+    private void ArrangeVerification(PaymentVerificationResponse response)
+    {
+        _pspGateway.VerifyPaymentAsync(Arg.Any<PaymentVerificationRequest>(), Arg.Any<CancellationToken>()).Returns(response);
+    }
+
+    private static PaymentCallbackCommand MakeCommand()
+    {
+        return new PaymentCallbackCommand
+        {
+            PspCode = PspCode.Saman
+        };
+    }
+
+    private static PspCallback MakeSuccessfulCallback()
+    {
+        return new PspCallback
+        {
+            ReservationNumber = PaymentId,
+            IsSuccess = true,
+            Status = "OK",
+            StatusCode = 2,
+            Token = Token,
+            ReferenceNumber = ReferenceNumber,
+            Amount = PaymentBuilder.DefaultAmount
+        };
+    }
+
+    private async Task AssertOutcome(PaymentOutcome outcome)
+    {
+        await _publisher.Received(1).Publish(Arg.Is<PaymentCallbackHandledEvent>(e => e.Outcome == outcome && e.ResultPageUrl == ResultPageUrl));
+    }
+
+    private static void SetId<TKey>(EntityBase<TKey> entity, TKey id)
+    {
+        typeof(EntityBase<TKey>).GetProperty(nameof(EntityBase<TKey>.Id))!.SetValue(entity, id);
+    }
+}
