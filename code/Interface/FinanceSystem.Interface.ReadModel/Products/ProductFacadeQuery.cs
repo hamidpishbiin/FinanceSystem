@@ -5,14 +5,14 @@ using FinanceSystem.Interface.ReadModel.Mappers;
 using Shared.Core.Exceptions;
 using Shared.Presentation;
 
-namespace FinanceSystem.Interface.ReadModel
+namespace FinanceSystem.Interface.ReadModel.Products
 {
     public class ProductFacadeQuery(IProductQueryRepository productRepository) : IProductFacadeQuery
     {
         public async Task<JsonResponse<ProductDto>> Get(Guid id)
         {
             var product = await productRepository.GetByIdAsync(id);
-            
+
             Guard<ProductNotFoundException>.AgainstNull(product);
 
             return JsonResponse<ProductDto>.Success(ProductMappers.Map(product));

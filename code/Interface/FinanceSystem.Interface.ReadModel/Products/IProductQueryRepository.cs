@@ -1,7 +1,7 @@
 ﻿using FinanceSystem.Domain.Products;
 using Shared.Domain;
 
-namespace FinanceSystem.Interface.ReadModel
+namespace FinanceSystem.Interface.ReadModel.Products
 {
     public interface IProductQueryRepository : IRepository
     {
