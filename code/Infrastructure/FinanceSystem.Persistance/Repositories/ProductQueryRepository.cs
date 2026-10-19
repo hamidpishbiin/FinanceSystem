@@ -1,5 +1,5 @@
 ﻿using FinanceSystem.Domain.Products;
-using FinanceSystem.Interface.ReadModel;
+using FinanceSystem.Interface.ReadModel.Products;
 
 namespace FinanceSystem.Persistance.Repositories
 {

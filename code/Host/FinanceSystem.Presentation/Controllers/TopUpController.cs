@@ -1,5 +1,5 @@
-using FinanceSystem.Interface.Contracts.Payments.Models;
-using FinanceSystem.Interface.Contracts.Payments.Services;
+using FinanceSystem.Interface.Contracts.TopUps.Models;
+using FinanceSystem.Interface.Contracts.TopUps.Services;
 
 namespace FinanceSystem.Presentation.Controllers;
 

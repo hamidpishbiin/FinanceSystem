@@ -11,8 +11,4 @@
     <ProjectReference Include="..\FinanceSystem.Interface.Contracts\FinanceSystem.Interface.Contracts.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Models\" />
-  </ItemGroup>
-
 </Project>

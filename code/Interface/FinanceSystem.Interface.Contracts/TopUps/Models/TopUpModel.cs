@@ -1,4 +1,4 @@
-namespace FinanceSystem.Interface.Contracts.Payments.Models;
+namespace FinanceSystem.Interface.Contracts.TopUps.Models;
 
 public class TopUpModel
 {

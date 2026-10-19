@@ -3,9 +3,9 @@ using FinanceSystem.Application.Contracts.Payments.Events;
 using FinanceSystem.Domain.Contract.Payments;
 using FinanceSystem.Domain.PaymentServiceProviders.Enums;
 using FinanceSystem.Interface.Contracts.Payments.Models;
-using FinanceSystem.Interface.Contracts.Payments.Services;
+using FinanceSystem.Interface.Contracts.TopUps.Models;
+using FinanceSystem.Interface.Contracts.TopUps.Services;
 using Shared.Core;
-using Shared.Core.Exceptions;
 
 namespace FinanceSystem.Interface.WriteModel;
 

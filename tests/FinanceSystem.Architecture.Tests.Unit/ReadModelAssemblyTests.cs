@@ -1,6 +1,6 @@
 ﻿using FluentAssertions;
 using NetArchTest.Rules;
-using FinanceSystem.Interface.ReadModel;
+using FinanceSystem.Interface.ReadModel.Products;
 
 namespace FinanceSystem.Architecture.Tests.Unit
 {

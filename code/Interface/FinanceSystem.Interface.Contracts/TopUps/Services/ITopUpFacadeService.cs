@@ -1,9 +1,10 @@
 using FinanceSystem.Core;
 using FinanceSystem.Interface.Contracts.Payments.Models;
+using FinanceSystem.Interface.Contracts.TopUps.Models;
 using Shared.Core;
 using Shared.Presentation;
 
-namespace FinanceSystem.Interface.Contracts.Payments.Services;
+namespace FinanceSystem.Interface.Contracts.TopUps.Services;
 
 public interface ITopUpFacadeService : IFacadeService
 {

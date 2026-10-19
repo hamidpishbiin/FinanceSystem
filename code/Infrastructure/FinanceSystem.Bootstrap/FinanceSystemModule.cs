@@ -6,7 +6,7 @@ using FinanceSystem.BehPardakht;
 using FinanceSystem.Core;
 using FinanceSystem.Domain.EventHandlers.ProductEventHandlers;
 using FinanceSystem.Domain.Products.DomainServices;
-using FinanceSystem.Interface.ReadModel;
+using FinanceSystem.Interface.ReadModel.Products;
 using FinanceSystem.Interface.WriteModel;
 using FinanceSystem.Persistance;
 using FinanceSystem.Persistance.Repositories;
