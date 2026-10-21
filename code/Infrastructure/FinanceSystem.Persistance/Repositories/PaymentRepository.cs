@@ -2,22 +2,27 @@ using FinanceSystem.Domain.Payments;
 
 namespace FinanceSystem.Persistance.Repositories;
 
-public class PaymentRepository(IDbContext context) : IPaymentRepository
+internal class PaymentRepository : IPaymentRepository
 {
-    private DbSet<Payment> DbSet => context.DbSet<Payment>();
+    private readonly DbSet<Payment> _dbSet;
+
+    public PaymentRepository(IDbContext context)
+    {
+        _dbSet = context.DbSet<Payment>();
+    }
 
     public async Task AddAsync(Payment payment)
     {
-        await DbSet.AddAsync(payment);
+        await _dbSet.AddAsync(payment);
     }
 
     public async Task<Payment?> GetByIdAsync(long id, CancellationToken cancellationToken)
     {
-        return await DbSet.FirstOrDefaultAsync(a => a.Id == id, cancellationToken);
+        return await _dbSet.FirstOrDefaultAsync(a => a.Id == id, cancellationToken);
     }
 
     public async Task<Payment?> GetByReferenceNumberAsync(string referenceNumber, CancellationToken cancellationToken)
     {
-        return await DbSet.FirstOrDefaultAsync(p => p.ReferenceNumber == referenceNumber, cancellationToken);
+        return await _dbSet.FirstOrDefaultAsync(p => p.ReferenceNumber == referenceNumber, cancellationToken);
     }
 }

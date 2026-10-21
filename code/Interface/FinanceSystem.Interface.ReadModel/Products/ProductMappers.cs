@@ -1,7 +1,7 @@
 ﻿using FinanceSystem.Domain.Products;
 using FinanceSystem.Interface.Contracts.Products.DTOs;
 
-namespace FinanceSystem.Interface.ReadModel.Mappers
+namespace FinanceSystem.Interface.ReadModel.Products
 {
     public static class ProductMappers
     {

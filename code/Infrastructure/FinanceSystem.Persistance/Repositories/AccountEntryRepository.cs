@@ -2,12 +2,17 @@ using FinanceSystem.Domain.AccountEntries;
 
 namespace FinanceSystem.Persistance.Repositories;
 
-public class AccountEntryRepository(IDbContext context) : IAccountEntryRepository
+internal class AccountEntryRepository : IAccountEntryRepository
 {
-    private DbSet<AccountEntry> DbSet => context.DbSet<AccountEntry>();
+    private readonly DbSet<AccountEntry> _dbSet;
+
+    public AccountEntryRepository(IDbContext context)
+    {
+        _dbSet = context.DbSet<AccountEntry>();
+    }
 
     public async Task AddAsync(AccountEntry accountEntry)
     {
-        await DbSet.AddAsync(accountEntry);
+        await _dbSet.AddAsync(accountEntry);
     }
 }

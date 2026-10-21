@@ -1,7 +1,6 @@
 ﻿using FinanceSystem.Domain.Products.Exceptions;
 using FinanceSystem.Interface.Contracts.Products.DTOs;
 using FinanceSystem.Interface.Contracts.Products.Services;
-using FinanceSystem.Interface.ReadModel.Mappers;
 using Shared.Core.Exceptions;
 using Shared.Presentation;
 

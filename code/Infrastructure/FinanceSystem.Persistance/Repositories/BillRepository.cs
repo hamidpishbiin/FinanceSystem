@@ -2,17 +2,22 @@ using FinanceSystem.Domain.Bills;
 
 namespace FinanceSystem.Persistance.Repositories;
 
-public class BillRepository(IDbContext context) : IBillRepository
+internal class BillRepository : IBillRepository
 {
-    private DbSet<Bill> DbSet => context.DbSet<Bill>();
+    private readonly DbSet<Bill> _dbSet;
+
+    public BillRepository(IDbContext context)
+    {
+        _dbSet = context.DbSet<Bill>();
+    }
 
     public async Task AddAsync(Bill entity, CancellationToken cancellationToken)
     {
-        await DbSet.AddAsync(entity, cancellationToken);
+        await _dbSet.AddAsync(entity, cancellationToken);
     }
 
     public Task<Bill?> GetById(long billId, CancellationToken cancellationToken)
     {
-        return DbSet.FirstOrDefaultAsync(b => b.Id == billId, cancellationToken);
+        return _dbSet.FirstOrDefaultAsync(b => b.Id == billId, cancellationToken);
     }
 }

@@ -3,23 +3,28 @@ using FinanceSystem.Domain.FinanceAccounts.Enums;
 
 namespace FinanceSystem.Persistance.Repositories;
 
-public class FinanceAccountRepository(IDbContext dbContext) : IFinanceAccountRepository
+internal class FinanceAccountRepository : IFinanceAccountRepository
 {
-    private DbSet<FinanceAccount> DbSet => dbContext.DbSet<FinanceAccount>();
+    private readonly DbSet<FinanceAccount> _dbSet;
+
+    public FinanceAccountRepository(IDbContext context)
+    {
+        _dbSet = context.DbSet<FinanceAccount>();
+    }
 
     public async Task<FinanceAccount?> GetByUserId(long userId, CancellationToken cancellationToken)
     {
-        return await DbSet.FirstOrDefaultAsync(fa => fa.UserId == userId, cancellationToken);
+        return await _dbSet.FirstOrDefaultAsync(fa => fa.UserId == userId, cancellationToken);
     }
 
     public async Task<FinanceAccount?> GetByIdAsync(long id, CancellationToken cancellationToken)
     {
-        return await DbSet.FirstOrDefaultAsync(fa => fa.Id == id, cancellationToken);
+        return await _dbSet.FirstOrDefaultAsync(fa => fa.Id == id, cancellationToken);
     }
 
     public async Task<FinanceAccount?> GetTopUpTargetAccountAsync(long userId, CancellationToken cancellationToken)
     {
-        return await DbSet
+        return await _dbSet
             .FirstOrDefaultAsync(fa =>
                 fa.UserId == userId &&
                 fa.Type == FinanceAccountType.UserWallet &&
@@ -32,7 +37,7 @@ public class FinanceAccountRepository(IDbContext dbContext) : IFinanceAccountRep
         List<FinanceAccountStatus> accountStatusList,
         CancellationToken cancellationToken)
     {
-        return await DbSet
+        return await _dbSet
             .FirstOrDefaultAsync(fa =>
                     fa.UserId == userId &&
                     fa.Type == accountType &&
