@@ -220,7 +220,7 @@ public class TopUpCallbackCommandHandlerTests
             e.PaymentId == PaymentId &&
             e.FinanceAccountId == UserAccountId &&
             e.Amount == PaymentBuilder.DefaultAmount &&
-            e.Direction == EntryDirection.In));
+            e.Direction == EntryDirection.Inbound));
         await AssertOutcome(TopUpOutcome.Success);
     }
 

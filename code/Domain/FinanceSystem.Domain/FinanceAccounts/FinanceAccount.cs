@@ -73,8 +73,8 @@ public class FinanceAccount : EntityBase<long>
     private bool Allows(EntryDirection direction) => State switch
     {
         FinanceAccountState.Active => true,
-        FinanceAccountState.InboundFrozen => direction == EntryDirection.Out,
-        FinanceAccountState.OutboundFrozen => direction == EntryDirection.In,
+        FinanceAccountState.InboundFrozen => direction == EntryDirection.Outbound,
+        FinanceAccountState.OutboundFrozen => direction == EntryDirection.Inbound,
         FinanceAccountState.CompletelyFrozen => false,
         _ => false
     };

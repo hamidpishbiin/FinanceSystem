@@ -18,13 +18,23 @@ public class LedgerEntry : EntityBase<long>
     public FinanceAccount? FinanceAccount { get; private set; }
     public Payment? Payment { get; private set; }
 
-    public decimal SignedAmount => Direction == EntryDirection.In ? Amount : -Amount;
+    public decimal SignedAmount => Direction == EntryDirection.Inbound ? Amount : -Amount;
 
     private LedgerEntry()
     {
     }
 
-    public LedgerEntry(
+    public static LedgerEntry CreateInboundEntry(long paymentId, long financeAccountId, Money amount)
+    {
+        return new LedgerEntry(paymentId, financeAccountId, amount, EntryDirection.Inbound);
+    }
+
+    public static LedgerEntry CreateOutboundEntry(long paymentId, long financeAccountId, Money amount)
+    {
+        return new LedgerEntry(paymentId, financeAccountId, amount, EntryDirection.Outbound);
+    }
+
+    private LedgerEntry(
         long paymentId,
         long financeAccountId,
         Money amount,
@@ -34,7 +44,6 @@ public class LedgerEntry : EntityBase<long>
         Guard<InvalidFinanceAccountIdException>.IsTrue(financeAccountId <= 0);
         Guard<NullEntryException>.AgainstNull(amount);
         Guard<InvalidMoneyAmountException>.IsTrue(amount.Value == 0);
-        Guard<InvalidEntryDirectionException>.IsFalse(Enum.IsDefined(direction));
 
         PaymentId = paymentId;
         FinanceAccountId = financeAccountId;

@@ -131,6 +131,26 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
             eventPublisher);
     }
 
+    public static Payment CreateWalletPurchasePayment(
+        Money amount,
+        long financeAccountId,
+        string serviceId,
+        string referenceId,
+        IEventPublisher eventPublisher)
+    {
+        return new Payment(
+            PaymentPurpose.Purchase,
+            PaymentChannel.Wallet,
+            amount,
+            financeAccountId,
+            PaymentDirection.Outbound,
+            serviceId,
+            referenceId,
+            null,
+            null,
+            eventPublisher);
+    }
+
     public async Task MarkTokenRequestFailed(
         PaymentFailureReason failureReason,
         string? rawStatus,
@@ -217,6 +237,7 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
     {
         var isAllowed = State switch
         {
+            PaymentState.Initiated when Channel == PaymentChannel.Wallet => newState is PaymentState.Succeeded or PaymentState.Failed,
             PaymentState.Initiated => newState is PaymentState.TokenReceived or PaymentState.Failed,
             PaymentState.TokenReceived => newState is PaymentState.CallbackReceived,
             PaymentState.CallbackReceived => newState is PaymentState.Verifying or PaymentState.Failed,

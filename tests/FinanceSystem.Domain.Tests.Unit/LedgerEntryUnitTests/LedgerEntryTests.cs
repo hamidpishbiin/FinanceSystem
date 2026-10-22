@@ -2,7 +2,6 @@ using FinanceSystem.Domain.FinanceAccounts.Exceptions;
 using FinanceSystem.Domain.LedgerEntries.Enums;
 using FinanceSystem.Domain.LedgerEntries.Exceptions;
 using FinanceSystem.Domain.Payments;
-using FinanceSystem.Domain.Payments.Enums;
 using FluentAssertions;
 using Shared.Domain.Exceptions;
 
@@ -18,26 +17,41 @@ public class LedgerEntryTests
     }
 
     [Fact]
-    public void Create_should_properly_create_ledgerEntry()
+    public void CreateInboundEntry_should_properly_create_inbound_ledgerEntry()
     {
-        var ledgerEntry = _builder.Build();
+        var ledgerEntry = _builder.BuildInbound();
 
         ledgerEntry.PaymentId.Should().Be(LedgerEntryBuilder.DefaultPaymentId);
         ledgerEntry.FinanceAccountId.Should().Be(LedgerEntryBuilder.DefaultFinanceAccountId);
         ledgerEntry.Amount.Should().Be(LedgerEntryBuilder.DefaultAmount);
-        ledgerEntry.Direction.Should().Be(LedgerEntryBuilder.DefaultDirection);
+        ledgerEntry.Direction.Should().Be(EntryDirection.Inbound);
     }
 
-    [Theory]
-    [InlineData(EntryDirection.In, 110)]
-    [InlineData(EntryDirection.Out, -110)]
-    public void SignedAmount_should_be_negative_only_for_outgoing_entries(
-        EntryDirection direction,
-        decimal expected)
+    [Fact]
+    public void CreateOutboundEntry_should_properly_create_outbound_ledgerEntry()
     {
-        var ledgerEntry = _builder.WithDirection(direction).Build();
+        var ledgerEntry = _builder.BuildOutbound();
 
-        ledgerEntry.SignedAmount.Should().Be(expected);
+        ledgerEntry.PaymentId.Should().Be(LedgerEntryBuilder.DefaultPaymentId);
+        ledgerEntry.FinanceAccountId.Should().Be(LedgerEntryBuilder.DefaultFinanceAccountId);
+        ledgerEntry.Amount.Should().Be(LedgerEntryBuilder.DefaultAmount);
+        ledgerEntry.Direction.Should().Be(EntryDirection.Outbound);
+    }
+
+    [Fact]
+    public void SignedAmount_should_be_positive_only_for_ingoing_entries()
+    {
+        var ledgerEntry = _builder.BuildInbound();
+
+        ledgerEntry.SignedAmount.Should().Be(LedgerEntryBuilder.DefaultAmount);
+    }
+
+    [Fact]
+    public void SignedAmount_should_be_negative_only_for_outgoing_entries()
+    {
+        var ledgerEntry = _builder.BuildOutbound();
+
+        ledgerEntry.SignedAmount.Should().Be(-LedgerEntryBuilder.DefaultAmount);
     }
 
     [Theory]
@@ -45,7 +59,7 @@ public class LedgerEntryTests
     [InlineData(-1)]
     public void Create_should_throw_when_PaymentId_is_not_positive(long paymentId)
     {
-        Action act = () => _builder.WithPaymentId(paymentId).Build();
+        Action act = () => _builder.WithPaymentId(paymentId).BuildInbound();
 
         act.Should().Throw<InvalidPaymentIdException>();
     }
@@ -55,7 +69,7 @@ public class LedgerEntryTests
     [InlineData(-1)]
     public void Create_should_throw_when_FinanceAccountId_is_not_positive(long financeAccountId)
     {
-        Action act = () => _builder.WithFinanceAccountId(financeAccountId).Build();
+        Action act = () => _builder.WithFinanceAccountId(financeAccountId).BuildInbound();
 
         act.Should().Throw<InvalidFinanceAccountIdException>();
     }
@@ -63,7 +77,7 @@ public class LedgerEntryTests
     [Fact]
     public void Create_should_throw_when_Amount_is_null()
     {
-        Action act = () => _builder.WithAmount(null!).Build();
+        Action act = () => _builder.WithAmount(null!).BuildInbound();
 
         act.Should().Throw<NullEntryException>();
     }
@@ -71,18 +85,8 @@ public class LedgerEntryTests
     [Fact]
     public void Create_should_throw_when_Amount_is_zero()
     {
-        Action act = () => _builder.WithAmount(new Money(0)).Build();
+        Action act = () => _builder.WithAmount(new Money(0)).BuildInbound();
 
         act.Should().Throw<InvalidMoneyAmountException>();
-    }
-
-    [Theory]
-    [InlineData((EntryDirection)0)]
-    [InlineData((EntryDirection)99)]
-    public void Create_should_throw_when_Direction_is_not_defined(EntryDirection direction)
-    {
-        Action act = () => _builder.WithDirection(direction).Build();
-
-        act.Should().Throw<InvalidEntryDirectionException>();
     }
 }

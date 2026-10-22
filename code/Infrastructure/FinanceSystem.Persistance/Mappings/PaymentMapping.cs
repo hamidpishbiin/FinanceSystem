@@ -13,7 +13,7 @@ public class PaymentMapping() : EntityBaseMap<Payment, long>("Payments")
         builder
             .Property(p => p.Id)
             .HasColumnName("Id")
-            .ValueGeneratedOnAdd();
+            .UseHiLo("payment_hilo_seq");
 
         builder
             .Property(p => p.Purpose)

@@ -107,7 +107,7 @@ public class TopUpCallbackCommandHandler(
 
         Guard<FinanceAccountNotFoundException>.AgainstNull(userAccount);
 
-        var userEntry = new LedgerEntry(payment.Id, userAccount!.Id, amount, EntryDirection.In);
+        var userEntry = LedgerEntry.CreateInboundEntry(payment.Id, userAccount!.Id, amount);
 
         userAccount.ApplyEntry(userEntry, occurredAt);
 

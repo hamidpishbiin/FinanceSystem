@@ -10,8 +10,6 @@ public class TokenEligibilityService(IBillRepository repository)
 
         Guard<BillNotFoundException>.AgainstNull(bill);
 
-        Guard<InvalidUserBillException>.IsFalse(bill!.Id == userId);
-
         return bill!;
     }
 }
