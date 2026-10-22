@@ -8,16 +8,16 @@ using Microsoft.Extensions.Options;
 
 namespace FinanceSystem.Application.Payments.CommandHandlers;
 
-public class PaymentCallbackCommandHandler(
+public class PspPaymentCallbackCommandHandler(
     IPaymentRepository repository,
     IPspGatewayFactory pspGatewayFactory,
     IUnitOfWork unitOfWork,
     IEventPublisher publisher,
     IEventListener listener,
     IOptions<PspOptions> pspOptions)
-    : PaymentCommandHandler<PaymentCallbackCommand>(repository, publisher, listener)
+    : PaymentCommandHandler<ProcessPspPaymentCallbackCommand>(repository, publisher, listener)
 {
-    public override async Task Handle(PaymentCallbackCommand command, CancellationToken cancellationToken = default)
+    public override async Task Handle(ProcessPspPaymentCallbackCommand command, CancellationToken cancellationToken = default)
     {
         var pspGateway = pspGatewayFactory.Get(command.PspCode);
 
@@ -101,6 +101,6 @@ public class PaymentCallbackCommandHandler(
 
     private async Task PublishOutcome(PaymentOutcome outcome, string resultPageUrl)
     {
-        await Publisher.Publish(new PaymentCallbackHandledEvent(outcome, resultPageUrl));
+        await Publisher.Publish(new PaymentCallbackProcessedEvent(outcome, resultPageUrl));
     }
 }

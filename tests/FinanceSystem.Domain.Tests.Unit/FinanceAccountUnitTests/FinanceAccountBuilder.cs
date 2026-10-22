@@ -8,7 +8,7 @@ namespace FinanceSystem.Domain.Tests.Unit.FinanceAccountUnitTests;
 public class FinanceAccountBuilder
 {
     public const FinanceAccountType DefaultType = FinanceAccountType.UserWallet;
-    public const FinanceAccountStatus DefaultStatus = FinanceAccountStatus.Active;
+    public const FinanceAccountState DefaultState = FinanceAccountState.Active;
     public const decimal DefaultCachedBalance = 300;
     public static readonly DateTimeOffset DefaultBalanceCalculatedAt = new(2026, 08, 09, 0, 0, 0, TimeSpan.Zero);
     public const bool DefaultAllowNegativeBalance = false;
@@ -16,7 +16,7 @@ public class FinanceAccountBuilder
     public const long DefaultUserId = 1;
 
     private FinanceAccountType Type { get; set; } = DefaultType;
-    private FinanceAccountStatus Status { get; set; } = DefaultStatus;
+    private FinanceAccountState State { get; set; } = DefaultState;
     private long UserId { get; set; } = DefaultUserId;
     private Money CachedAmount { get; set; } = new(DefaultCachedBalance);
     private DateTimeOffset BalanceCalculatedAt { get; set; } = DefaultBalanceCalculatedAt;
@@ -26,7 +26,7 @@ public class FinanceAccountBuilder
     {
         return new FinanceAccount(
             Type,
-            Status,
+            State,
             UserId,
             CachedAmount,
             BalanceCalculatedAt,
@@ -39,9 +39,9 @@ public class FinanceAccountBuilder
         return this;
     }
 
-    public FinanceAccountBuilder WithStatus(FinanceAccountStatus status)
+    public FinanceAccountBuilder WithState(FinanceAccountState state)
     {
-        Status = status;
+        State = state;
         return this;
     }
 

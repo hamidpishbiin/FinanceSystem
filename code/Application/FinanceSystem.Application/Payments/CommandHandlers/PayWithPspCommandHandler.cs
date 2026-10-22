@@ -19,7 +19,7 @@ public class PayWithPspCommandHandler(
 {
     public override async Task Handle(PayWithPspCommand command, CancellationToken cancellationToken = default)
     {
-        var bill = await tokenEligibilityService.GetBillByToken(command.Token, cancellationToken);
+        var bill = await tokenEligibilityService.GetBill(command.Token, command.UserId, cancellationToken);
 
         var psp = await pspSelector.SelectAsync(command.PspCode, cancellationToken);
 

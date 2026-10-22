@@ -27,11 +27,11 @@ public class TopUpFacadeService(
             Purpose = model.Purpose,
             Channel = model.Channel,
             Amount = model.Amount,
-            FinanceAccountId = model.FinanceAccountId,
+            UserId = model.FinanceAccountId,
             Direction = model.Direction,
             ServiceId = model.ServiceId,
             ReferenceId = model.ReferenceId,
-            PspCode = model.PspCode
+            PspCode = model.PspCode,
         });
 
         return JsonResponse<string>.Success(referenceId);

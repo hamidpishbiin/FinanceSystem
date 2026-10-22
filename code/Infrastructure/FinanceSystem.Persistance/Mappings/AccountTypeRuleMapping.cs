@@ -22,12 +22,8 @@ public class AccountTypeRuleMapping() : EntityBaseMap<AccountTypeRule, int>("Acc
             .HasColumnName("Purpose");
 
         builder
-            .Property(p => p.CanBeSource)
-            .HasColumnName("CanBeSource");
-
-        builder
-            .Property(p => p.CanBeDestination)
-            .HasColumnName("CanBeDestination");
+            .Property(p => p.IsAllowed)
+            .HasColumnName("IsAllowed");
 
         builder
             .HasIndex(p => new { p.Type, p.Purpose })

@@ -23,22 +23,30 @@ public class PaymentController(
     }
 
     [HttpPost("pay-with-psp")]
-    public async Task<IActionResult> RequestPaymentTokenAsync(PspPaymentModel model, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> PayWithPspAsync(PspPaymentModel model, CancellationToken cancellationToken = default)
     {
-        var response = await facadeService.RequestPaymentTokenAsync(model, cancellationToken);
+        var response = await facadeService.PayWithPspAsync(model, cancellationToken);
 
         return Ok(response);
     }
 
     [HttpPost("callback/{psp}")]
-    public async Task<IActionResult> CompletePaymentProcessAsync(string psp, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> ProcessPaymentCallbackAsync(string psp, CancellationToken cancellationToken = default)
     {
         var form = await Request.ReadFormAsync(cancellationToken);
 
         var fields = form.ToDictionary(f => f.Key, f => f.Value.ToString(), StringComparer.OrdinalIgnoreCase);
 
-        var response = await facadeService.CompletePaymentProcessAsync(psp, fields, cancellationToken);
+        var response = await facadeService.ProcessPaymentCallbackAsync(psp, fields, cancellationToken);
 
         return response.Status ? Redirect(response.Data) : BadRequest(response);
+    }
+
+    [HttpPost("pay-with-wallet")]
+    public async Task<IActionResult> PayWithWalletAsync(WalletPaymentModel model, CancellationToken cancellationToken)
+    {
+        model.UserId = long.Parse(userResolver.GetUserId());
+
+        return Ok();
     }
 }

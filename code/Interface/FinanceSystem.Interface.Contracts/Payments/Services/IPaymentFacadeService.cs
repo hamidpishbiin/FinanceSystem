@@ -8,7 +8,8 @@ namespace FinanceSystem.Interface.Contracts.Payments.Services;
 public interface IPaymentFacadeService : IFacadeService
 {
     [HasPermission(Permissions.CreatePayment, (int)UserRoleEnum.Owner)]
-    Task<JsonResponse<string>> RequestPaymentTokenAsync(PspPaymentModel model, CancellationToken cancellationToken = default);
+    Task<JsonResponse<string>> PayWithPspAsync(PspPaymentModel model, CancellationToken cancellationToken = default);
     [IgnorePermission]
-    Task<JsonResponse<string>> CompletePaymentProcessAsync(string psp, Dictionary<string, string> fields, CancellationToken cancellationToken);
+    Task<JsonResponse<string>> ProcessPaymentCallbackAsync(string psp, Dictionary<string, string> fields, CancellationToken cancellationToken);
+    Task<JsonResponse<string>> PayWithWalletAsync(WalletPaymentModel model, CancellationToken cancellationToken);
 }

@@ -12,9 +12,9 @@ internal class FinanceAccountRepository : IFinanceAccountRepository
         _dbSet = context.DbSet<FinanceAccount>();
     }
 
-    public async Task<FinanceAccount?> GetByUserId(long userId, CancellationToken cancellationToken)
+    public async Task<List<FinanceAccount>> GetByUserIdAsync(long userId, CancellationToken cancellationToken)
     {
-        return await _dbSet.FirstOrDefaultAsync(fa => fa.UserId == userId, cancellationToken);
+        return await _dbSet.Where(fa => fa.UserId == userId).ToListAsync(cancellationToken);
     }
 
     public async Task<FinanceAccount?> GetByIdAsync(long id, CancellationToken cancellationToken)
@@ -22,26 +22,16 @@ internal class FinanceAccountRepository : IFinanceAccountRepository
         return await _dbSet.FirstOrDefaultAsync(fa => fa.Id == id, cancellationToken);
     }
 
-    public async Task<FinanceAccount?> GetTopUpTargetAccountAsync(long userId, CancellationToken cancellationToken)
-    {
-        return await _dbSet
-            .FirstOrDefaultAsync(fa =>
-                fa.UserId == userId &&
-                fa.Type == FinanceAccountType.UserWallet &&
-                fa.Status != FinanceAccountStatus.InboundFrozen,
-                cancellationToken);
-    }
-
     public async Task<FinanceAccount?> GetTargetAccount(long userId,
         FinanceAccountType accountType,
-        List<FinanceAccountStatus> accountStatusList,
+        List<FinanceAccountState> accountStateList,
         CancellationToken cancellationToken)
     {
         return await _dbSet
             .FirstOrDefaultAsync(fa =>
                     fa.UserId == userId &&
                     fa.Type == accountType &&
-                    accountStatusList.Contains(fa.Status),
+                    accountStateList.Contains(fa.State),
                 cancellationToken);
     }
 }

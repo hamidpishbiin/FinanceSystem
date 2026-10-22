@@ -4,8 +4,7 @@ namespace FinanceSystem.Domain.FinanceAccounts;
 
 public interface IFinanceAccountRepository : IRepository
 {
-    Task<FinanceAccount?> GetByUserId(long userId, CancellationToken cancellationToken);
+    Task<List<FinanceAccount>> GetByUserIdAsync(long userId, CancellationToken cancellationToken);
     Task<FinanceAccount?> GetByIdAsync(long id, CancellationToken cancellationToken);
-    Task<FinanceAccount?> GetTopUpTargetAccountAsync(long userId, CancellationToken cancellationToken);
-    Task<FinanceAccount?> GetTargetAccount(long userId, FinanceAccountType accountType, List<FinanceAccountStatus> accountStatusList, CancellationToken cancellationToken);
+    Task<FinanceAccount?> GetTargetAccount(long userId, FinanceAccountType accountType, List<FinanceAccountState> accountStateList, CancellationToken cancellationToken);
 }

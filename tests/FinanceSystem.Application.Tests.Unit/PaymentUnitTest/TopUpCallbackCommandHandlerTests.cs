@@ -246,7 +246,7 @@ public class TopUpCallbackCommandHandlerTests
     private FinanceAccount ArrangeUserAccount()
     {
         var userAccount = new FinanceAccount(
-            FinanceAccountType.UserWallet, FinanceAccountStatus.Active, 1, new Money(0), DateTimeOffset.UtcNow, false);
+            FinanceAccountType.UserWallet, FinanceAccountState.Active, 1, new Money(0), DateTimeOffset.UtcNow, false);
         SetId(userAccount, UserAccountId);
 
         _financeAccountRepository.GetByIdAsync(UserAccountId, Arg.Any<CancellationToken>()).Returns(userAccount);

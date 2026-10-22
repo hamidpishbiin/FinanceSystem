@@ -9,7 +9,7 @@ namespace FinanceSystem.Interface.WriteModel;
 
 public class PaymentFacadeService(ICommandBus commandBus, IEventListener listener) : IPaymentFacadeService
 {
-    public async Task<JsonResponse<string>> RequestPaymentTokenAsync(PspPaymentModel model, CancellationToken cancellationToken = default)
+    public async Task<JsonResponse<string>> PayWithPspAsync(PspPaymentModel model, CancellationToken cancellationToken = default)
     {
         var ipgUrl = string.Empty;
 
@@ -21,13 +21,14 @@ public class PaymentFacadeService(ICommandBus commandBus, IEventListener listene
         await commandBus.Dispatch(new PayWithPspCommand()
         {
             Token = long.Parse(model.Token),
+            UserId = model.UserId!.Value,
             PspCode = model.PspCode
         }, cancellationToken);
 
         return JsonResponse<string>.Success(ipgUrl);
     }
 
-    public async Task<JsonResponse<string>> CompletePaymentProcessAsync(string psp, Dictionary<string, string> fields, CancellationToken cancellationToken)
+    public async Task<JsonResponse<string>> ProcessPaymentCallbackAsync(string psp, Dictionary<string, string> fields, CancellationToken cancellationToken)
     {
         var outcome = PaymentOutcome.Failure;
 
@@ -38,18 +39,23 @@ public class PaymentFacadeService(ICommandBus commandBus, IEventListener listene
 
         var resultPageUrl = string.Empty;
 
-        await listener.Subscribe(new EventHandlerAction<PaymentCallbackHandledEvent>(e =>
+        await listener.Subscribe(new EventHandlerAction<PaymentCallbackProcessedEvent>(e =>
         {
             outcome = e.Outcome;
             resultPageUrl = e.ResultPageUrl;
         }));
 
-        await commandBus.Dispatch(new PaymentCallbackCommand()
+        await commandBus.Dispatch(new ProcessPspPaymentCallbackCommand()
         {
             PspCode = pspCode,
             Fields = fields
         }, cancellationToken);
 
         return JsonResponse<string>.Success($"{resultPageUrl}?status={outcome.ToString().ToLowerInvariant()}");
+    }
+
+    public async Task<JsonResponse<string>> PayWithWalletAsync(WalletPaymentModel model, CancellationToken cancellationToken)
+    {
+        return JsonResponse<string>.Success("");
     }
 }

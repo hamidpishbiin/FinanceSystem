@@ -7,23 +7,30 @@ namespace FinanceSystem.Domain.Tests.Unit.AccountTypeRuleUnitTests;
 public class AccountTypeRuleBuilder
 {
     public const FinanceAccountType DefaultType = FinanceAccountType.UserWallet;
+    public const FinanceAccountState DefaultSate = FinanceAccountState.Active;
     public const PaymentPurpose DefaultPaymentPurpose = PaymentPurpose.TopUp;
-    public const bool DefaultCanBeSource = true;
+    public const bool DefaultIsAllowed = true;
     public const bool DefaultCanBeDestination = true;
 
     private FinanceAccountType Type { get; set; } = DefaultType;
+    private FinanceAccountState State { get; set; } = DefaultSate;
     private PaymentPurpose Purpose { get; set; } = DefaultPaymentPurpose;
-    private bool CanBeSource { get; set; } = DefaultCanBeSource;
-    private bool CanBeDestination { get; set; } = DefaultCanBeDestination;
+    private bool IsAllowed { get; set; } = DefaultIsAllowed;
 
     public AccountTypeRule Build()
     {
-        return new AccountTypeRule(Type, Purpose, CanBeSource, CanBeDestination);
+        return new AccountTypeRule(Type, State, Purpose, IsAllowed);
     }
 
     public AccountTypeRuleBuilder WithType(FinanceAccountType type)
     {
         Type = type;
+        return this;
+    }
+
+    public AccountTypeRuleBuilder WithState(FinanceAccountState state)
+    {
+        State = state;
         return this;
     }
 
@@ -33,15 +40,9 @@ public class AccountTypeRuleBuilder
         return this;
     }
 
-    public AccountTypeRuleBuilder WithCanBeSource(bool canBeSource)
+    public AccountTypeRuleBuilder WithIsAllowed(bool isAllowed)
     {
-        CanBeSource = canBeSource;
-        return this;
-    }
-
-    public AccountTypeRuleBuilder WithCanBeDestination(bool canBeDestination)
-    {
-        CanBeDestination = canBeDestination;
+        IsAllowed = isAllowed;
         return this;
     }
 }

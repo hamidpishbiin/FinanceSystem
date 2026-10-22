@@ -32,9 +32,7 @@ public class TopUpCommandHandler(
 
         Guard<UserNotFoundException>.AgainstNull(user);
 
-        var userFinanceAccount = await financeAccountEligibilityService.GetTopUpTargetAccountAsync(user!.Id, cancellationToken);
-
-        Guard<FinanceAccountNotFoundException>.AgainstNull(userFinanceAccount);
+        var userFinanceAccount = await financeAccountEligibilityService.GetEligibleTopUpAccountAsync(user!.Id, cancellationToken);
 
         var amount = new Money(command.Amount);
 

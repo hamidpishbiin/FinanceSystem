@@ -1,5 +1,6 @@
 using FinanceSystem.Domain.AccountEntries;
 using FinanceSystem.Domain.AccountEntries.Enums;
+using FinanceSystem.Domain.AccountTypeRules;
 using FinanceSystem.Domain.FinanceAccounts.Enums;
 using FinanceSystem.Domain.FinanceAccounts.Exceptions;
 using FinanceSystem.Domain.Payments;
@@ -11,7 +12,7 @@ namespace FinanceSystem.Domain.FinanceAccounts;
 public class FinanceAccount : EntityBase<long>
 {
     public FinanceAccountType Type { get; private set; }
-    public FinanceAccountStatus Status { get; private set; }
+    public FinanceAccountState State { get; private set; }
     public long UserId { get; private set; }
     public decimal CachedBalance { get; private set; }
     public DateTimeOffset BalanceCalculatedAt { get; private set; }
@@ -23,7 +24,7 @@ public class FinanceAccount : EntityBase<long>
 
     public FinanceAccount(
         FinanceAccountType type,
-        FinanceAccountStatus status,
+        FinanceAccountState state,
         long userId,
         Money cachedBalance,
         DateTimeOffset balanceCalculatedAt,
@@ -33,7 +34,7 @@ public class FinanceAccount : EntityBase<long>
         Guard<NullEntryException>.AgainstNull(cachedBalance);
 
         Type = type;
-        Status = status;
+        State = state;
         UserId = userId;
         CachedBalance = cachedBalance.Value;
         BalanceCalculatedAt = balanceCalculatedAt;
@@ -44,7 +45,6 @@ public class FinanceAccount : EntityBase<long>
     {
         Guard<NullEntryException>.AgainstNull(entry);
         Guard<EntryFinanceAccountMismatchException>.IsTrue(entry.FinanceAccountId != Id);
-        Guard<FinanceAccountClosedException>.IsTrue(Status == FinanceAccountStatus.Closed);
         Guard<FinanceAccountDirectionNotAllowedException>.IsFalse(Allows(entry.Direction));
 
         var newBalance = CachedBalance + entry.SignedAmount;
@@ -55,13 +55,27 @@ public class FinanceAccount : EntityBase<long>
         BalanceCalculatedAt = occurredAt;
     }
 
-    private bool Allows(EntryDirection direction) => Status switch
+    public bool IsAllowedToPurchase(List<AccountTypeRule> rules)
     {
-        FinanceAccountStatus.Active => true,
-        FinanceAccountStatus.InboundFrozen => direction == EntryDirection.Out,
-        FinanceAccountStatus.OutboundFrozen => direction == EntryDirection.In,
-        FinanceAccountStatus.CompletelyFrozen => false,
-        FinanceAccountStatus.Closed => false,
+        return IsTransactionAllowed(rules, PaymentPurpose.Purchase);
+    }
+
+    public bool IsTopUpAllowed(List<AccountTypeRule> rules)
+    {
+        return IsTransactionAllowed(rules, PaymentPurpose.TopUp);
+    }
+
+    private bool IsTransactionAllowed(List<AccountTypeRule> rules, PaymentPurpose purpose)
+    {
+        return rules.FirstOrDefault(ar => ar.Type == Type && ar.State == State && ar.Purpose == purpose)?.IsAllowed ?? false;
+    }
+
+    private bool Allows(EntryDirection direction) => State switch
+    {
+        FinanceAccountState.Active => true,
+        FinanceAccountState.InboundFrozen => direction == EntryDirection.Out,
+        FinanceAccountState.OutboundFrozen => direction == EntryDirection.In,
+        FinanceAccountState.CompletelyFrozen => false,
         _ => false
     };
 }

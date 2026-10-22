@@ -24,7 +24,7 @@ public class FinanceAccountTests
         var financeAccount = _financeAccountBuilder.Build();
 
         financeAccount.Type.Should().Be(FinanceAccountBuilder.DefaultType);
-        financeAccount.Status.Should().Be(FinanceAccountBuilder.DefaultStatus);
+        financeAccount.State.Should().Be(FinanceAccountBuilder.DefaultState);
         financeAccount.UserId.Should().Be(FinanceAccountBuilder.DefaultUserId);
         financeAccount.CachedBalance.Should().Be(FinanceAccountBuilder.DefaultCachedBalance);
         financeAccount.BalanceCalculatedAt.Should().Be(FinanceAccountBuilder.DefaultBalanceCalculatedAt);

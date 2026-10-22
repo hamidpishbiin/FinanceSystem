@@ -39,8 +39,8 @@ public class FinanceAccountMapping() : EntityBaseMap<FinanceAccount, long>("Fina
             .HasPrecision(18, 0);
 
         builder
-            .Property(p => p.Status)
-            .HasColumnName("Status");
+            .Property(p => p.State)
+            .HasColumnName("State");
 
         builder
             .Property(p => p.Type)

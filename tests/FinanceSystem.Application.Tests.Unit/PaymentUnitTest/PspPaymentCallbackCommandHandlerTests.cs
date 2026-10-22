@@ -16,7 +16,7 @@ using Shared.Domain;
 
 namespace FinanceSystem.Application.Tests.Unit.PaymentUnitTest;
 
-public class PaymentCallbackCommandHandlerTests
+public class PspPaymentCallbackCommandHandlerTests
 {
     private const long PaymentId = 42;
     private const string Token = "token-123";
@@ -29,15 +29,15 @@ public class PaymentCallbackCommandHandlerTests
     private readonly IUnitOfWork _unitOfWork = Substitute.For<IUnitOfWork>();
     private readonly IEventPublisher _publisher = Substitute.For<IEventPublisher>();
     private readonly PspCallback _callback = MakeSuccessfulCallback();
-    private readonly PaymentCallbackCommandHandler _handler;
+    private readonly PspPaymentCallbackCommandHandler _handler;
 
-    public PaymentCallbackCommandHandlerTests()
+    public PspPaymentCallbackCommandHandlerTests()
     {
         _pspGateway.Code.Returns(PspCode.Saman);
         _pspGateway.ParseCallback(Arg.Any<IReadOnlyDictionary<string, string>>()).Returns(_ => _callback);
         _pspGatewayFactory.Get(PspCode.Saman).Returns(_pspGateway);
 
-        _handler = new PaymentCallbackCommandHandler(
+        _handler = new PspPaymentCallbackCommandHandler(
             _paymentRepository,
             _pspGatewayFactory,
             _unitOfWork,
@@ -229,9 +229,9 @@ public class PaymentCallbackCommandHandlerTests
         _pspGateway.VerifyPaymentAsync(Arg.Any<PaymentVerificationRequest>(), Arg.Any<CancellationToken>()).Returns(response);
     }
 
-    private static PaymentCallbackCommand MakeCommand()
+    private static ProcessPspPaymentCallbackCommand MakeCommand()
     {
-        return new PaymentCallbackCommand
+        return new ProcessPspPaymentCallbackCommand
         {
             PspCode = PspCode.Saman
         };
@@ -253,7 +253,7 @@ public class PaymentCallbackCommandHandlerTests
 
     private async Task AssertOutcome(PaymentOutcome outcome)
     {
-        await _publisher.Received(1).Publish(Arg.Is<PaymentCallbackHandledEvent>(e => e.Outcome == outcome && e.ResultPageUrl == ResultPageUrl));
+        await _publisher.Received(1).Publish(Arg.Is<PaymentCallbackProcessedEvent>(e => e.Outcome == outcome && e.ResultPageUrl == ResultPageUrl));
     }
 
     private static void SetId<TKey>(EntityBase<TKey> entity, TKey id)

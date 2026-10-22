@@ -19,14 +19,11 @@ public class AccountTypeRuleTests
     public void Create_should_properly_create_accountTypeRule()
     {
         var atr = _builder
-            .WithCanBeSource(true)
-            .WithCanBeDestination(false)
             .Build();
 
         atr.Type.Should().Be(AccountTypeRuleBuilder.DefaultType);
         atr.Purpose.Should().Be(AccountTypeRuleBuilder.DefaultPaymentPurpose);
-        atr.CanBeSource.Should().BeTrue();
-        atr.CanBeDestination.Should().BeFalse();
+        atr.IsAllowed.Should().BeTrue();
     }
 
     [Theory]
@@ -53,8 +50,7 @@ public class AccountTypeRuleTests
     public void Create_should_throw_when_both_canBeSource_and_canBeDestination_are_False()
     {
         Action atr = () => _builder
-            .WithCanBeSource(false)
-            .WithCanBeDestination(false)
+            .WithIsAllowed(false)
             .Build();
 
         atr.Should().Throw<InvalidSourceDestinationException>();
