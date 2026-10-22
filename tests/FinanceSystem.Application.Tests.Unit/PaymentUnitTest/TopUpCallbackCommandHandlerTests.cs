@@ -2,8 +2,8 @@ using FinanceSystem.Application.Contracts.Payments.Command;
 using FinanceSystem.Application.Contracts.Payments.Events;
 using FinanceSystem.Application.Payments.CommandHandlers;
 using FinanceSystem.Application.Payments.Gateways;
-using FinanceSystem.Domain.AccountEntries;
-using FinanceSystem.Domain.AccountEntries.Enums;
+using FinanceSystem.Domain.LedgerEntries;
+using FinanceSystem.Domain.LedgerEntries.Enums;
 using FinanceSystem.Domain.FinanceAccounts;
 using FinanceSystem.Domain.FinanceAccounts.Enums;
 using FinanceSystem.Domain.Payments;
@@ -30,7 +30,7 @@ public class TopUpCallbackCommandHandlerTests
 
     private readonly IPaymentRepository _paymentRepository = Substitute.For<IPaymentRepository>();
     private readonly IFinanceAccountRepository _financeAccountRepository = Substitute.For<IFinanceAccountRepository>();
-    private readonly IAccountEntryRepository _accountEntryRepository = Substitute.For<IAccountEntryRepository>();
+    private readonly ILedgerEntryRepository _ledgerEntryRepository = Substitute.For<ILedgerEntryRepository>();
     private readonly IPspGatewayFactory _pspGatewayFactory = Substitute.For<IPspGatewayFactory>();
     private readonly IPspGateway _pspGateway = Substitute.For<IPspGateway>();
     private readonly IUnitOfWork _unitOfWork = Substitute.For<IUnitOfWork>();
@@ -47,7 +47,7 @@ public class TopUpCallbackCommandHandlerTests
         _handler = new TopUpCallbackCommandHandler(
             _paymentRepository,
             _financeAccountRepository,
-            _accountEntryRepository,
+            _ledgerEntryRepository,
             _pspGatewayFactory,
             _unitOfWork,
             _publisher,
@@ -215,8 +215,8 @@ public class TopUpCallbackCommandHandlerTests
         payment.SucceededAtUtc.Should().NotBeNull();
         payment.ReferenceNumber.Should().Be(ReferenceNumber);
         userAccount.CachedBalance.Should().Be(PaymentBuilder.DefaultAmount);
-        await _accountEntryRepository.Received(1).AddAsync(Arg.Any<AccountEntry>());
-        await _accountEntryRepository.Received(1).AddAsync(Arg.Is<AccountEntry>(e =>
+        await _ledgerEntryRepository.Received(1).AddAsync(Arg.Any<LedgerEntry>());
+        await _ledgerEntryRepository.Received(1).AddAsync(Arg.Is<LedgerEntry>(e =>
             e.PaymentId == PaymentId &&
             e.FinanceAccountId == UserAccountId &&
             e.Amount == PaymentBuilder.DefaultAmount &&

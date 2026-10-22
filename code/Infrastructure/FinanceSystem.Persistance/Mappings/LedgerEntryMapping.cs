@@ -1,13 +1,13 @@
-using FinanceSystem.Domain.AccountEntries;
-using FinanceSystem.Domain.AccountEntries.Enums;
+using FinanceSystem.Domain.LedgerEntries;
+using FinanceSystem.Domain.LedgerEntries.Enums;
 using FinanceSystem.Domain.FinanceAccounts;
 using FinanceSystem.Domain.Payments;
 
 namespace FinanceSystem.Persistance.Mappings;
 
-public class AccountEntryMapping() : EntityBaseMap<AccountEntry, long>("AccountEntries")
+public class LedgerEntryMapping() : EntityBaseMap<LedgerEntry, long>("LedgerEntries")
 {
-    override protected void ConfigureMap(EntityTypeBuilder<AccountEntry> builder)
+    override protected void ConfigureMap(EntityTypeBuilder<LedgerEntry> builder)
     {
         builder.HasKey(p => p.Id);
 
@@ -23,14 +23,14 @@ public class AccountEntryMapping() : EntityBaseMap<AccountEntry, long>("AccountE
         builder
             .HasIndex(p => p.PaymentId)
             .IncludeProperties(p => p.Amount)
-            .HasDatabaseName("IX_AccountEntries_PaymentId");
+            .HasDatabaseName("IX_LedgerEntries_PaymentId");
 
         builder
             .HasOne(p => p.Payment)
             .WithMany()
             .HasForeignKey(p => p.PaymentId)
             .OnDelete(DeleteBehavior.Restrict)
-            .HasConstraintName("FK_AccountEntries_Payments_PaymentId");
+            .HasConstraintName("FK_LedgerEntries_Payments_PaymentId");
 
         builder
             .Property(p => p.FinanceAccountId)
@@ -39,14 +39,14 @@ public class AccountEntryMapping() : EntityBaseMap<AccountEntry, long>("AccountE
         builder
             .HasIndex(p => p.FinanceAccountId)
             .IncludeProperties(p => new { p.Amount, p.Direction })
-            .HasDatabaseName("IX_AccountEntries_FinanceAccountId");
+            .HasDatabaseName("IX_LedgerEntries_FinanceAccountId");
 
         builder
             .HasOne(p => p.FinanceAccount)
             .WithMany()
             .HasForeignKey(p => p.FinanceAccountId)
             .OnDelete(DeleteBehavior.Restrict)
-            .HasConstraintName("FK_AccountEntries_FinanceAccounts_FinanceAccountId");
+            .HasConstraintName("FK_LedgerEntries_FinanceAccounts_FinanceAccountId");
 
         builder
             .Property(p => p.Amount)

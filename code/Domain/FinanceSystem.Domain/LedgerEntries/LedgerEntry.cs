@@ -1,14 +1,14 @@
 using FinanceSystem.Domain.FinanceAccounts.Exceptions;
-using FinanceSystem.Domain.AccountEntries.Enums;
-using FinanceSystem.Domain.AccountEntries.Exceptions;
+using FinanceSystem.Domain.LedgerEntries.Enums;
+using FinanceSystem.Domain.LedgerEntries.Exceptions;
 using FinanceSystem.Domain.FinanceAccounts;
 using FinanceSystem.Domain.Payments;
 using FinanceSystem.Domain.Payments.Enums;
 using Shared.Domain.Exceptions;
 
-namespace FinanceSystem.Domain.AccountEntries;
+namespace FinanceSystem.Domain.LedgerEntries;
 
-public class AccountEntry : EntityBase<long>
+public class LedgerEntry : EntityBase<long>
 {
     public long PaymentId { get; private set; }
     public long FinanceAccountId { get; private set; }
@@ -20,11 +20,11 @@ public class AccountEntry : EntityBase<long>
 
     public decimal SignedAmount => Direction == EntryDirection.In ? Amount : -Amount;
 
-    private AccountEntry()
+    private LedgerEntry()
     {
     }
 
-    public AccountEntry(
+    public LedgerEntry(
         long paymentId,
         long financeAccountId,
         Money amount,

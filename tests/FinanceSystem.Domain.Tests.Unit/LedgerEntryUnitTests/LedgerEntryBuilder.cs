@@ -1,11 +1,11 @@
-using FinanceSystem.Domain.AccountEntries;
-using FinanceSystem.Domain.AccountEntries.Enums;
+using FinanceSystem.Domain.LedgerEntries;
+using FinanceSystem.Domain.LedgerEntries.Enums;
 using FinanceSystem.Domain.Payments;
 using FinanceSystem.Domain.Payments.Enums;
 
-namespace FinanceSystem.Domain.Tests.Unit.AccountEntryUnitTests;
+namespace FinanceSystem.Domain.Tests.Unit.LedgerEntryUnitTests;
 
-public class AccountEntryBuilder
+public class LedgerEntryBuilder
 {
     public const long DefaultPaymentId = 12;
     public const long DefaultFinanceAccountId = 13;
@@ -17,30 +17,30 @@ public class AccountEntryBuilder
     private Money Amount { get; set; } = new(DefaultAmount);
     private EntryDirection Direction { get; set; } = DefaultDirection;
 
-    public AccountEntry Build()
+    public LedgerEntry Build()
     {
-        return new AccountEntry(PaymentId, FinanceAccountId, Amount, Direction);
+        return new LedgerEntry(PaymentId, FinanceAccountId, Amount, Direction);
     }
 
-    public AccountEntryBuilder WithPaymentId(long paymentId)
+    public LedgerEntryBuilder WithPaymentId(long paymentId)
     {
         PaymentId = paymentId;
         return this;
     }
 
-    public AccountEntryBuilder WithFinanceAccountId(long financeAccountId)
+    public LedgerEntryBuilder WithFinanceAccountId(long financeAccountId)
     {
         FinanceAccountId = financeAccountId;
         return this;
     }
 
-    public AccountEntryBuilder WithAmount(Money amount)
+    public LedgerEntryBuilder WithAmount(Money amount)
     {
         Amount = amount;
         return this;
     }
 
-    public AccountEntryBuilder WithDirection(EntryDirection direction)
+    public LedgerEntryBuilder WithDirection(EntryDirection direction)
     {
         Direction = direction;
         return this;

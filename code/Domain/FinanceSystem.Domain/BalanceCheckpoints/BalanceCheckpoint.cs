@@ -1,6 +1,6 @@
 using FinanceSystem.Domain.FinanceAccounts.Exceptions;
 using FinanceSystem.Domain.BalanceCheckpoints.Exceptions;
-using FinanceSystem.Domain.AccountEntries;
+using FinanceSystem.Domain.LedgerEntries;
 using FinanceSystem.Domain.FinanceAccounts;
 using FinanceSystem.Domain.Payments;
 using FinanceSystem.Domain.Payments.Enums;
@@ -15,7 +15,7 @@ public class BalanceCheckpoint : EntityBase<long>
     public decimal Balance { get; private set; }
 
     public FinanceAccount? FinanceAccount { get; private set; }
-    public AccountEntry? UpToEntry { get; private set; }
+    public LedgerEntry? UpToEntry { get; private set; }
 
     private BalanceCheckpoint()
     {

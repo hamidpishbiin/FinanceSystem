@@ -71,7 +71,7 @@ Recorded decisions win over these rules. Flag the tension once if it matters, ne
 | EV-ENT-2 | Identity must be unique, immutable once assigned, and survive persistence. The model defines what "same thing" means. | Identity is a domain decision, not a technical accident. | Public/settable `Id`; identity reassigned after creation; reconstitution generating a new Id. | [93–96], [145] |
 | EV-ENT-3 | Decide deliberately whether identity comes from outside (external key) or is generated, and who generates it. | Determines constructor shape, factory responsibility and integration. | Constructor accepts an `id` for a DB-generated key, or a DB key used where an external business id exists. | [94–96], [144–145] |
 | EV-ENT-4 | Keep entities spare: identity, attributes used to find/match it, and essential behaviour. Push other data into VOs or associated objects. | Bloated entities hide their identity and core role. | Entities accumulating gateway responses, display fields or unrelated configuration. | [93–94] |
-| EV-ENT-5 | Business-meaningful events that "happened twice with the same values" are still two entities. | Value equality would merge them. | Deduplicating `AccountEntry` or payments by amount+date. | [92] |
+| EV-ENT-5 | Business-meaningful events that "happened twice with the same values" are still two entities. | Value equality would merge them. | Deduplicating `LedgerEntry` or payments by amount+date. | [92] |
 
 ## 4. Value objects  `EV-VO`
 
@@ -94,7 +94,7 @@ Recorded decisions win over these rules. Flag the tension once if it matters, ne
 | EV-AGG-4 | Every committed change leaves *all* invariants of the aggregate satisfied. | Partial updates create states the model forbids. | A method that changes state and expects a second call to "fix" it; invariant enforced only on some code paths. | [129] |
 | EV-AGG-5 | Rules spanning aggregates are *eventually* consistent (events/batches), not enforced in one transaction. | Cross-aggregate locking causes contention and coupling. | One command mutating several aggregates to keep them in lockstep — check whether the rule truly needs atomicity. | [128] |
 | EV-AGG-6 | Draw boundaries from business knowledge: what must be consistent, contention, rate of change. Copy volatile data from shared objects into the aggregate when it's a point-in-time fact. | Evans copies the part price into the PO line item. | An aggregate reading "live" data from another aggregate to compute a stored amount (fees, rates, prices) instead of snapshotting it. | [130–135] |
-| EV-AGG-7 | High-frequency, low-contention records (event logs, handling events) are often their own aggregate rather than a growing collection inside another. | Avoids locking the parent on every append. | `AccountEntry`/history appended through a large parent aggregate on every operation. | [170–171], [177–179] |
+| EV-AGG-7 | High-frequency, low-contention records (event logs, handling events) are often their own aggregate rather than a growing collection inside another. | Avoids locking the parent on every append. | `LedgerEntry`/history appended through a large parent aggregate on every operation. | [170–171], [177–179] |
 | EV-AGG-8 | Delete/archive removes everything inside the boundary as one unit. | Orphans and dangling references. | Deleting a root without its children, or children without the root's consent. | [129] |
 | EV-AGG-9 | Inner entities need only local identity. | Global ids for inner parts invite outside references. | Child entities with globally queried ids. | [127–128] |
 

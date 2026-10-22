@@ -1,31 +1,31 @@
 using FinanceSystem.Domain.FinanceAccounts.Exceptions;
-using FinanceSystem.Domain.AccountEntries.Enums;
-using FinanceSystem.Domain.AccountEntries.Exceptions;
+using FinanceSystem.Domain.LedgerEntries.Enums;
+using FinanceSystem.Domain.LedgerEntries.Exceptions;
 using FinanceSystem.Domain.Payments;
 using FinanceSystem.Domain.Payments.Enums;
 using FluentAssertions;
 using Shared.Domain.Exceptions;
 
-namespace FinanceSystem.Domain.Tests.Unit.AccountEntryUnitTests;
+namespace FinanceSystem.Domain.Tests.Unit.LedgerEntryUnitTests;
 
-public class AccountEntryTests
+public class LedgerEntryTests
 {
-    private readonly AccountEntryBuilder _builder;
+    private readonly LedgerEntryBuilder _builder;
 
-    public AccountEntryTests()
+    public LedgerEntryTests()
     {
-        _builder = new AccountEntryBuilder();
+        _builder = new LedgerEntryBuilder();
     }
 
     [Fact]
-    public void Create_should_properly_create_accountEntry()
+    public void Create_should_properly_create_ledgerEntry()
     {
-        var accountEntry = _builder.Build();
+        var ledgerEntry = _builder.Build();
 
-        accountEntry.PaymentId.Should().Be(AccountEntryBuilder.DefaultPaymentId);
-        accountEntry.FinanceAccountId.Should().Be(AccountEntryBuilder.DefaultFinanceAccountId);
-        accountEntry.Amount.Should().Be(AccountEntryBuilder.DefaultAmount);
-        accountEntry.Direction.Should().Be(AccountEntryBuilder.DefaultDirection);
+        ledgerEntry.PaymentId.Should().Be(LedgerEntryBuilder.DefaultPaymentId);
+        ledgerEntry.FinanceAccountId.Should().Be(LedgerEntryBuilder.DefaultFinanceAccountId);
+        ledgerEntry.Amount.Should().Be(LedgerEntryBuilder.DefaultAmount);
+        ledgerEntry.Direction.Should().Be(LedgerEntryBuilder.DefaultDirection);
     }
 
     [Theory]
@@ -35,9 +35,9 @@ public class AccountEntryTests
         EntryDirection direction,
         decimal expected)
     {
-        var accountEntry = _builder.WithDirection(direction).Build();
+        var ledgerEntry = _builder.WithDirection(direction).Build();
 
-        accountEntry.SignedAmount.Should().Be(expected);
+        ledgerEntry.SignedAmount.Should().Be(expected);
     }
 
     [Theory]

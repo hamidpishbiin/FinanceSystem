@@ -1,4 +1,4 @@
-using FinanceSystem.Domain.AccountEntries;
+using FinanceSystem.Domain.LedgerEntries;
 using FinanceSystem.Domain.FinanceAccounts;
 using FinanceSystem.Domain.BalanceCheckpoints;
 
@@ -37,7 +37,7 @@ public class BalanceCheckpointMapping() : EntityBaseMap<BalanceCheckpoint, long>
             .WithMany()
             .HasForeignKey(p => p.UpToEntryId)
             .OnDelete(DeleteBehavior.Restrict)
-            .HasConstraintName("FK_BalanceCheckpoints_AccountEntries_UpToEntryId");
+            .HasConstraintName("FK_BalanceCheckpoints_LedgerEntries_UpToEntryId");
 
         builder
             .Property(p => p.Balance)

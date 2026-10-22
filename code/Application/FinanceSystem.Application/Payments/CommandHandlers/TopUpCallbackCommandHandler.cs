@@ -1,8 +1,8 @@
 using FinanceSystem.Application.Contracts.Payments.Command;
 using FinanceSystem.Application.Contracts.Payments.Events;
 using FinanceSystem.Application.Payments.Gateways;
-using FinanceSystem.Domain.AccountEntries;
-using FinanceSystem.Domain.AccountEntries.Enums;
+using FinanceSystem.Domain.LedgerEntries;
+using FinanceSystem.Domain.LedgerEntries.Enums;
 using FinanceSystem.Domain.FinanceAccounts;
 using FinanceSystem.Domain.FinanceAccounts.Exceptions;
 using FinanceSystem.Domain.Payments;
@@ -15,7 +15,7 @@ namespace FinanceSystem.Application.Payments.CommandHandlers;
 public class TopUpCallbackCommandHandler(
     IPaymentRepository repository,
     IFinanceAccountRepository financeAccountRepository,
-    IAccountEntryRepository accountEntryRepository,
+    ILedgerEntryRepository ledgerEntryRepository,
     IPspGatewayFactory pspGatewayFactory,
     IUnitOfWork unitOfWork,
     IEventPublisher publisher,
@@ -107,11 +107,11 @@ public class TopUpCallbackCommandHandler(
 
         Guard<FinanceAccountNotFoundException>.AgainstNull(userAccount);
 
-        var userEntry = new AccountEntry(payment.Id, userAccount!.Id, amount, EntryDirection.In);
+        var userEntry = new LedgerEntry(payment.Id, userAccount!.Id, amount, EntryDirection.In);
 
         userAccount.ApplyEntry(userEntry, occurredAt);
 
-        await accountEntryRepository.AddAsync(userEntry);
+        await ledgerEntryRepository.AddAsync(userEntry);
     }
 
     private async Task FailAsync(Payment payment, string resultPageUrl, PaymentFailureReason? failureReason = null)

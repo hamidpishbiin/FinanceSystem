@@ -1,5 +1,5 @@
-using FinanceSystem.Domain.AccountEntries;
-using FinanceSystem.Domain.AccountEntries.Enums;
+using FinanceSystem.Domain.LedgerEntries;
+using FinanceSystem.Domain.LedgerEntries.Enums;
 using FinanceSystem.Domain.AccountTypeRules;
 using FinanceSystem.Domain.FinanceAccounts.Enums;
 using FinanceSystem.Domain.FinanceAccounts.Exceptions;
@@ -41,7 +41,7 @@ public class FinanceAccount : EntityBase<long>
         AllowNegativeBalance = allowNegativeBalance;
     }
 
-    public void ApplyEntry(AccountEntry entry, DateTimeOffset occurredAt)
+    public void ApplyEntry(LedgerEntry entry, DateTimeOffset occurredAt)
     {
         Guard<NullEntryException>.AgainstNull(entry);
         Guard<EntryFinanceAccountMismatchException>.IsTrue(entry.FinanceAccountId != Id);

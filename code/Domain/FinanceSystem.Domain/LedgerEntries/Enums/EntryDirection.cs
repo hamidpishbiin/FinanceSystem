@@ -1,4 +1,4 @@
-namespace FinanceSystem.Domain.AccountEntries.Enums;
+namespace FinanceSystem.Domain.LedgerEntries.Enums;
 
 public enum EntryDirection : byte
 {
