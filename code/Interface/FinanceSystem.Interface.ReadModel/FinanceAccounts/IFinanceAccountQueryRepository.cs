@@ -5,5 +5,5 @@ namespace FinanceSystem.Interface.ReadModel.FinanceAccounts;
 
 public interface IFinanceAccountQueryRepository : IRepository
 {
-    Task<IEnumerable<FinanceAccount>> GetActiveAccountsAsync(long userId, decimal billAmount, CancellationToken cancellationToken);
+    Task<List<FinanceAccount>> GetUserAccountsAsync(long userId, CancellationToken cancellationToken);
 }

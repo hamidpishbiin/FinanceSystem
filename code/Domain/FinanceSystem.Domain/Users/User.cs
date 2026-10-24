@@ -4,12 +4,12 @@ namespace FinanceSystem.Domain.Users;
 
 public class User : EntityBase<long>
 {
-    private const int NationalCodeLength = 10;
+    private const int _nationalCodeLength = 10;
 
-    public string FirstName { get; private set; } = default!;
-    public string LastName { get; private set; } = default!;
-    public string PhoneNumber { get; private set; } = default!;
-    public string NationalCode { get; private set; } = default!;
+    public string FirstName { get; private set; } = string.Empty;
+    public string LastName { get; private set; } = string.Empty;
+    public string PhoneNumber { get; private set; } = string.Empty;
+    public string NationalCode { get; private set; } = string.Empty;
 
     private User()
     {
@@ -32,6 +32,8 @@ public class User : EntityBase<long>
         NationalCode = nationalCode;
     }
 
-    private static bool IsValidNationalCode(string? nationalCode) =>
-        nationalCode is { Length: NationalCodeLength } && nationalCode.All(char.IsAsciiDigit);
+    private static bool IsValidNationalCode(string? nationalCode)
+    {
+        return nationalCode is { Length: _nationalCodeLength } && nationalCode.All(char.IsAsciiDigit);
+    }
 }

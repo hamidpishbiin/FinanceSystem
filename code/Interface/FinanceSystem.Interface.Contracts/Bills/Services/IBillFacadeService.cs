@@ -6,5 +6,10 @@ namespace FinanceSystem.Interface.Contracts.Bills.Services;
 
 public interface IBillFacadeService : IFacadeService
 {
-    Task<JsonResponse<long>> CreateBill(CreateBillModel model, string userId, CancellationToken cancellationToken);
+    [IgnorePermission]
+    Task<JsonResponse<string>> PayWithPspAsync(PspPaymentRequest request, long userId, CancellationToken cancellationToken = default);
+    [IgnorePermission]
+    Task<JsonResponse<long>> CreateBill(CreateBillRequest request, CancellationToken cancellationToken);
+    [IgnorePermission]
+    Task<JsonResponse<string>> PayWithWalletAsync(long billId, long userId, long financeAccountId, CancellationToken cancellationToken);
 }

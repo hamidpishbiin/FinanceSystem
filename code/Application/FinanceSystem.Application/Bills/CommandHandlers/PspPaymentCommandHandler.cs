@@ -1,27 +1,29 @@
 using FinanceSystem.Application.Contracts.Payments.Command;
 using FinanceSystem.Application.Payments.Gateways;
+using FinanceSystem.Domain.Bills;
 using FinanceSystem.Domain.Bills.Services;
 using FinanceSystem.Domain.Payments;
 using FinanceSystem.Domain.Payments.Enums;
 using FinanceSystem.Domain.PaymentServiceProviders.Services;
 
-namespace FinanceSystem.Application.Payments.CommandHandlers;
+namespace FinanceSystem.Application.Bills.CommandHandlers;
 
-public class PayWithPspCommandHandler(
-    IPaymentRepository paymentRepository,
+public class PspPaymentCommandHandler(
+    IBillRepository billRepository,
     IEventPublisher publisher,
     IEventListener listener,
-    TokenEligibilityService tokenEligibilityService,
+    BillEligibilityService billEligibilityService,
     PspSelector pspSelector,
     IPspGatewayFactory pspGatewayFactory,
-    IUnitOfWork unitOfWork)
-    : PaymentCommandHandler<PayWithPspCommand>(paymentRepository, publisher, listener)
+    IUnitOfWork unitOfWork,
+    IPaymentRepository paymentRepository)
+    : BillCommandHandler<PspPaymentCommand>(billRepository, publisher, listener)
 {
-    public override async Task Handle(PayWithPspCommand command, CancellationToken cancellationToken = default)
+    public override async Task Handle(PspPaymentCommand paymentCommand, CancellationToken cancellationToken = default)
     {
-        var bill = await tokenEligibilityService.GetBill(command.Token, command.UserId, cancellationToken);
+        var bill = await billEligibilityService.GetBill(paymentCommand.Token, paymentCommand.UserId, cancellationToken);
 
-        var psp = await pspSelector.SelectAsync(command.PspCode, cancellationToken);
+        var psp = await pspSelector.SelectAsync(paymentCommand.PspCode, cancellationToken);
 
         var payment = Payment.CreatePspPurchasePayment(
             new Money(bill.Amount),
@@ -32,7 +34,7 @@ public class PayWithPspCommandHandler(
             psp.Code,
             Publisher);
 
-        await Repository.AddAsync(payment);
+        await paymentRepository.AddAsync(payment);
 
         await unitOfWork.SaveChangesAsync();
 

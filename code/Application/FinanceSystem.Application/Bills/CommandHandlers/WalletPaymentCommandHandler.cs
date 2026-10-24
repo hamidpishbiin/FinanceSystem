@@ -1,24 +1,27 @@
 using FinanceSystem.Application.Contracts.Payments.Command;
+using FinanceSystem.Domain.Bills;
 using FinanceSystem.Domain.Bills.Services;
 using FinanceSystem.Domain.FinanceAccounts.DomainServices;
 using FinanceSystem.Domain.LedgerEntries;
 using FinanceSystem.Domain.Payments;
 
-namespace FinanceSystem.Application.Payments.CommandHandlers;
+namespace FinanceSystem.Application.Bills.CommandHandlers;
 
-public class PayWithWalletCommandHandler(
-    IPaymentRepository repository,
+public class WalletPaymentCommandHandler(
+    IBillRepository repository,
     IEventPublisher publisher,
     IEventListener listener,
-    TokenEligibilityService tokenEligibilityService,
+    BillEligibilityService billEligibilityService,
     FinanceAccountEligibilityService financeAccountEligibilityService,
-    ILedgerEntryRepository ledgerEntryRepository) : PaymentCommandHandler<PayWithWalletCommand>(repository, publisher, listener)
+    ILedgerEntryRepository ledgerEntryRepository,
+    IPaymentRepository paymentRepository)
+    : BillCommandHandler<WalletPaymentCommand>(repository, publisher, listener)
 {
-    public override async Task Handle(PayWithWalletCommand command, CancellationToken cancellationToken = default)
+    public override async Task Handle(WalletPaymentCommand paymentCommand, CancellationToken cancellationToken = default)
     {
-        var bill = await tokenEligibilityService.GetBill(command.Token, command.UserId, cancellationToken);
+        var bill = await billEligibilityService.GetBill(paymentCommand.BillId, paymentCommand.UserId, cancellationToken);
 
-        var financeAccount = await financeAccountEligibilityService.GetEligibleWalletPurchaseAccountAsync(command.UserId, command.FinanceAccountType, cancellationToken);
+        var financeAccount = await financeAccountEligibilityService.GetEligibleWalletPurchaseAccountAsync(paymentCommand.UserId, paymentCommand.FinanceAccountId, cancellationToken);
 
         var amount = new Money(bill.Amount);
 
@@ -29,7 +32,7 @@ public class PayWithWalletCommandHandler(
             bill.ReferenceId.ToString(),
             Publisher);
 
-        await Repository.AddAsync(payment);
+        await paymentRepository.AddAsync(payment);
 
         var ledgerEntry = LedgerEntry.CreateOutboundEntry(payment.Id, financeAccount.Id, amount);
 

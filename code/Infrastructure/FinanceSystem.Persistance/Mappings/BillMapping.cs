@@ -1,4 +1,5 @@
 using FinanceSystem.Domain.Bills;
+using FinanceSystem.Domain.Users;
 
 namespace FinanceSystem.Persistance.Mappings;
 
@@ -11,7 +12,7 @@ public class BillMapping() : EntityBaseMap<Bill, long>("Bills")
         builder
             .Property(b => b.Id)
             .HasColumnName("Id")
-            .ValueGeneratedOnAdd();
+            .UseHiLo("bill_hilo_seq");
 
         builder
             .Property(b => b.ServiceId)
@@ -26,15 +27,15 @@ public class BillMapping() : EntityBaseMap<Bill, long>("Bills")
             .HasColumnName("Amount");
 
         builder
-            .Property(b => b.FinanceAccountId)
-            .HasColumnName("FinanceAccountId");
+            .Property(b => b.UserId)
+            .HasColumnName("UserId");
 
         builder
-            .HasOne(b => b.FinanceAccount)
+            .HasOne<User>()
             .WithMany()
-            .HasForeignKey(b => b.FinanceAccountId)
+            .HasForeignKey(b => b.UserId)
             .OnDelete(DeleteBehavior.Restrict)
-            .HasConstraintName("FK_Bills_FinanceAccounts_FinanceAccountId");
+            .HasConstraintName("FK_Bills_Users_UserId");
 
         builder.Ignore(b => b.Publisher);
     }

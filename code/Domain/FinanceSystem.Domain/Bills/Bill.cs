@@ -12,8 +12,7 @@ public class Bill : EntityBase<long>, IAggregateRoot
     public IEventPublisher Publisher { get; set; }
     public long ServiceId { get; private set; }
     public long ReferenceId { get; private set; }
-    public long FinanceAccountId { get; private set; }
-    public FinanceAccount FinanceAccount { get; private set; }
+    public long UserId { get; private set; }
     public decimal Amount { get; private set; }
 
     private Bill(){}
@@ -21,18 +20,18 @@ public class Bill : EntityBase<long>, IAggregateRoot
     public Bill(
         long serviceId,
         long referenceId,
-        long financeAccountId,
+        long userId,
         Money amount)
     {
         Guard<InvalidReferenceIdException>.IsTrue(referenceId <= 0);
         Guard<InvalidServiceIdException>.IsTrue(serviceId <= 0);
-        Guard<InvalidFinanceAccountIdException>.IsTrue(financeAccountId <= 0);
+        Guard<InvalidFinanceAccountIdException>.IsTrue(userId <= 0);
         Guard<NullEntryException>.AgainstNull(amount);
         Guard<InvalidMoneyAmountException>.IsTrue(amount.Value == 0);
 
         ServiceId = serviceId;
         ReferenceId = referenceId;
-        FinanceAccountId = financeAccountId;
+        UserId = userId;
         Amount = amount.Value;
     }
 }

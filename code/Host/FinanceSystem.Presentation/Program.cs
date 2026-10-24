@@ -53,35 +53,17 @@ try
 
 
     builder.Services.AddOptions<ConnectionStrings>()
-        .Bind(builder.Configuration.GetSection(ConnectionStrings.SectionName))
-        .Validate(
-            c => !string.IsNullOrWhiteSpace(c.DefaultConnection),
-            $"{ConnectionStrings.SectionName}:DefaultConnection is required.")
-        .Validate(
-            c => !string.IsNullOrWhiteSpace(c.ReadOnlyConnection),
-            $"{ConnectionStrings.SectionName}:ReadOnlyConnection is required.")
-        .ValidateOnStart();
-    builder.Services.AddOptions<PspOptions>()
-        .Bind(builder.Configuration.GetSection(PspOptions.SectionName))
-        .Validate(
-            o => IsConfigured(o.Saman),
-            $"{PspOptions.SectionName}:Saman needs absolute TopUpCallBackUrl, TopUpResultPageUrl, PaymentCallBackUrl, PaymentResultPageUrl and BaseUrl, MerchantId, TerminalId, CredentialsRef and a positive TimeoutInSeconds.")
-        .Validate(
-            o => IsConfigured(o.BehPardakht),
-            $"{PspOptions.SectionName}:BehPardakht needs absolute TopUpCallBackUrl, TopUpResultPageUrl, PaymentCallBackUrl, PaymentResultPageUrl and BaseUrl, MerchantId, TerminalId, CredentialsRef and a positive TimeoutInSeconds.")
-        .ValidateOnStart();
+        .Bind(builder.Configuration.GetSection(ConnectionStrings.SectionName));
 
-    static bool IsConfigured(PspSettings? psp) =>
-        psp is not null
-        && Uri.TryCreate(psp.TopUpCallBackUrl, UriKind.Absolute, out _)
-        && Uri.TryCreate(psp.TopUpResultPageUrl, UriKind.Absolute, out _)
-        && Uri.TryCreate(psp.PaymentCallBackUrl, UriKind.Absolute, out _)
-        && Uri.TryCreate(psp.PaymentResultPageUrl, UriKind.Absolute, out _)
-        && Uri.TryCreate(psp.BaseUrl, UriKind.Absolute, out _)
-        && !string.IsNullOrWhiteSpace(psp.MerchantId)
-        && !string.IsNullOrWhiteSpace(psp.TerminalId)
-        && !string.IsNullOrWhiteSpace(psp.CredentialsRef)
-        && psp.TimeoutInSeconds > 0;
+    builder.Services.AddOptions<PspOptions>()
+        .Bind(builder.Configuration.GetSection(PspOptions.SectionName));
+
+    builder
+        .Services
+        .AddOptions<PaymentResultPageConfig>()
+        .Bind(builder.Configuration.GetSection(PaymentResultPageConfig.SectionName));
+
+
     var connectionStrings = builder.Configuration.GetSection(ConnectionStrings.SectionName).Get<ConnectionStrings>()
         ?? throw new InvalidOperationException($"Configuration section '{ConnectionStrings.SectionName}' is missing.");
 

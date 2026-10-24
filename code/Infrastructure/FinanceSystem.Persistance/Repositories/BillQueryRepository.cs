@@ -19,6 +19,6 @@ internal class BillQueryRepository : IBillQueryRepository
 
     public async Task<Bill?> GetAsync(long billId, long userId, CancellationToken cancellationToken)
     {
-        return await _queryDbSet.FirstOrDefaultAsync(b => b.Id == billId && b.FinanceAccountId == userId, cancellationToken);
+        return await _queryDbSet.FirstOrDefaultAsync(b => b.Id == billId && b.UserId == userId, cancellationToken);
     }
 }

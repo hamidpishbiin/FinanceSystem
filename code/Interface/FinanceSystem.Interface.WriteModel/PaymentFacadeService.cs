@@ -1,33 +1,12 @@
 using FinanceSystem.Application.Contracts.Payments.Command;
 using FinanceSystem.Application.Contracts.Payments.Events;
-using FinanceSystem.Domain.Contract.Payments;
 using FinanceSystem.Domain.PaymentServiceProviders.Enums;
-using FinanceSystem.Interface.Contracts.Payments.Models;
 using FinanceSystem.Interface.Contracts.Payments.Services;
 
 namespace FinanceSystem.Interface.WriteModel;
 
 public class PaymentFacadeService(ICommandBus commandBus, IEventListener listener) : IPaymentFacadeService
 {
-    public async Task<JsonResponse<string>> PayWithPspAsync(PspPaymentModel model, CancellationToken cancellationToken = default)
-    {
-        var ipgUrl = string.Empty;
-
-        await listener.Subscribe(new EventHandlerAction<PspTokenReceivedEvent>(e =>
-        {
-            ipgUrl = e.IpgUrl;
-        }));
-
-        await commandBus.Dispatch(new PayWithPspCommand()
-        {
-            Token = long.Parse(model.Token),
-            UserId = model.UserId!.Value,
-            PspCode = model.PspCode
-        }, cancellationToken);
-
-        return JsonResponse<string>.Success(ipgUrl);
-    }
-
     public async Task<JsonResponse<string>> ProcessPaymentCallbackAsync(string psp, Dictionary<string, string> fields, CancellationToken cancellationToken)
     {
         var outcome = PaymentOutcome.Failure;
@@ -52,10 +31,5 @@ public class PaymentFacadeService(ICommandBus commandBus, IEventListener listene
         }, cancellationToken);
 
         return JsonResponse<string>.Success($"{resultPageUrl}?status={outcome.ToString().ToLowerInvariant()}");
-    }
-
-    public async Task<JsonResponse<string>> PayWithWalletAsync(WalletPaymentModel model, CancellationToken cancellationToken)
-    {
-        return JsonResponse<string>.Success("");
     }
 }

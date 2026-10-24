@@ -13,10 +13,10 @@ internal class FinanceAccountQueryRepository : IFinanceAccountQueryRepository
         _queryDbSet = queryContext.DbSet<FinanceAccount>();
     }
 
-    public async Task<IEnumerable<FinanceAccount>> GetActiveAccountsAsync(long userId, decimal billAmount, CancellationToken cancellationToken)
+    public async Task<List<FinanceAccount>> GetUserAccountsAsync(long userId, CancellationToken cancellationToken)
     {
         return await _queryDbSet
-            .Where(fa => fa.UserId == userId && fa.State == FinanceAccountState.Active && fa.CachedBalance >= billAmount)
+            .Where(fa => fa.UserId == userId)
             .ToListAsync(cancellationToken);
     }
 }
