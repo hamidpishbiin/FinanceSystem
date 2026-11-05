@@ -79,6 +79,22 @@ public class PspExchangeLog : EntityBase<long>
             httpStatus,
             durationMs);
     }
+
+    public static PspExchangeLog CreateReverseLog(
+        long referenceId,
+        string? requestBody,
+        string? responseBody,
+        int? httpStatus,
+        int? durationMs)
+    {
+        return new PspExchangeLog(
+            PspExchangeStep.Reverse,
+            referenceId,
+            requestBody,
+            responseBody,
+            httpStatus,
+            durationMs);
+    }
 }
 
 

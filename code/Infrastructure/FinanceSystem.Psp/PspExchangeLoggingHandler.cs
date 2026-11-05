@@ -52,6 +52,12 @@ public class PspExchangeLoggingHandler(
                     responseBody,
                     (int?)response?.StatusCode,
                     (int)stopWatch.ElapsedMilliseconds),
+                PspExchangeStep.Reverse => PspExchangeLog.CreateReverseLog(
+                    paymentId,
+                    requestBody,
+                    responseBody,
+                    (int?)response?.StatusCode,
+                    (int)stopWatch.ElapsedMilliseconds),
                 _ => throw new ArgumentOutOfRangeException($"Invalid step {step}")
             });
         }
