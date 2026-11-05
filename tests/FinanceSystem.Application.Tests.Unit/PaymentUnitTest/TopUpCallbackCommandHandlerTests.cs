@@ -4,12 +4,15 @@ using FinanceSystem.Application.Gateways;
 using FinanceSystem.Application.Payments.CommandHandlers;
 using FinanceSystem.Domain.LedgerEntries;
 using FinanceSystem.Domain.LedgerEntries.Enums;
+using FinanceSystem.Domain.AccountTypeRules;
 using FinanceSystem.Domain.FinanceAccounts;
+using FinanceSystem.Domain.FinanceAccounts.DomainServices;
 using FinanceSystem.Domain.FinanceAccounts.Enums;
 using FinanceSystem.Domain.Payments;
 using FinanceSystem.Domain.Payments.Enums;
 using FinanceSystem.Domain.Payments.Exceptions;
 using FinanceSystem.Domain.PaymentServiceProviders.Enums;
+using FinanceSystem.Domain.Tests.Unit.AccountTypeRuleUnitTests;
 using FinanceSystem.Domain.Tests.Unit.PaymentUnitTests;
 using FluentAssertions;
 using Microsoft.Extensions.Options;
@@ -30,6 +33,7 @@ public class TopUpCallbackCommandHandlerTests
 
     private readonly IPaymentRepository _paymentRepository = Substitute.For<IPaymentRepository>();
     private readonly IFinanceAccountRepository _financeAccountRepository = Substitute.For<IFinanceAccountRepository>();
+    private readonly IAccountTypeRuleRepository _accountTypeRuleRepository = Substitute.For<IAccountTypeRuleRepository>();
     private readonly ILedgerEntryRepository _ledgerEntryRepository = Substitute.For<ILedgerEntryRepository>();
     private readonly IPspGatewayFactory _pspGatewayFactory = Substitute.For<IPspGatewayFactory>();
     private readonly IPspGateway _pspGateway = Substitute.For<IPspGateway>();
@@ -43,10 +47,13 @@ public class TopUpCallbackCommandHandlerTests
         _pspGateway.Code.Returns(PspCode.Saman);
         _pspGateway.ParseCallback(Arg.Any<IReadOnlyDictionary<string, string>>()).Returns(_ => _callback);
         _pspGatewayFactory.Get(PspCode.Saman).Returns(_pspGateway);
+        _accountTypeRuleRepository.GetTopUpRules(Arg.Any<CancellationToken>())
+            .Returns(new List<AccountTypeRule> { new AccountTypeRuleBuilder().Build() });
+        ArrangeUserAccount();
 
         _handler = new TopUpCallbackCommandHandler(
             _paymentRepository,
-            _financeAccountRepository,
+            new FinanceAccountEligibilityService(_financeAccountRepository, _accountTypeRuleRepository),
             _ledgerEntryRepository,
             _pspGatewayFactory,
             _unitOfWork,
@@ -249,7 +256,8 @@ public class TopUpCallbackCommandHandlerTests
             FinanceAccountType.MainWallet, FinanceAccountState.Active, 1, new Money(0), DateTimeOffset.UtcNow, false);
         SetId(userAccount, UserAccountId);
 
-        _financeAccountRepository.GetByIdAsync(UserAccountId, Arg.Any<CancellationToken>()).Returns(userAccount);
+        _financeAccountRepository.GetByUserIdAsync(PaymentBuilder.DefaultUserId, Arg.Any<CancellationToken>())
+            .Returns(new List<FinanceAccount> { userAccount });
 
         return userAccount;
     }

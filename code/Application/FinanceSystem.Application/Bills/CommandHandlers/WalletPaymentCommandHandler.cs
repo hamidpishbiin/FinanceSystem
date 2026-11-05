@@ -27,7 +27,7 @@ public class WalletPaymentCommandHandler(
 
         var payment = Payment.CreateWalletPurchasePayment(
             amount,
-            financeAccount.Id,
+            paymentCommand.UserId,
             bill.ServiceId.ToString(),
             bill.ReferenceId.ToString(),
             Publisher);

@@ -29,7 +29,7 @@ public class PaymentTests
         payment.Direction.Should().Be(PaymentDirection.Inbound);
         payment.State.Should().Be(PaymentState.Initiated);
         payment.Amount.Should().Be(PaymentBuilder.DefaultAmount);
-        payment.FinanceAccountId.Should().Be(PaymentBuilder.DefaultFinanceAccountId);
+        payment.UserId.Should().Be(PaymentBuilder.DefaultUserId);
         payment.ServiceId.Should().Be(PaymentBuilder.DefaultServiceId);
         payment.ReferenceId.Should().Be(PaymentBuilder.DefaultReferenceId);
         payment.BillId.Should().BeNull();
@@ -47,7 +47,7 @@ public class PaymentTests
         payment.Direction.Should().Be(PaymentDirection.Inbound);
         payment.State.Should().Be(PaymentState.Initiated);
         payment.Amount.Should().Be(PaymentBuilder.DefaultAmount);
-        payment.FinanceAccountId.Should().Be(PaymentBuilder.DefaultFinanceAccountId);
+        payment.UserId.Should().Be(PaymentBuilder.DefaultUserId);
         payment.ServiceId.Should().Be(PaymentBuilder.DefaultServiceId);
         payment.ReferenceId.Should().Be(PaymentBuilder.DefaultReferenceId);
         payment.BillId.Should().Be(PaymentBuilder.DefaultBillId);
@@ -80,11 +80,11 @@ public class PaymentTests
     [InlineData(TopUp, -1)]
     [InlineData(PspPurchase, 0)]
     [InlineData(PspPurchase, -1)]
-    public void Factories_should_throw_when_financeAccountId_is_not_positive(string factory, long financeAccountId)
+    public void Factories_should_throw_when_userId_is_not_positive(string factory, long userId)
     {
-        Action act = () => Build(_builder.WithFinanceAccountId(financeAccountId), factory);
+        Action act = () => Build(_builder.WithUserId(userId), factory);
 
-        act.Should().Throw<InvalidFinanceAccountIdException>();
+        act.Should().Throw<InvalidUserIdException>();
     }
 
     [Theory]

@@ -8,14 +8,14 @@ namespace FinanceSystem.Domain.Tests.Unit.PaymentUnitTests;
 public class PaymentBuilder
 {
     public const decimal DefaultAmount = 250_000;
-    public const long DefaultFinanceAccountId = 22;
+    public const long DefaultUserId = 22;
     public const string DefaultServiceId = "checkout-service";
     public const string DefaultReferenceId = "ext-ref-9931";
     public const long DefaultBillId = 41;
     public const PspCode DefaultPspCode = Domain.PaymentServiceProviders.Enums.PspCode.Saman;
 
     private Money Amount { get; set; } = new(DefaultAmount);
-    private long FinanceAccountId { get; set; } = DefaultFinanceAccountId;
+    private long UserId { get; set; } = DefaultUserId;
     private string ServiceId { get; set; } = DefaultServiceId;
     private string ReferenceId { get; set; } = DefaultReferenceId;
     private long BillId { get; set; } = DefaultBillId;
@@ -27,7 +27,7 @@ public class PaymentBuilder
     {
         return Payment.CreateTopUpPayment(
             Amount,
-            FinanceAccountId,
+            UserId,
             ServiceId,
             ReferenceId,
             PspCode,
@@ -38,7 +38,7 @@ public class PaymentBuilder
     {
         return Payment.CreatePspPurchasePayment(
             Amount,
-            FinanceAccountId,
+            UserId,
             ServiceId,
             ReferenceId,
             BillId,
@@ -52,9 +52,9 @@ public class PaymentBuilder
         return this;
     }
 
-    public PaymentBuilder WithFinanceAccountId(long financeAccountId)
+    public PaymentBuilder WithUserId(long userId)
     {
-        FinanceAccountId = financeAccountId;
+        UserId = userId;
         return this;
     }
 

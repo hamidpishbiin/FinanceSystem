@@ -10,12 +10,12 @@ public class BillBuilder
     public IEventPublisher Publisher { get; private set; } = Substitute.For<IEventPublisher>();
     public const long DefaultServiceId = 12;
     public const long DefaultReferenceId = 1234;
-    public const long DefaultFinanceAccountId = 78645;
+    public const long DefaultUserId = 78645;
     public const decimal DefaultAmount = 8765;
 
     private long ServiceId { get; set; } = DefaultServiceId;
     private long ReferenceId { get; set; } = DefaultReferenceId;
-    private long FinanceAccountId { get; set; } = DefaultFinanceAccountId;
+    private long UserId { get; set; } = DefaultUserId;
     private decimal Amount { get; set; } = DefaultAmount;
 
     public Bill Build()
@@ -23,7 +23,7 @@ public class BillBuilder
         return new Bill(
             ServiceId,
             ReferenceId,
-            FinanceAccountId,
+            UserId,
             new Money(Amount));
     }
 
@@ -39,9 +39,9 @@ public class BillBuilder
         return this;
     }
 
-    public BillBuilder WithFinanceAccountId(long financeAccountId)
+    public BillBuilder WithUserId(long userId)
     {
-        FinanceAccountId = financeAccountId;
+        UserId = userId;
         return this;
     }
 

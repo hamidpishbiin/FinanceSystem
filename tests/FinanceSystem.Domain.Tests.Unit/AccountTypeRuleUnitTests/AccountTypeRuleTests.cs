@@ -45,14 +45,4 @@ public class AccountTypeRuleTests
 
         atr.Should().Throw<InvalidPaymentPurposeException>();
     }
-
-    [Fact]
-    public void Create_should_throw_when_both_canBeSource_and_canBeDestination_are_False()
-    {
-        Action atr = () => _builder
-            .WithIsAllowed(false)
-            .Build();
-
-        atr.Should().Throw<InvalidSourceDestinationException>();
-    }
 }

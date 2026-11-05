@@ -17,7 +17,7 @@ public class BillTests
 
         bill.ServiceId.Should().Be(BillBuilder.DefaultServiceId);
         bill.ReferenceId.Should().Be(BillBuilder.DefaultReferenceId);
-        bill.FinanceAccountId.Should().Be(BillBuilder.DefaultFinanceAccountId);
+        bill.UserId.Should().Be(BillBuilder.DefaultUserId);
         bill.Amount.Should().Be(BillBuilder.DefaultAmount);
     }
 
@@ -44,9 +44,9 @@ public class BillTests
     [Theory]
     [InlineData(0)]
     [InlineData(-1)]
-    public void Create_should_throw_if_financeAccountId_is_zero_or_negative(long financeAccountId)
+    public void Create_should_throw_if_userId_is_zero_or_negative(long userId)
     {
-        Action act = () => _builder.WithFinanceAccountId(financeAccountId).Build();
+        Action act = () => _builder.WithUserId(userId).Build();
 
         act.Should().Throw<InvalidFinanceAccountIdException>();
     }

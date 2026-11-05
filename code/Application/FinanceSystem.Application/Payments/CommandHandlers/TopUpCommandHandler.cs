@@ -30,7 +30,7 @@ public class TopUpCommandHandler(
 
         Guard<UserNotFoundException>.AgainstNull(user);
 
-        var userFinanceAccount = await financeAccountEligibilityService.GetEligibleAccountForTopUpAsync(user!.Id, cancellationToken);
+        await financeAccountEligibilityService.GetEligibleAccountForTopUpAsync(user!.Id, cancellationToken);
 
         var amount = new Money(command.Amount);
 
@@ -38,7 +38,7 @@ public class TopUpCommandHandler(
 
         var payment = Payment.CreateTopUpPayment(
             amount,
-            userFinanceAccount.Id,
+            user.Id,
             _serviceId,
             guidGenerator.New().ToString(),
             psp.Code,

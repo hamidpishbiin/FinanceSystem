@@ -1,6 +1,6 @@
 using FinanceSystem.Domain.Bills;
-using FinanceSystem.Domain.FinanceAccounts;
 using FinanceSystem.Domain.Payments;
+using FinanceSystem.Domain.Users;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.ValueGeneration;
 
@@ -33,8 +33,15 @@ public class PaymentMapping() : EntityBaseMap<Payment, long>("Payments")
             .HasColumnName("Amount");
 
         builder
-            .Property(p => p.FinanceAccountId)
-            .HasColumnName("FinanceAccountId");
+            .Property(p => p.UserId)
+            .HasColumnName("UserId");
+
+        builder
+            .HasOne(p => p.User)
+            .WithMany()
+            .HasForeignKey(p => p.UserId)
+            .OnDelete(DeleteBehavior.Restrict)
+            .HasConstraintName("FK_Payments_Users_UserId");
 
         builder
             .Property(p => p.Direction)
@@ -150,13 +157,6 @@ public class PaymentMapping() : EntityBaseMap<Payment, long>("Payments")
         builder
             .Property(p => p.SucceededAtUtc)
             .HasColumnName("SucceededAtUtc");
-
-        builder
-            .HasOne(p => p.FinanceAccount)
-            .WithMany()
-            .HasForeignKey(p => p.FinanceAccountId)
-            .OnDelete(DeleteBehavior.Restrict)
-            .HasConstraintName("FK_Payments_FinanceAccounts_FinanceAccountId");
 
         builder.Ignore(p => p.Publisher);
     }

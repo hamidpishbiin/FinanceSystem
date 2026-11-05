@@ -47,7 +47,8 @@ public class PspPaymentCallbackCommandHandlerTests
             {
                 Saman = new PspSettings { PaymentResultPageUrl = ResultPageUrl },
                 BehPardakht = new PspSettings { PaymentResultPageUrl = ResultPageUrl }
-            }));
+            }),
+            new PaymentEligibilityService(_paymentRepository));
     }
 
     [Fact]

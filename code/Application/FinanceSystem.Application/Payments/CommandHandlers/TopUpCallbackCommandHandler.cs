@@ -4,7 +4,7 @@ using FinanceSystem.Application.Gateways;
 using FinanceSystem.Domain.LedgerEntries;
 using FinanceSystem.Domain.LedgerEntries.Enums;
 using FinanceSystem.Domain.FinanceAccounts;
-using FinanceSystem.Domain.FinanceAccounts.Exceptions;
+using FinanceSystem.Domain.FinanceAccounts.DomainServices;
 using FinanceSystem.Domain.Payments;
 using FinanceSystem.Domain.Payments.Enums;
 using FinanceSystem.Domain.Payments.Exceptions;
@@ -14,7 +14,7 @@ namespace FinanceSystem.Application.Payments.CommandHandlers;
 
 public class TopUpCallbackCommandHandler(
     IPaymentRepository repository,
-    IFinanceAccountRepository financeAccountRepository,
+    FinanceAccountEligibilityService financeAccountEligibilityService,
     ILedgerEntryRepository ledgerEntryRepository,
     IPspGatewayFactory pspGatewayFactory,
     IUnitOfWork unitOfWork,
@@ -72,6 +72,8 @@ public class TopUpCallbackCommandHandler(
             return;
         }
 
+        var userAccount = await financeAccountEligibilityService.GetEligibleAccountForTopUpAsync(payment.UserId, cancellationToken);
+
         payment.MarkVerifying();
 
         await unitOfWork.SaveChangesAsync();
@@ -93,21 +95,17 @@ public class TopUpCallbackCommandHandler(
 
         await payment.MarkSucceeded();
 
-        await CreditWalletAsync(payment, cancellationToken);
+        await CreditWalletAsync(payment, userAccount);
 
         await PublishOutcome(TopUpOutcome.Success, resultPageUrl);
     }
 
-    private async Task CreditWalletAsync(Payment payment, CancellationToken cancellationToken)
+    private async Task CreditWalletAsync(Payment payment, FinanceAccount userAccount)
     {
         var amount = new Money(payment.Amount);
         var occurredAt = DateTimeOffset.UtcNow;
 
-        var userAccount = await financeAccountRepository.GetByIdAsync(payment.FinanceAccountId, cancellationToken);
-
-        Guard<FinanceAccountNotFoundException>.AgainstNull(userAccount);
-
-        var userEntry = LedgerEntry.CreateInboundEntry(payment.Id, userAccount!.Id, amount);
+        var userEntry = LedgerEntry.CreateInboundEntry(payment.Id, userAccount.Id, amount);
 
         userAccount.ApplyEntry(userEntry, occurredAt);
 

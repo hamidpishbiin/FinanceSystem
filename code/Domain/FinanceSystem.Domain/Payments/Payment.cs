@@ -1,11 +1,11 @@
 using FinanceSystem.Domain.FinanceAccounts.Exceptions;
 using FinanceSystem.Domain.Contract.Payments;
-using FinanceSystem.Domain.FinanceAccounts;
 using FinanceSystem.Domain.PaymentServiceProviders;
 using FinanceSystem.Domain.PaymentServiceProviders.Enums;
 using FinanceSystem.Domain.PaymentServiceProviders.Exceptions;
 using FinanceSystem.Domain.Payments.Enums;
 using FinanceSystem.Domain.Payments.Exceptions;
+using FinanceSystem.Domain.Users;
 using Shared.Domain.Exceptions;
 
 namespace FinanceSystem.Domain.Payments;
@@ -20,7 +20,7 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
     public PaymentChannel Channel { get; private set; }
     public PaymentState State { get; private set; }
 
-    public long FinanceAccountId { get; private set; }
+    public long UserId { get; private set; }
     public PaymentDirection Direction { get; private set; }
     public string ServiceId { get; private set; }
     public string ReferenceId { get; private set; }
@@ -37,8 +37,8 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
     public string? RawDescription { get; private set; }
     public DateTimeOffset? SucceededAtUtc { get; private set; }
     public PaymentFailureReason? FailureReason { get; private set; }
-    public FinanceAccount? FinanceAccount { get; private set; }
     public PaymentServiceProvider? Psp { get; private set; }
+    public User? User { get; private set; }
 
     private Payment()
     {
@@ -49,7 +49,7 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
         PaymentPurpose purpose,
         PaymentChannel channel,
         Money amount,
-        long financeAccountId,
+        long userId,
         PaymentDirection direction,
         string serviceId,
         string referenceId,
@@ -63,7 +63,7 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
         Guard<NullEntryException>.AgainstNull(amount);
         Guard<InvalidPaymentAmountException>.IsTrue(amount.Value == 0);
 
-        Guard<InvalidFinanceAccountIdException>.IsTrue(financeAccountId <= 0);
+        Guard<InvalidUserIdException>.IsTrue(userId <= 0);
         Guard<InvalidPaymentDirectionException>.IsTrue(!Enum.IsDefined(direction));
 
         Guard<InvalidServiceIdException>.AgainstNullOrEmpty(serviceId);
@@ -79,7 +79,7 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
         Channel = channel;
         State = PaymentState.Initiated;
         Amount = amount.Value;
-        FinanceAccountId = financeAccountId;
+        UserId = userId;
         Direction = direction;
         ServiceId = serviceId;
         ReferenceId = referenceId;
@@ -90,7 +90,7 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
 
     public static Payment CreatePspPurchasePayment(
         Money amount,
-        long financeAccountId,
+        long userId,
         string serviceId,
         string referenceId,
         long billId,
@@ -101,7 +101,7 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
             PaymentPurpose.Purchase,
             PaymentChannel.Psp,
             amount,
-            financeAccountId,
+            userId,
             PaymentDirection.Inbound,
             serviceId,
             referenceId,
@@ -112,7 +112,7 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
 
     public static Payment CreateTopUpPayment(
         Money amount,
-        long financeAccountId,
+        long userId,
         string serviceId,
         string referenceId,
         PspCode pspCode,
@@ -122,7 +122,7 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
             PaymentPurpose.TopUp,
             PaymentChannel.Psp,
             amount,
-            financeAccountId,
+            userId,
             PaymentDirection.Inbound,
             serviceId,
             referenceId,
@@ -133,7 +133,7 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
 
     public static Payment CreateWalletPurchasePayment(
         Money amount,
-        long financeAccountId,
+        long userId,
         string serviceId,
         string referenceId,
         IEventPublisher eventPublisher)
@@ -142,7 +142,7 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
             PaymentPurpose.Purchase,
             PaymentChannel.Wallet,
             amount,
-            financeAccountId,
+            userId,
             PaymentDirection.Outbound,
             serviceId,
             referenceId,
