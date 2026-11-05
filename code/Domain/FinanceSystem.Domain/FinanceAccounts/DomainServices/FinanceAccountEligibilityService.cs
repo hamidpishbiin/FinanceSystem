@@ -9,7 +9,7 @@ public class FinanceAccountEligibilityService(
     IFinanceAccountRepository repository,
     IAccountTypeRuleRepository accountTypeRuleRepository) : IDomainService
 {
-    public async Task<FinanceAccount> GetEligibleTopUpAccountAsync(long userId, CancellationToken cancellationToken)
+    public async Task<FinanceAccount> GetEligibleAccountForTopUpAsync(long userId, CancellationToken cancellationToken)
     {
         var accounts = await repository.GetByUserIdAsync(userId, cancellationToken);
 
@@ -26,7 +26,7 @@ public class FinanceAccountEligibilityService(
         return validAccounts.First();
     }
 
-    public async Task<FinanceAccount> GetEligibleWalletPurchaseAccountAsync(long userId, long financeAccountId, CancellationToken cancellationToken)
+    public async Task<FinanceAccount> GetEligibleAccountForWalletPurchaseAsync(long userId, long financeAccountId, CancellationToken cancellationToken)
     {
         var accounts = await repository.GetByUserIdAsync(userId, cancellationToken);
 

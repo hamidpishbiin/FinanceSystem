@@ -1,6 +1,6 @@
 using FinanceSystem.Application.Contracts.Payments.Command;
 using FinanceSystem.Application.Contracts.Payments.Events;
-using FinanceSystem.Application.Payments.Gateways;
+using FinanceSystem.Application.Gateways;
 using FinanceSystem.Domain.Payments;
 using FinanceSystem.Domain.Payments.Enums;
 using FinanceSystem.Domain.Payments.Exceptions;
@@ -14,7 +14,8 @@ public class PspPaymentCallbackCommandHandler(
     IUnitOfWork unitOfWork,
     IEventPublisher publisher,
     IEventListener listener,
-    IOptions<PspOptions> pspOptions)
+    IOptions<PspOptions> pspOptions,
+    PaymentEligibilityService paymentEligibilityService)
     : PaymentCommandHandler<ProcessPspPaymentCallbackCommand>(repository, publisher, listener)
 {
     public override async Task Handle(ProcessPspPaymentCallbackCommand command, CancellationToken cancellationToken = default)
@@ -25,11 +26,7 @@ public class PspPaymentCallbackCommandHandler(
 
         var callback = pspGateway.ParseCallback(command.Fields);
 
-        var payment = await Repository.GetByIdAsync(callback.ReservationNumber, cancellationToken); // Should be done by a domain service
-
-        Guard<PaymentNotFoundException>.AgainstNull(payment);
-
-        Guard<InvalidPaymentPurposeException>.IsTrue(payment!.Purpose != PaymentPurpose.Purchase);
+        var payment = await paymentEligibilityService.GetPurchasePaymentAsync(callback.ReservationNumber, cancellationToken);
 
         payment.Publisher = Publisher;
 
@@ -39,9 +36,7 @@ public class PspPaymentCallbackCommandHandler(
             return;
         }
 
-        var isReferenceNumberUsed = callback.IsSuccess && await Repository.GetByReferenceNumberAsync(callback.ReferenceNumber, cancellationToken) is not null; // Domain service
-
-        Guard<DuplicateReferenceNumberException>.IsTrue(isReferenceNumberUsed);
+        await paymentEligibilityService.ValidateReferenceNumberAsync(callback.ReferenceNumber, cancellationToken);
 
         Guard<PspCodeMismatchException>.IsTrue(payment.PspCode != pspGateway.Code);
         Guard<CallbackTokenMismatchException>.IsTrue(payment.Token != callback.Token);

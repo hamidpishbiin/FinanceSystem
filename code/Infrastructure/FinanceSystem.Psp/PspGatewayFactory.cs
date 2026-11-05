@@ -1,4 +1,4 @@
-﻿using FinanceSystem.Application.Payments.Gateways;
+﻿using FinanceSystem.Application.Gateways;
 using FinanceSystem.Domain.PaymentServiceProviders.Enums;
 
 namespace FinanceSystem.Psp;

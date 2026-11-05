@@ -1,6 +1,6 @@
 ﻿using Autofac;
 using Autofac.Extras.DynamicProxy;
-using FinanceSystem.Application.Payments.Gateways;
+using FinanceSystem.Application.Gateways;
 using FinanceSystem.Application.Product.CommandHandlers;
 using FinanceSystem.BehPardakht;
 using FinanceSystem.Core;

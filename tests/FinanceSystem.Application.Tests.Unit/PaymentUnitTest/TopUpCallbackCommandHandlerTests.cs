@@ -1,7 +1,7 @@
 using FinanceSystem.Application.Contracts.Payments.Command;
 using FinanceSystem.Application.Contracts.Payments.Events;
+using FinanceSystem.Application.Gateways;
 using FinanceSystem.Application.Payments.CommandHandlers;
-using FinanceSystem.Application.Payments.Gateways;
 using FinanceSystem.Domain.LedgerEntries;
 using FinanceSystem.Domain.LedgerEntries.Enums;
 using FinanceSystem.Domain.FinanceAccounts;
@@ -246,7 +246,7 @@ public class TopUpCallbackCommandHandlerTests
     private FinanceAccount ArrangeUserAccount()
     {
         var userAccount = new FinanceAccount(
-            FinanceAccountType.UserWallet, FinanceAccountState.Active, 1, new Money(0), DateTimeOffset.UtcNow, false);
+            FinanceAccountType.MainWallet, FinanceAccountState.Active, 1, new Money(0), DateTimeOffset.UtcNow, false);
         SetId(userAccount, UserAccountId);
 
         _financeAccountRepository.GetByIdAsync(UserAccountId, Arg.Any<CancellationToken>()).Returns(userAccount);

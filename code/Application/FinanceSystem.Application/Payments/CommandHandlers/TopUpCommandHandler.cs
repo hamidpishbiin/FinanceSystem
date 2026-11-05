@@ -1,8 +1,6 @@
 using FinanceSystem.Application.Contracts.Payments.Command;
-using FinanceSystem.Application.Payments.Gateways;
-using FinanceSystem.Domain.FinanceAccounts;
+using FinanceSystem.Application.Gateways;
 using FinanceSystem.Domain.FinanceAccounts.DomainServices;
-using FinanceSystem.Domain.FinanceAccounts.Exceptions;
 using FinanceSystem.Domain.Payments;
 using FinanceSystem.Domain.Payments.Enums;
 using FinanceSystem.Domain.PaymentServiceProviders.Enums;
@@ -32,15 +30,15 @@ public class TopUpCommandHandler(
 
         Guard<UserNotFoundException>.AgainstNull(user);
 
-        var userFinanceAccount = await financeAccountEligibilityService.GetEligibleTopUpAccountAsync(user!.Id, cancellationToken);
+        var userFinanceAccount = await financeAccountEligibilityService.GetEligibleAccountForTopUpAsync(user!.Id, cancellationToken);
 
         var amount = new Money(command.Amount);
 
-        var psp = await pspSelector.SelectAsync(command.PspCode!.Value, cancellationToken);
+        var psp = await pspSelector.SelectAsync((PspCode)command.PspCode!.Value, cancellationToken);
 
         var payment = Payment.CreateTopUpPayment(
             amount,
-            userFinanceAccount!.Id,
+            userFinanceAccount.Id,
             _serviceId,
             guidGenerator.New().ToString(),
             psp.Code,
@@ -65,13 +63,13 @@ public class TopUpCommandHandler(
         {
             await payment.MarkTokenReceived(
                 paymentTokenResponse.Token,
-                paymentTokenResponse.IpgUrl);
+                string.Empty);
         }
         else
         {
             await payment.MarkTokenRequestFailed(
                 PaymentFailureReason.Unknown,
-                paymentTokenResponse.Status,
+                paymentTokenResponse.Status.ToString(),
                 paymentTokenResponse.StatusCode,
                 paymentTokenResponse.Description);
         }

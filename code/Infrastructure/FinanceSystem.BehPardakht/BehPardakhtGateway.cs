@@ -1,4 +1,4 @@
-using FinanceSystem.Application.Payments.Gateways;
+using FinanceSystem.Application.Gateways;
 using FinanceSystem.Domain.PaymentServiceProviders.Enums;
 using FinanceSystem.Domain.Payments.Enums;
 using Microsoft.Extensions.Options;

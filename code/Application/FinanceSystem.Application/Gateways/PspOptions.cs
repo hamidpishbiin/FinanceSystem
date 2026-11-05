@@ -1,6 +1,6 @@
 using FinanceSystem.Domain.PaymentServiceProviders.Enums;
 
-namespace FinanceSystem.Application.Payments.Gateways;
+namespace FinanceSystem.Application.Gateways;
 
 public class PspOptions
 {

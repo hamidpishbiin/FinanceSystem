@@ -1,7 +1,6 @@
-using FinanceSystem.Domain.Payments.Enums;
 using FinanceSystem.Domain.PaymentServiceProviders.Enums;
 
-namespace FinanceSystem.Application.Payments.Gateways;
+namespace FinanceSystem.Application.Gateways;
 
 public interface IPspGateway
 {

@@ -1,8 +1,8 @@
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
+using FinanceSystem.Application.Gateways;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Options;
-using FinanceSystem.Application.Payments.Gateways;
 using FinanceSystem.Bootstrap;
 using FinanceSystem.Persistance.Mappings;
 using FinanceSystem.Psp;

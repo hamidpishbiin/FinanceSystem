@@ -1,13 +1,10 @@
-using FinanceSystem.Domain.Payments.Enums;
-
-namespace FinanceSystem.Application.Payments.Gateways;
+namespace FinanceSystem.Application.Gateways;
 
 public class PspTokenResponse
 {
     public bool IsSuccess { get; set; }
     public string Token { get; set; } = string.Empty;
-    public string IpgUrl { get; set; } = string.Empty;
-    public string Status { get; set; } = string.Empty;
+    public int Status { get; set; }
     public int StatusCode { get; set; }
     public string Description { get; set; } = string.Empty;
 }

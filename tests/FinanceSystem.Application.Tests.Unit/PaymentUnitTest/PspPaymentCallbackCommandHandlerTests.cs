@@ -1,7 +1,7 @@
 using FinanceSystem.Application.Contracts.Payments.Command;
 using FinanceSystem.Application.Contracts.Payments.Events;
+using FinanceSystem.Application.Gateways;
 using FinanceSystem.Application.Payments.CommandHandlers;
-using FinanceSystem.Application.Payments.Gateways;
 using FinanceSystem.Domain.Payments;
 using FinanceSystem.Domain.Payments.Enums;
 using FinanceSystem.Domain.Payments.Exceptions;

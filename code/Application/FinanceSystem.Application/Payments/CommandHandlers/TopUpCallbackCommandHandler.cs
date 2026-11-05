@@ -1,6 +1,6 @@
 using FinanceSystem.Application.Contracts.Payments.Command;
 using FinanceSystem.Application.Contracts.Payments.Events;
-using FinanceSystem.Application.Payments.Gateways;
+using FinanceSystem.Application.Gateways;
 using FinanceSystem.Domain.LedgerEntries;
 using FinanceSystem.Domain.LedgerEntries.Enums;
 using FinanceSystem.Domain.FinanceAccounts;

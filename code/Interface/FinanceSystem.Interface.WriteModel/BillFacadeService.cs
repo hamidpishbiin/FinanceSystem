@@ -40,7 +40,7 @@ public class BillFacadeService(ICommandBus commandBus, IEventListener eventListe
 
         await commandBus.Dispatch(new PspPaymentCommand()
         {
-            Token = long.Parse(request.BillId),
+            BillId = long.Parse(request.BillId),
             UserId = userId,
             PspCode = request.PspCode
         }, cancellationToken);

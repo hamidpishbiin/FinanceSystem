@@ -1,6 +1,4 @@
-using FinanceSystem.Domain.Payments.Enums;
-
-namespace FinanceSystem.Application.Payments.Gateways;
+namespace FinanceSystem.Application.Gateways;
 
 public class PspCallback
 {

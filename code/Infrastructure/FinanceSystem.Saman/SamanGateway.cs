@@ -1,8 +1,9 @@
 using System.Net.Http.Json;
-using FinanceSystem.Application.Payments.Gateways;
+using FinanceSystem.Application.Gateways;
 using FinanceSystem.Domain.PaymentServiceProviders.Enums;
 using FinanceSystem.Domain.Payments.Enums;
 using FinanceSystem.Domain.Payments.Exceptions;
+using FinanceSystem.Domain.PspExchangeLogs.Enums;
 using Microsoft.Extensions.Options;
 using Shared.Core;
 
@@ -11,6 +12,7 @@ namespace FinanceSystem.Saman;
 internal class SamanGateway : IPspGateway
 {
     private const int _samanCallbackOkStatus = 2;
+    private const int _tokenResponseSuccessStatus = 1;
 
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly ILoggerService _loggerService;
@@ -35,7 +37,7 @@ internal class SamanGateway : IPspGateway
             var payload = new
             {
                 action = "token",
-                redirectUrl = SelectRedirectUrl(_settings, request.PaymentPurpose),
+                redirectUrl = SelectRedirectUrl(_settings, request.PaymentPurpose), // Not a concern of an ACL
                 terminalId = _settings.TerminalId,
                 amount = request.Amount,
                 resNum = request.ReservationNumber
@@ -43,27 +45,29 @@ internal class SamanGateway : IPspGateway
 
             var httpClient = _httpClientFactory.CreateClient(nameof(PspCode.Saman));
 
-            var apiResponse = await httpClient.PostAsJsonAsync("/OnlinePG/OnlinePG", payload, cancellationToken);
+            using var message = new HttpRequestMessage(HttpMethod.Post, "/OnlinePG/OnlinePG")
+            {
+                Content = JsonContent.Create(payload)
+            }.WithExchangeContext(PspExchangeStep.Token, request.ReservationNumber);
 
-            apiResponse.EnsureSuccessStatusCode();
+            var serializedResponse = await httpClient.SendAsync(message, cancellationToken);
 
-            var samanResponse = await apiResponse.Content.ReadFromJsonAsync<SamanTokenResponse>(cancellationToken);
+            serializedResponse.EnsureSuccessStatusCode();
 
-            if (samanResponse is null)
+            var response = await serializedResponse.Content.ReadFromJsonAsync<SamanTokenResponse>(cancellationToken);
+
+            if (response is null)
             {
                 throw new InvalidOperationException("Saman token response was null.");
             }
 
-            var isSamanResponseSuccess = samanResponse.Status == 1;
-
-            return new PspTokenResponse()
+            return new PspTokenResponse
             {
-                IsSuccess = isSamanResponseSuccess,
-                Token = samanResponse.Token,
-                IpgUrl = $"{_settings.BaseUrl}/OnlinePG/SendToken?token={samanResponse.Token}",
-                Status = samanResponse.Status.ToString(),
-                StatusCode = samanResponse.ErrorCode,
-                Description = samanResponse.ErrorDesc
+                IsSuccess = response.Status == _tokenResponseSuccessStatus,
+                Token = response.Token,
+                Status = response.Status,
+                StatusCode = response.ErrorCode,
+                Description = response.ErrorDesc
             };
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
@@ -108,7 +112,12 @@ internal class SamanGateway : IPspGateway
 
             var httpClient = _httpClientFactory.CreateClient(nameof(PspCode.Saman));
 
-            var response = await httpClient.PostAsJsonAsync("/verifyTxnRandomSessionKey/ipg/VerifyTransaction", payload, cancellationToken);
+            using var message = new HttpRequestMessage(HttpMethod.Post, "/verifyTxnRandomSessionKey/ipg/VerifyTransaction")
+            {
+                Content = JsonContent.Create(payload)
+            }.WithExchangeContext(PspExchangeStep.Verification, request.ReservationNumber);
+
+            var response = await httpClient.SendAsync(message, cancellationToken);
 
             response.EnsureSuccessStatusCode();
 
@@ -128,9 +137,9 @@ internal class SamanGateway : IPspGateway
                 return result;
             }
 
-            result.IsSuccess = responseBody?.Success ?? false;
-            result.Amount = responseBody?.TransactionDetail?.OrginalAmount;
-            result.Code = responseBody!.ResultCode!.Value;
+            result.IsSuccess = responseBody.Success ?? false;
+            result.Amount = responseBody.TransactionDetail?.OrginalAmount;
+            result.Code = responseBody.ResultCode!.Value;
 
             return result;
         }
@@ -175,7 +184,12 @@ internal class SamanGateway : IPspGateway
 
             var httpClient = _httpClientFactory.CreateClient(nameof(PspCode.Saman));
 
-            var response = await httpClient.PostAsJsonAsync("/verifyTxnRandomSessionKey/ipg/ReverseTransaction", payload, cancellationToken);
+            using var message = new HttpRequestMessage(HttpMethod.Post, "/verifyTxnRandomSessionKey/ipg/ReverseTransaction")
+            {
+                Content = JsonContent.Create(payload)
+            }.WithExchangeContext(PspExchangeStep.Reverse, request.ReservationNumber);
+
+            var response = await httpClient.SendAsync(message, cancellationToken);
 
             response.EnsureSuccessStatusCode();
 

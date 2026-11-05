@@ -1,4 +1,4 @@
-using FinanceSystem.Application.Payments.Gateways;
+using FinanceSystem.Application.Gateways;
 using FinanceSystem.Domain.PaymentServiceProviders.Enums;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -9,11 +9,21 @@ public static class PspHttpClientRegistration
 {
     public static IServiceCollection AddPspHttpClients(this IServiceCollection services)
     {
-        services.AddHttpClient(nameof(PspCode.Saman), (provider, client) =>
-            Configure(client, provider, options => options.Saman));
+        services.AddTransient<PspExchangeLoggingHandler>();
 
-        services.AddHttpClient(nameof(PspCode.BehPardakht), (provider, client) =>
-            Configure(client, provider, options => options.BehPardakht));
+        services.AddHttpClient(nameof(PspCode.Saman),
+                (provider, client) =>
+                {
+                    Configure(client, provider, options => options.Saman);
+                })
+            .AddHttpMessageHandler<PspExchangeLoggingHandler>();
+
+        services.AddHttpClient(nameof(PspCode.BehPardakht),
+                (provider, client) =>
+                {
+                    Configure(client, provider, options => options.BehPardakht);
+                })
+            .AddHttpMessageHandler<PspExchangeLoggingHandler>();
 
         return services;
     }

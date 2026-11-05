@@ -7,7 +7,7 @@ namespace FinanceSystem.Domain.Tests.Unit.FinanceAccountUnitTests;
 
 public class FinanceAccountBuilder
 {
-    public const FinanceAccountType DefaultType = FinanceAccountType.UserWallet;
+    public const FinanceAccountType DefaultType = FinanceAccountType.MainWallet;
     public const FinanceAccountState DefaultState = FinanceAccountState.Active;
     public const decimal DefaultCachedBalance = 300;
     public static readonly DateTimeOffset DefaultBalanceCalculatedAt = new(2026, 08, 09, 0, 0, 0, TimeSpan.Zero);

@@ -1,6 +1,8 @@
 using FinanceSystem.Domain.Bills;
 using FinanceSystem.Domain.FinanceAccounts;
 using FinanceSystem.Domain.Payments;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.ValueGeneration;
 
 namespace FinanceSystem.Persistance.Mappings;
 
@@ -13,7 +15,8 @@ public class PaymentMapping() : EntityBaseMap<Payment, long>("Payments")
         builder
             .Property(p => p.Id)
             .HasColumnName("Id")
-            .UseHiLo("payment_hilo_seq");
+            .ValueGeneratedOnAdd()
+            .HasValueGenerator<PaymentIdGenerator>();
 
         builder
             .Property(p => p.Purpose)
@@ -156,5 +159,24 @@ public class PaymentMapping() : EntityBaseMap<Payment, long>("Payments")
             .HasConstraintName("FK_Payments_FinanceAccounts_FinanceAccountId");
 
         builder.Ignore(p => p.Publisher);
+    }
+}
+
+internal sealed class PaymentIdGenerator : ValueGenerator<long>
+{
+    public override bool GeneratesTemporaryValues => false;
+
+    public override long Next(EntityEntry entry)
+    {
+        return  entry.Context.Database
+            .SqlQuery<long>($"SELECT nextval('payment_id_seq') AS \"Value\"")
+            .Single();
+    }
+
+    public async override ValueTask<long> NextAsync(EntityEntry entry, CancellationToken cancellationToken = new())
+    {
+        return await entry.Context.Database
+            .SqlQuery<long>($"SELECT nextval('payment_id_seq') AS \"Value\"")
+            .SingleAsync(cancellationToken);
     }
 }

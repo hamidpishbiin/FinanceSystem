@@ -1,4 +1,4 @@
-using FinanceSystem.Application.Payments.Gateways;
+using FinanceSystem.Application.Gateways;
 
 namespace FinanceSystem.Saman;
 

@@ -6,7 +6,7 @@ namespace FinanceSystem.Domain.Tests.Unit.AccountTypeRuleUnitTests;
 
 public class AccountTypeRuleBuilder
 {
-    public const FinanceAccountType DefaultType = FinanceAccountType.UserWallet;
+    public const FinanceAccountType DefaultType = FinanceAccountType.MainWallet;
     public const FinanceAccountState DefaultSate = FinanceAccountState.Active;
     public const PaymentPurpose DefaultPaymentPurpose = PaymentPurpose.TopUp;
     public const bool DefaultIsAllowed = true;

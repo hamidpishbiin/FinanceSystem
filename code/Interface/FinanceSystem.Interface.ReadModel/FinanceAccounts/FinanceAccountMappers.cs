@@ -16,6 +16,7 @@ internal static class FinanceAccountMappers
         {
             Name = model.Type.ToString(),
             Channel = (int)model.Type,
+            FinanceAccountId = model.Id
         };
     }
 }

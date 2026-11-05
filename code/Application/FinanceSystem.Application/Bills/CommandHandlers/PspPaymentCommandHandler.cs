@@ -1,10 +1,12 @@
 using FinanceSystem.Application.Contracts.Payments.Command;
-using FinanceSystem.Application.Payments.Gateways;
+using FinanceSystem.Application.Gateways;
 using FinanceSystem.Domain.Bills;
 using FinanceSystem.Domain.Bills.Services;
 using FinanceSystem.Domain.Payments;
 using FinanceSystem.Domain.Payments.Enums;
+using FinanceSystem.Domain.PaymentServiceProviders.Enums;
 using FinanceSystem.Domain.PaymentServiceProviders.Services;
+using Microsoft.Extensions.Options;
 
 namespace FinanceSystem.Application.Bills.CommandHandlers;
 
@@ -15,19 +17,21 @@ public class PspPaymentCommandHandler(
     BillEligibilityService billEligibilityService,
     PspSelector pspSelector,
     IPspGatewayFactory pspGatewayFactory,
-    IUnitOfWork unitOfWork,
-    IPaymentRepository paymentRepository)
+    IPaymentRepository paymentRepository,
+    IOptions<PspOptions> pspOptions)
     : BillCommandHandler<PspPaymentCommand>(billRepository, publisher, listener)
 {
     public override async Task Handle(PspPaymentCommand paymentCommand, CancellationToken cancellationToken = default)
     {
-        var bill = await billEligibilityService.GetBill(paymentCommand.Token, paymentCommand.UserId, cancellationToken);
+        var bill = await billEligibilityService.GetBill(paymentCommand.BillId, paymentCommand.UserId, cancellationToken);
 
-        var psp = await pspSelector.SelectAsync(paymentCommand.PspCode, cancellationToken);
+        var pspEnum = (PspCode)paymentCommand.PspCode;
+
+        var psp = await pspSelector.SelectAsync(pspEnum, cancellationToken);
 
         var payment = Payment.CreatePspPurchasePayment(
             new Money(bill.Amount),
-            bill.FinanceAccountId,
+            bill.UserId,
             bill.ServiceId.ToString(),
             bill.ReferenceId.ToString(),
             bill.Id,
@@ -36,30 +40,33 @@ public class PspPaymentCommandHandler(
 
         await paymentRepository.AddAsync(payment);
 
-        await unitOfWork.SaveChangesAsync();
-
         var pspGateway = pspGatewayFactory.Get(psp.Code);
 
-        var pspTokenRequest = new PspTokenRequest()
+        var request = new PspTokenRequest()
         {
             Amount = bill.Amount,
             ReservationNumber = payment.Id,
             PaymentPurpose = PaymentPurpose.Purchase
         };
 
-        var tokenResponse = await pspGateway.RequestPaymentTokenAsync(pspTokenRequest, cancellationToken);
+        var response = await pspGateway.RequestPaymentTokenAsync(request, cancellationToken);
 
-        if (tokenResponse.IsSuccess)
+        if (response.IsSuccess)
         {
-            await payment.MarkTokenReceived(tokenResponse.Token, tokenResponse.IpgUrl);
+            await payment.MarkTokenReceived(response.Token, GetPspRedirectUrl(pspEnum, response.Token));
         }
         else
         {
             await payment.MarkTokenRequestFailed(
                 PaymentFailureReason.Unknown,
-                tokenResponse.Status,
-                tokenResponse.StatusCode,
-                tokenResponse.Description);
+                response.Status.ToString(),
+                response.StatusCode,
+                response.Description);
         }
+    }
+
+    private string GetPspRedirectUrl(PspCode pspCode, string token)
+    {
+        return $"{pspOptions.Value.For(pspCode).BaseUrl}/OnlinePG/SendToken?token={token}";
     }
 }
