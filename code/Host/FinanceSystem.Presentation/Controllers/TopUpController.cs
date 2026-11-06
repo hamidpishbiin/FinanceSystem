@@ -9,9 +9,11 @@ namespace FinanceSystem.Presentation.Controllers;
 public class TopUpController(ITopUpFacadeService facadeService) : ControllerBase
 {
     [HttpPost("request")]
-    public async Task<JsonResponse<string>> TopUp(TopUpModel model, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> TopUp(TopUpModel model, CancellationToken cancellationToken = default)
     {
-        return await facadeService.TopUpAsync(model, cancellationToken);
+        var response = await facadeService.TopUpAsync(model, cancellationToken);
+
+        return response.Status ? Ok(response) : BadRequest(response);
     }
 
     [HttpPost("callback/{psp}")]

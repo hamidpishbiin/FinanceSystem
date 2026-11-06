@@ -246,7 +246,7 @@ public class TopUpCallbackCommandHandlerTests
     private async Task<Payment> ArrangePaymentWithToken()
     {
         var payment = ArrangePayment();
-        await payment.MarkTokenReceived(Token, "https://ipg.example/pay");
+        await payment.MarkTokenReceived(Token);
         return payment;
     }
 

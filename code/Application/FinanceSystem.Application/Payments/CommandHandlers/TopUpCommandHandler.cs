@@ -1,4 +1,5 @@
 using FinanceSystem.Application.Contracts.Payments.Command;
+using FinanceSystem.Application.Contracts.Payments.Events;
 using FinanceSystem.Application.Gateways;
 using FinanceSystem.Domain.FinanceAccounts.DomainServices;
 using FinanceSystem.Domain.Payments;
@@ -7,6 +8,7 @@ using FinanceSystem.Domain.PaymentServiceProviders.Enums;
 using FinanceSystem.Domain.PaymentServiceProviders.Services;
 using FinanceSystem.Domain.Users;
 using FinanceSystem.Domain.Users.Exceptions;
+using Microsoft.Extensions.Options;
 
 namespace FinanceSystem.Application.Payments.CommandHandlers;
 
@@ -19,7 +21,8 @@ public class TopUpCommandHandler(
     IGuidGenerator guidGenerator,
     IUnitOfWork unitOfWork,
     IUserRepository userRepository,
-    FinanceAccountEligibilityService financeAccountEligibilityService)
+    FinanceAccountEligibilityService financeAccountEligibilityService,
+    IOptions<PspOptions> pspOptions)
     : PaymentCommandHandler<TopUpCommand>(paymentRepository, publisher, listener)
 {
     private const string _serviceId = "FinanceSystem";
@@ -54,16 +57,15 @@ public class TopUpCommandHandler(
         {
             Amount = amount.Value,
             ReservationNumber = payment.Id,
-            PaymentPurpose = PaymentPurpose.TopUp
+            CallbackUrl = pspOptions.Value.For(psp.Code).TopUpCallBackUrl
         };
 
         var paymentTokenResponse = await pspGateway.RequestPaymentTokenAsync(pspTokenRequest, cancellationToken);
 
         if (paymentTokenResponse.IsSuccess)
         {
-            await payment.MarkTokenReceived(
-                paymentTokenResponse.Token,
-                string.Empty);
+            await payment.MarkTokenReceived(paymentTokenResponse.Token);
+            await Publisher.Publish(new PspHandoffReadyEvent(paymentTokenResponse.Handoff!));
         }
         else
         {

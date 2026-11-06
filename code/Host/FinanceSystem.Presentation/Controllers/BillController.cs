@@ -30,7 +30,7 @@ public class BillController(
         return Ok(response);
     }
 
-    [HttpPost("{billId}/pay/psp/{pspCode}")]
+    [HttpPost("{billId}/pay/psp/{pspCodeValue}")]
     public async Task<IActionResult> PayWithPspAsync([FromRoute] PspPaymentRequest request, CancellationToken cancellationToken = default)
     {
         var userId = long.Parse(userResolver.GetUserId());

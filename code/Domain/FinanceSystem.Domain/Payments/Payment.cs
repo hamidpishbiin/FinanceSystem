@@ -157,8 +157,6 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
         int? rawStatusCode,
         string? rawDescription)
     {
-        Guard<InvalidPaymentStateException>.IsTrue(Channel != PaymentChannel.Psp);
-
         SetState(PaymentState.Failed);
         FailureReason = failureReason;
         Status = rawStatus;
@@ -168,15 +166,13 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
         await Publisher.Publish(new PaymentTokenRequestFailedEvent(ReferenceId));
     }
 
-    public async Task MarkTokenReceived(string token, string ipgUrl)
+    public async Task MarkTokenReceived(string token)
     {
-        Guard<InvalidPaymentStateException>.IsTrue(Channel != PaymentChannel.Psp);
-        Guard<InvalidTokenException>.AgainstNullOrEmpty(token);
-
         SetState(PaymentState.TokenReceived);
-        Token = token;
 
-        await Publisher.Publish(new PspTokenReceivedEvent(ReferenceId, ipgUrl));
+        SetToken(token);
+
+        await Publisher.Publish(new PspTokenReceivedEvent(ReferenceId));
     }
 
     public void StoreCallback(
@@ -252,5 +248,12 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
         Guard<InvalidPaymentStateException>.IsFalse(isAllowed);
 
         State = newState;
+    }
+
+    private void SetToken(string token)
+    {
+        Guard<InvalidTokenException>.AgainstNullOrEmpty(token);
+
+        Token = token;
     }
 }

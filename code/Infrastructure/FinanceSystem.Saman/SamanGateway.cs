@@ -1,7 +1,7 @@
 using System.Net.Http.Json;
 using FinanceSystem.Application.Gateways;
 using FinanceSystem.Domain.PaymentServiceProviders.Enums;
-using FinanceSystem.Domain.Payments.Enums;
+using FinanceSystem.Application.Contracts.Payments;
 using FinanceSystem.Domain.Payments.Exceptions;
 using FinanceSystem.Domain.PspExchangeLogs.Enums;
 using Microsoft.Extensions.Options;
@@ -37,7 +37,7 @@ internal class SamanGateway : IPspGateway
             var payload = new
             {
                 action = "token",
-                redirectUrl = SelectRedirectUrl(_settings, request.PaymentPurpose), // Not a concern of an ACL
+                redirectUrl = request.CallbackUrl,
                 terminalId = _settings.TerminalId,
                 amount = request.Amount,
                 resNum = request.ReservationNumber
@@ -61,10 +61,13 @@ internal class SamanGateway : IPspGateway
                 throw new InvalidOperationException("Saman token response was null.");
             }
 
+            var isSuccess = response.Status == _tokenResponseSuccessStatus;
+
             return new PspTokenResponse
             {
-                IsSuccess = response.Status == _tokenResponseSuccessStatus,
+                IsSuccess = isSuccess,
                 Token = response.Token,
+                Handoff = isSuccess ? MakeHandoff(response.Token) : null,
                 Status = response.Status,
                 StatusCode = response.ErrorCode,
                 Description = response.ErrorDesc
@@ -266,13 +269,11 @@ internal class SamanGateway : IPspGateway
         };
     }
 
-    private static string SelectRedirectUrl(PspSettings settings, PaymentPurpose paymentPurpose)
+    private PspHandoff MakeHandoff(string token)
     {
-        return paymentPurpose switch
-        {
-            PaymentPurpose.TopUp => settings.TopUpCallBackUrl,
-            PaymentPurpose.Purchase => settings.PaymentCallBackUrl,
-            _ => throw new InvalidPaymentPurchaseException()
-        };
+        return new PspHandoff(
+            $"{_settings.BaseUrl}/OnlinePG/SendToken?token={Uri.EscapeDataString(token)}",
+            HttpMethod.Get.Method,
+            new Dictionary<string, string>());
     }
 }

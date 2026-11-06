@@ -1,10 +1,10 @@
 using FinanceSystem.Application.Contracts.Payments.Command;
+using FinanceSystem.Application.Contracts.Payments.Events;
 using FinanceSystem.Application.Gateways;
 using FinanceSystem.Domain.Bills;
 using FinanceSystem.Domain.Bills.Services;
 using FinanceSystem.Domain.Payments;
 using FinanceSystem.Domain.Payments.Enums;
-using FinanceSystem.Domain.PaymentServiceProviders.Enums;
 using FinanceSystem.Domain.PaymentServiceProviders.Services;
 using Microsoft.Extensions.Options;
 
@@ -21,13 +21,11 @@ public class PspPaymentCommandHandler(
     IOptions<PspOptions> pspOptions)
     : BillCommandHandler<PspPaymentCommand>(billRepository, publisher, listener)
 {
-    public override async Task Handle(PspPaymentCommand paymentCommand, CancellationToken cancellationToken = default)
+    public override async Task Handle(PspPaymentCommand command, CancellationToken cancellationToken = default)
     {
-        var bill = await billEligibilityService.GetBill(paymentCommand.BillId, paymentCommand.UserId, cancellationToken);
+        var bill = await billEligibilityService.GetBill(command.BillId, command.UserId, cancellationToken);
 
-        var pspEnum = (PspCode)paymentCommand.PspCode;
-
-        var psp = await pspSelector.SelectAsync(pspEnum, cancellationToken);
+        var psp = await pspSelector.SelectAsync(command.PspCode, cancellationToken);
 
         var payment = Payment.CreatePspPurchasePayment(
             new Money(bill.Amount),
@@ -46,14 +44,15 @@ public class PspPaymentCommandHandler(
         {
             Amount = bill.Amount,
             ReservationNumber = payment.Id,
-            PaymentPurpose = PaymentPurpose.Purchase
+            CallbackUrl = pspOptions.Value.For(psp.Code).PaymentCallBackUrl
         };
 
         var response = await pspGateway.RequestPaymentTokenAsync(request, cancellationToken);
 
         if (response.IsSuccess)
         {
-            await payment.MarkTokenReceived(response.Token, GetPspRedirectUrl(pspEnum, response.Token));
+            await payment.MarkTokenReceived(response.Token);
+            await Publisher.Publish(new PspHandoffReadyEvent(response.Handoff!));
         }
         else
         {
@@ -63,10 +62,5 @@ public class PspPaymentCommandHandler(
                 response.StatusCode,
                 response.Description);
         }
-    }
-
-    private string GetPspRedirectUrl(PspCode pspCode, string token)
-    {
-        return $"{pspOptions.Value.For(pspCode).BaseUrl}/OnlinePG/SendToken?token={token}";
     }
 }

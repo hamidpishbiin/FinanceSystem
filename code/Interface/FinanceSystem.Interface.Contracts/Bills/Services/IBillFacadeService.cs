@@ -1,4 +1,5 @@
 using FinanceSystem.Interface.Contracts.Bills.Models;
+using FinanceSystem.Interface.Contracts.Payments.Models;
 using Shared.Core;
 using Shared.Presentation;
 
@@ -7,7 +8,7 @@ namespace FinanceSystem.Interface.Contracts.Bills.Services;
 public interface IBillFacadeService : IFacadeService
 {
     [IgnorePermission]
-    Task<JsonResponse<string>> PayWithPspAsync(PspPaymentRequest request, long userId, CancellationToken cancellationToken = default);
+    Task<JsonResponse<PspHandoffModel>> PayWithPspAsync(PspPaymentRequest request, long userId, CancellationToken cancellationToken = default);
     [IgnorePermission]
     Task<JsonResponse<long>> CreateBill(CreateBillRequest request, CancellationToken cancellationToken);
     [IgnorePermission]

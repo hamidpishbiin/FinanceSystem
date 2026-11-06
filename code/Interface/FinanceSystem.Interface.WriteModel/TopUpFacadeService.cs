@@ -37,14 +37,19 @@ public class TopUpFacadeService(
         return JsonResponse<string>.Success(referenceId);
     }
 
-    public async Task<JsonResponse<string>> TopUpAsync(TopUpModel model, CancellationToken cancellationToken = default)
+    public async Task<JsonResponse<PspHandoffModel>> TopUpAsync(TopUpModel model, CancellationToken cancellationToken = default)
     {
-        var ipgUrl = string.Empty;
+        PspHandoffModel? handoff = null;
         var tokenRequestFailed = false;
 
-        await listener.Subscribe(new EventHandlerAction<PspTokenReceivedEvent>(a =>
+        await listener.Subscribe(new EventHandlerAction<PspHandoffReadyEvent>(a =>
         {
-            ipgUrl = a.IpgUrl;
+            handoff = new PspHandoffModel
+            {
+                Url = a.Handoff.Url,
+                Method = a.Handoff.Method,
+                Fields = a.Handoff.Fields
+            };
         }));
 
         await listener.Subscribe(new EventHandlerAction<PaymentTokenRequestFailedEvent>(_ =>
@@ -59,12 +64,12 @@ public class TopUpFacadeService(
             UserId = long.Parse(userResolver.GetUserId())
         }, cancellationToken);
 
-        if (tokenRequestFailed)
+        if (tokenRequestFailed || handoff is null)
         {
-            return JsonResponse<string>.Failure("Payment gateway token request failed. Please try again.");
+            return JsonResponse<PspHandoffModel>.Failure("Payment gateway token request failed. Please try again.");
         }
 
-        return JsonResponse<string>.Success(ipgUrl);
+        return JsonResponse<PspHandoffModel>.Success(handoff);
     }
 
     public async Task<JsonResponse<string>> CompleteTopUpProcess(string psp, IReadOnlyDictionary<string, string> fields, CancellationToken cancellationToken = default)

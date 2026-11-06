@@ -66,7 +66,7 @@ public class PspPaymentCallbackCommandHandlerTests
         var payment = new PaymentBuilder().WithPspCode(PspCode.Saman).BuildTopUp();
         SetId(payment, PaymentId);
         _paymentRepository.GetByIdAsync(PaymentId, Arg.Any<CancellationToken>()).Returns(payment);
-        await payment.MarkTokenReceived(Token, "https://ipg.example/pay");
+        await payment.MarkTokenReceived(Token);
 
         Func<Task> act = () => _handler.Handle(MakeCommand());
 
@@ -220,7 +220,7 @@ public class PspPaymentCallbackCommandHandlerTests
         SetId(payment, PaymentId);
         _paymentRepository.GetByIdAsync(PaymentId, Arg.Any<CancellationToken>()).Returns(payment);
 
-        await payment.MarkTokenReceived(Token, "https://ipg.example/pay");
+        await payment.MarkTokenReceived(Token);
 
         return payment;
     }

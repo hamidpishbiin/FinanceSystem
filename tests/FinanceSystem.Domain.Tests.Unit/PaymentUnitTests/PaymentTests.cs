@@ -179,15 +179,14 @@ public class PaymentTests
     {
         var payment = _builder.BuildTopUp();
 
-        await payment.MarkTokenReceived("token-123", "https://ipg.example/pay");
+        await payment.MarkTokenReceived("token-123");
 
         payment.Token.Should().Be("token-123");
         payment.State.Should().Be(PaymentState.TokenReceived);
         await _builder.EventPublisher
             .Received(1)
             .Publish(Arg.Is<PspTokenReceivedEvent>(e =>
-                e.ReferenceId == PaymentBuilder.DefaultReferenceId &&
-                e.IpgUrl == "https://ipg.example/pay"));
+                e.ReferenceId == PaymentBuilder.DefaultReferenceId));
     }
 
     [Theory]
@@ -198,7 +197,7 @@ public class PaymentTests
     {
         var payment = _builder.BuildTopUp();
 
-        Func<Task> act = () => payment.MarkTokenReceived(token!, "https://ipg.example/pay");
+        Func<Task> act = () => payment.MarkTokenReceived(token!);
 
         await act.Should().ThrowAsync<InvalidTokenException>();
     }
@@ -227,7 +226,7 @@ public class PaymentTests
         var payment = _builder.BuildTopUp();
         await payment.MarkTokenRequestFailed(PaymentFailureReason.Unknown, null, null, null);
 
-        Func<Task> act = () => payment.MarkTokenReceived("token-123", "https://ipg.example/pay");
+        Func<Task> act = () => payment.MarkTokenReceived("token-123");
 
         await act.Should().ThrowAsync<InvalidPaymentStateException>();
     }
@@ -236,7 +235,7 @@ public class PaymentTests
     public async Task MarkTokenRequestFailed_should_throw_when_state_is_not_initiated()
     {
         var payment = _builder.BuildTopUp();
-        await payment.MarkTokenReceived("token-123", "https://ipg.example/pay");
+        await payment.MarkTokenReceived("token-123");
 
         Func<Task> act = () => payment.MarkTokenRequestFailed(PaymentFailureReason.Unknown, null, null, null);
 
@@ -393,7 +392,7 @@ public class PaymentTests
     private async Task<Payment> BuildPaymentWithToken()
     {
         var payment = _builder.BuildTopUp();
-        await payment.MarkTokenReceived("token-123", "https://ipg.example/pay");
+        await payment.MarkTokenReceived("token-123");
         return payment;
     }
 
