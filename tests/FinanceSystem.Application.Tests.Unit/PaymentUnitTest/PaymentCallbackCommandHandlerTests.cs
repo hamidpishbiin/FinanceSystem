@@ -1,3 +1,4 @@
+using FinanceSystem.Application.Contracts.Gateways;
 using FinanceSystem.Application.Contracts.Payments.Command;
 using FinanceSystem.Application.Contracts.Payments.Events;
 using FinanceSystem.Application.Gateways;
@@ -17,7 +18,7 @@ using Shared.Domain;
 
 namespace FinanceSystem.Application.Tests.Unit.PaymentUnitTest;
 
-public class PspPaymentCallbackCommandHandlerTests
+public class PaymentCallbackCommandHandlerTests
 {
     private const long PaymentId = 42;
     private const string Token = "token-123";
@@ -30,15 +31,15 @@ public class PspPaymentCallbackCommandHandlerTests
     private readonly IUnitOfWork _unitOfWork = Substitute.For<IUnitOfWork>();
     private readonly IEventPublisher _publisher = Substitute.For<IEventPublisher>();
     private readonly PspCallback _callback = MakeSuccessfulCallback();
-    private readonly PspPaymentCallbackCommandHandler _handler;
+    private readonly PaymentCallbackCommandHandler _handler;
 
-    public PspPaymentCallbackCommandHandlerTests()
+    public PaymentCallbackCommandHandlerTests()
     {
         _pspGateway.Code.Returns(PspCode.Saman);
         _pspGateway.ParseCallback(Arg.Any<IReadOnlyDictionary<string, string>>()).Returns(_ => _callback);
         _pspGatewayFactory.Get(PspCode.Saman).Returns(_pspGateway);
 
-        _handler = new PspPaymentCallbackCommandHandler(
+        _handler = new PaymentCallbackCommandHandler(
             _paymentRepository,
             _pspGatewayFactory,
             _unitOfWork,
@@ -229,9 +230,9 @@ public class PspPaymentCallbackCommandHandlerTests
         _pspGateway.VerifyPaymentAsync(Arg.Any<PaymentVerificationRequest>(), Arg.Any<CancellationToken>()).Returns(response);
     }
 
-    private static ProcessPspPaymentCallbackCommand MakeCommand()
+    private static ProcessPaymentCallbackCommand MakeCommand()
     {
-        return new ProcessPspPaymentCallbackCommand
+        return new ProcessPaymentCallbackCommand
         {
             PspCode = PspCode.Saman
         };

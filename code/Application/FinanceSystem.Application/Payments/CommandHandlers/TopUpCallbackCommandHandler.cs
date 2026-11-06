@@ -1,3 +1,4 @@
+using FinanceSystem.Application.Contracts.Gateways;
 using FinanceSystem.Application.Contracts.Payments.Command;
 using FinanceSystem.Application.Contracts.Payments.Events;
 using FinanceSystem.Application.Gateways;

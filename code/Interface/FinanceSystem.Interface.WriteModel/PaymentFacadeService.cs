@@ -1,35 +1,45 @@
 using FinanceSystem.Application.Contracts.Payments.Command;
 using FinanceSystem.Application.Contracts.Payments.Events;
 using FinanceSystem.Domain.PaymentServiceProviders.Enums;
+using FinanceSystem.Domain.PaymentServiceProviders.Exceptions;
 using FinanceSystem.Interface.Contracts.Payments.Services;
+using Shared.Core.Exceptions;
 
 namespace FinanceSystem.Interface.WriteModel;
 
-public class PaymentFacadeService(ICommandBus commandBus, IEventListener listener) : IPaymentFacadeService
+public class PaymentFacadeService(
+    ICommandBus commandBus,
+    IEventListener listener) : IPaymentFacadeService
 {
     public async Task<JsonResponse<string>> ProcessPaymentCallbackAsync(string psp, Dictionary<string, string> fields, CancellationToken cancellationToken)
     {
-        var outcome = PaymentOutcome.Failure;
-
-        if (!Enum.TryParse<PspCode>(psp, ignoreCase: true, out var pspCode) || !Enum.IsDefined(pspCode))
-        {
-            return JsonResponse<string>.Failure(outcome.ToString().ToLowerInvariant());
-        }
+        Guard<InvalidPspCodeException>.IsTrue(!Enum.TryParse<PspCode>(psp, ignoreCase: true, out var pspCode) || !Enum.IsDefined(pspCode));
 
         var resultPageUrl = string.Empty;
+        var isSuccess = false;
 
         await listener.Subscribe(new EventHandlerAction<PaymentCallbackProcessed>(e =>
         {
-            outcome = e.Outcome;
+            isSuccess = e.IsSuccess;
             resultPageUrl = e.ResultPageUrl;
         }));
 
-        await commandBus.Dispatch(new ProcessPspPaymentCallbackCommand()
+        try
         {
-            PspCode = pspCode,
-            Fields = fields
-        }, cancellationToken);
+            await commandBus.Dispatch(new ProcessPaymentCallbackCommand()
+                {
+                    PspCode = pspCode,
+                    Fields = fields
+                },
+                cancellationToken);
+        }
+        catch
+        {
+            // ignored
+        }
 
-        return JsonResponse<string>.Success($"{resultPageUrl}?status={outcome.ToString().ToLowerInvariant()}");
+        return isSuccess
+            ? JsonResponse<string>.Success(resultPageUrl)
+            : JsonResponse<string>.Failure(resultPageUrl);
     }
 }

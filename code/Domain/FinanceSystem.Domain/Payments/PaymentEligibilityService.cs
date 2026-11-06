@@ -19,8 +19,8 @@ public class PaymentEligibilityService(IPaymentRepository paymentRepository) : I
 
     public async Task ValidateReferenceNumberAsync(string referenceNumber, CancellationToken cancellationToken)
     {
-        var isReferenceNumberUsed = await paymentRepository.GetByReferenceNumberAsync(referenceNumber, cancellationToken) is not null;
+        var payment = await paymentRepository.GetByReferenceNumberAsync(referenceNumber, cancellationToken);
 
-        Guard<DuplicateReferenceNumberException>.IsTrue(isReferenceNumberUsed);
+        Guard<DuplicateReferenceNumberException>.AgainstNotNull(payment);
     }
 }

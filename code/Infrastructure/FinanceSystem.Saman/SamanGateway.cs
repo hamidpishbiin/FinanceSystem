@@ -1,4 +1,5 @@
 using System.Net.Http.Json;
+using FinanceSystem.Application.Contracts.Gateways;
 using FinanceSystem.Application.Gateways;
 using FinanceSystem.Domain.PaymentServiceProviders.Enums;
 using FinanceSystem.Application.Contracts.Payments;

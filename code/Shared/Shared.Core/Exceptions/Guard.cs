@@ -28,7 +28,7 @@
                 ThrowException();
         }
 
-        public static void AgainstNotNull<T>(T value) where T : class
+        public static void AgainstNotNull<T>(T value) where T : class?
         {
             if (value != null)
                 ThrowException();

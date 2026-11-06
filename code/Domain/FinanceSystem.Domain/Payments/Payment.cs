@@ -213,6 +213,13 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
         await Publisher.Publish(new PaymentReversed(ReferenceId));
     }
 
+    public void EnsureCallbackValidity(PspCode pspCode, string token, Money redirectAmount)
+    {
+        Guard<PspCodeMismatchException>.IsTrue(PspCode != pspCode);
+        Guard<CallbackTokenMismatchException>.IsTrue(Token != token);
+        Guard<InconsistentRedirectAmountException>.IsTrue(Amount != redirectAmount);
+    }
+
     private void SetState(PaymentState newState)
     {
         var isAllowed = State switch
