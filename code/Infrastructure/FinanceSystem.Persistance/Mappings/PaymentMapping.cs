@@ -1,6 +1,5 @@
 using FinanceSystem.Domain.Bills;
 using FinanceSystem.Domain.Payments;
-using FinanceSystem.Domain.Users;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.ValueGeneration;
 
@@ -142,19 +141,6 @@ public class PaymentMapping() : EntityBaseMap<Payment, long>("Payments")
             .HasColumnName("FailureReason");
 
         builder
-            .Property(p => p.Status)
-            .HasColumnName("RawStatus")
-            .HasMaxLength(20);
-
-        builder
-            .Property(p => p.StatusCode)
-            .HasColumnName("RawStatusCode");
-
-        builder
-            .Property(p => p.RawDescription)
-            .HasColumnName("RawDescription");
-
-        builder
             .Property(p => p.SucceededAtUtc)
             .HasColumnName("SucceededAtUtc");
 
@@ -168,9 +154,7 @@ internal sealed class PaymentIdGenerator : ValueGenerator<long>
 
     public override long Next(EntityEntry entry)
     {
-        return  entry.Context.Database
-            .SqlQuery<long>($"SELECT nextval('payment_id_seq') AS \"Value\"")
-            .Single();
+        return default;
     }
 
     public async override ValueTask<long> NextAsync(EntityEntry entry, CancellationToken cancellationToken = new())

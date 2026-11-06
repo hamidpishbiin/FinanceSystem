@@ -67,10 +67,7 @@ internal class SamanGateway : IPspGateway
             {
                 IsSuccess = isSuccess,
                 Token = response.Token,
-                Handoff = isSuccess ? MakeHandoff(response.Token) : null,
-                Status = response.Status,
-                StatusCode = response.ErrorCode,
-                Description = response.ErrorDesc
+                Handoff = isSuccess ? MakeHandoff(response.Token) : null
             };
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
@@ -241,8 +238,6 @@ internal class SamanGateway : IPspGateway
         {
             ReservationNumber = long.Parse(fields["ResNum"]),
             IsSuccess = isSuccess,
-            Status = fields["State"],
-            StatusCode = status,
             Token = fields["Token"],
             ReferenceNumber = fields["RefNum"],
             Amount = decimal.Parse(fields["Amount"]),

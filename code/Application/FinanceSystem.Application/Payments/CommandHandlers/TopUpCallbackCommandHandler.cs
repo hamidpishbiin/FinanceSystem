@@ -2,12 +2,12 @@ using FinanceSystem.Application.Contracts.Payments.Command;
 using FinanceSystem.Application.Contracts.Payments.Events;
 using FinanceSystem.Application.Gateways;
 using FinanceSystem.Domain.LedgerEntries;
-using FinanceSystem.Domain.LedgerEntries.Enums;
 using FinanceSystem.Domain.FinanceAccounts;
 using FinanceSystem.Domain.FinanceAccounts.DomainServices;
 using FinanceSystem.Domain.Payments;
 using FinanceSystem.Domain.Payments.Enums;
 using FinanceSystem.Domain.Payments.Exceptions;
+using FinanceSystem.Domain.PspExchangeLogs;
 using Microsoft.Extensions.Options;
 
 namespace FinanceSystem.Application.Payments.CommandHandlers;
@@ -34,7 +34,9 @@ public class TopUpCallbackCommandHandler(
 
         Guard<PaymentNotFoundException>.AgainstNull(payment);
 
-        payment!.Publisher = Publisher;
+        PspExchangeLog.CreateCallbackLog(payment!.Id, command.Fields.ToString());
+
+        payment.Publisher = Publisher;
 
         if (payment.State == PaymentState.Succeeded)
         {
@@ -52,8 +54,6 @@ public class TopUpCallbackCommandHandler(
         Guard<InvalidPaymentStateException>.IsTrue(payment.State != PaymentState.TokenReceived);
 
         payment.StoreCallback(
-            callback.Status,
-            callback.StatusCode,
             callback.ReferenceNumber,
             callback.Amount,
             callback.MaskedPan,

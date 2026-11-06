@@ -15,4 +15,9 @@ public class PspExchangeLogRepository : IPspExchangeLogRepository
     {
         await _dbSet.AddAsync(entity, cancellationToken);
     }
+
+    public void Add(PspExchangeLog entity)
+    {
+        _dbSet.Add(entity);
+    }
 }

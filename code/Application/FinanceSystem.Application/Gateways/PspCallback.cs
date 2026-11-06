@@ -4,8 +4,6 @@ public class PspCallback
 {
     public long ReservationNumber { get; set; }
     public bool IsSuccess { get; set; }
-    public string Status { get; set; } = string.Empty;
-    public int StatusCode { get; set; }
     public string Token { get; set; } = string.Empty;
     public string ReferenceNumber { get; set; } = string.Empty;
     public decimal Amount { get; set; }

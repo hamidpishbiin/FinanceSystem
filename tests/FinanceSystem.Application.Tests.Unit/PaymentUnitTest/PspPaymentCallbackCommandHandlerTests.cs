@@ -121,7 +121,7 @@ public class PspPaymentCallbackCommandHandlerTests
     public async Task Handle_should_report_success_without_verifying_again_when_payment_already_succeeded()
     {
         var payment = await ArrangePaymentWithToken();
-        payment.StoreCallback("OK", 0, ReferenceNumber, PaymentBuilder.DefaultAmount, null, null, null);
+        payment.StoreCallback(ReferenceNumber, PaymentBuilder.DefaultAmount, null, null, null);
         payment.MarkVerifying();
         await payment.MarkSucceeded();
 
@@ -137,14 +137,11 @@ public class PspPaymentCallbackCommandHandlerTests
     {
         var payment = await ArrangePaymentWithToken();
         _callback.IsSuccess = false;
-        _callback.Status = "SessionIsNull";
-        _callback.StatusCode = 4;
         _callback.ReferenceNumber = string.Empty;
 
         await _handler.Handle(MakeCommand());
 
         payment.State.Should().Be(PaymentState.Failed);
-        payment.Status.Should().Be("SessionIsNull");
         await _pspGateway.DidNotReceiveWithAnyArgs().VerifyPaymentAsync(default!, default);
         await AssertOutcome(PaymentOutcome.Failure);
     }
@@ -244,8 +241,6 @@ public class PspPaymentCallbackCommandHandlerTests
         {
             ReservationNumber = PaymentId,
             IsSuccess = true,
-            Status = "OK",
-            StatusCode = 2,
             Token = Token,
             ReferenceNumber = ReferenceNumber,
             Amount = PaymentBuilder.DefaultAmount

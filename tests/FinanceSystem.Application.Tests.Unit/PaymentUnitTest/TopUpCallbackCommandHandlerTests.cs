@@ -108,7 +108,7 @@ public class TopUpCallbackCommandHandlerTests
     public async Task Handle_should_report_success_without_verifying_again_when_payment_already_succeeded()
     {
         var payment = await ArrangePaymentWithToken();
-        payment.StoreCallback("OK", 0, ReferenceNumber, PaymentBuilder.DefaultAmount, null, null, null);
+        payment.StoreCallback(ReferenceNumber, PaymentBuilder.DefaultAmount, null, null, null);
         payment.MarkVerifying();
         await payment.MarkSucceeded();
 
@@ -123,7 +123,7 @@ public class TopUpCallbackCommandHandlerTests
     public async Task Handle_should_throw_and_leave_payment_unchanged_when_state_is_not_token_received()
     {
         var payment = await ArrangePaymentWithToken();
-        payment.StoreCallback("OK", 2, ReferenceNumber, PaymentBuilder.DefaultAmount - 1, "", "", "");
+        payment.StoreCallback(ReferenceNumber, PaymentBuilder.DefaultAmount - 1, "", "", "");
         await payment.MarkFailed(PaymentFailureReason.CallbackAmountMismatch);
 
         Func<Task> act = () => _handler.Handle(MakeCommand());
@@ -138,14 +138,11 @@ public class TopUpCallbackCommandHandlerTests
     {
         var payment = await ArrangePaymentWithToken();
         _callback.IsSuccess = false;
-        _callback.Status = "SessionIsNull";
-        _callback.StatusCode = 4;
         _callback.ReferenceNumber = string.Empty;
 
         await _handler.Handle(MakeCommand());
 
-        payment.Status.Should().Be("SessionIsNull");
-        payment.StatusCode.Should().Be(4);
+        payment.State.Should().Be(PaymentState.Failed);
         await _pspGateway.DidNotReceiveWithAnyArgs().VerifyPaymentAsync(default!, default);
         await AssertOutcome(TopUpOutcome.Failure);
     }
@@ -286,8 +283,6 @@ public class TopUpCallbackCommandHandlerTests
         {
             ReservationNumber = PaymentId,
             IsSuccess = true,
-            Status = "OK",
-            StatusCode = 2,
             Token = Token,
             ReferenceNumber = ReferenceNumber,
             Amount = PaymentBuilder.DefaultAmount

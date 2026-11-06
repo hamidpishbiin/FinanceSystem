@@ -32,9 +32,6 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
     public string? ReferenceNumber { get; private set; }
     public string? TraceNumber { get; private set; }
     public string? MaskedPan { get; private set; }
-    public string? Status { get; private set; }
-    public int? StatusCode { get; private set; }
-    public string? RawDescription { get; private set; }
     public DateTimeOffset? SucceededAtUtc { get; private set; }
     public PaymentFailureReason? FailureReason { get; private set; }
     public PaymentServiceProvider? Psp { get; private set; }
@@ -151,17 +148,10 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
             eventPublisher);
     }
 
-    public async Task MarkTokenRequestFailed(
-        PaymentFailureReason failureReason,
-        string? rawStatus,
-        int? rawStatusCode,
-        string? rawDescription)
+    public async Task MarkTokenRequestFailed(PaymentFailureReason failureReason)
     {
         SetState(PaymentState.Failed);
         FailureReason = failureReason;
-        Status = rawStatus;
-        StatusCode = rawStatusCode;
-        RawDescription = rawDescription;
 
         await Publisher.Publish(new PaymentTokenRequestFailedEvent(ReferenceId));
     }
@@ -176,20 +166,14 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
     }
 
     public void StoreCallback(
-        string status,
-        int statusCode,
         string referenceNumber,
         decimal redirectedAmount,
         string maskedPan,
         string rrn,
         string traceNumber)
     {
-        Guard<InvalidRawStatusException>.AgainstNullOrEmpty(status);
-
         SetState(PaymentState.CallbackReceived);
 
-        Status = status;
-        StatusCode = statusCode;
         ReferenceNumber = referenceNumber;
         RedirectedAmount = redirectedAmount;
         MaskedPan = maskedPan;

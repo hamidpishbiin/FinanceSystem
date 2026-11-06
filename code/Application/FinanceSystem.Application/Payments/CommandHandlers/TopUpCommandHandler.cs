@@ -69,11 +69,7 @@ public class TopUpCommandHandler(
         }
         else
         {
-            await payment.MarkTokenRequestFailed(
-                PaymentFailureReason.Unknown,
-                paymentTokenResponse.Status.ToString(),
-                paymentTokenResponse.StatusCode,
-                paymentTokenResponse.Description);
+            await payment.MarkTokenRequestFailed(PaymentFailureReason.TokenRequestFailed);
         }
     }
 }

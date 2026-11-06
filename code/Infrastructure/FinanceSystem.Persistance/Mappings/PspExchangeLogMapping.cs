@@ -20,13 +20,13 @@ public class PspExchangeLogMapping() : EntityBaseMap<PspExchangeLog, long>("PspE
             .HasConversion<byte>();
 
         builder
-            .Property(p => p.ReferenceId)
+            .Property(p => p.PaymentId)
             .IsRequired()
-            .HasColumnName("ReferenceId");
+            .HasColumnName("PaymentId");
 
         builder
-            .HasIndex(p => p.ReferenceId)
-            .HasDatabaseName("IX_PspExchangeLogs_ReferenceId");
+            .HasIndex(p => p.PaymentId)
+            .HasDatabaseName("IX_PspExchangeLogs_PaymentId");
 
         builder
             .Property(p => p.RequestBody)

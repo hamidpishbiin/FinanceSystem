@@ -4,6 +4,7 @@ using FinanceSystem.Application.Gateways;
 using FinanceSystem.Domain.Payments;
 using FinanceSystem.Domain.Payments.Enums;
 using FinanceSystem.Domain.Payments.Exceptions;
+using FinanceSystem.Domain.PspExchangeLogs;
 using Microsoft.Extensions.Options;
 
 namespace FinanceSystem.Application.Payments.CommandHandlers;
@@ -15,20 +16,24 @@ public class PspPaymentCallbackCommandHandler(
     IEventPublisher publisher,
     IEventListener listener,
     IOptions<PspOptions> pspOptions,
-    PaymentEligibilityService paymentEligibilityService)
+    PaymentEligibilityService paymentEligibilityService,
+    IPspExchangeLogRepository pspExchangeLogRepository)
     : PaymentCommandHandler<ProcessPspPaymentCallbackCommand>(repository, publisher, listener)
 {
     public override async Task Handle(ProcessPspPaymentCallbackCommand command, CancellationToken cancellationToken = default)
     {
         var pspGateway = pspGatewayFactory.Get(command.PspCode);
 
-        var resultPageUrl = pspOptions.Value.For(pspGateway.Code).PaymentResultPageUrl; // Should it be here?
-
         var callback = pspGateway.ParseCallback(command.Fields);
 
         var payment = await paymentEligibilityService.GetPurchasePaymentAsync(callback.ReservationNumber, cancellationToken);
 
+        var callbackLog = PspExchangeLog.CreateCallbackLog(payment.Id, command.Fields.ToString());
+        pspExchangeLogRepository.Add(callbackLog);
+
         payment.Publisher = Publisher;
+
+        var resultPageUrl = pspOptions.Value.For(pspGateway.Code).PaymentResultPageUrl;
 
         if (payment.State == PaymentState.Succeeded)
         {
@@ -44,8 +49,6 @@ public class PspPaymentCallbackCommandHandler(
         Guard<InvalidPaymentStateException>.IsTrue(payment.State != PaymentState.TokenReceived);
 
         payment.StoreCallback(
-            callback.Status,
-            callback.StatusCode,
             callback.ReferenceNumber,
             callback.Amount,
             callback.MaskedPan,

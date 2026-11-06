@@ -11,12 +11,10 @@ public static class PaymentExceptionCodes
     public const int UnexpectedPspCode = 211;
     public const int InvalidToken = 212;
     public const int InvalidPaymentState = 213;
-    public const int InvalidRawStatus = 214;
     public const int PaymentNotFound = 216;
     public const int PspCodeMismatch = 217;
     public const int CallbackTokenMismatch = 218;
     public const int DuplicateReferenceNumber = 219;
     public const int PaymentReverseFailed = 220;
     public const int InvalidPaymentDirection = 221;
-    public const int InvalidPaymentPurchase = 222;
 }

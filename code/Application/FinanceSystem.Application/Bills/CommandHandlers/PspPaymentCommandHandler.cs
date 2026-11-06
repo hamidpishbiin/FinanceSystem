@@ -56,11 +56,7 @@ public class PspPaymentCommandHandler(
         }
         else
         {
-            await payment.MarkTokenRequestFailed(
-                PaymentFailureReason.Unknown,
-                response.Status.ToString(),
-                response.StatusCode,
-                response.Description);
+            await payment.MarkTokenRequestFailed(PaymentFailureReason.TokenRequestFailed);
         }
     }
 }

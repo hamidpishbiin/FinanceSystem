@@ -7,4 +7,5 @@ public enum PaymentFailureReason
     CallbackAmountMismatch = 2,
     VerificationFailed = 3,
     VerificationAmountMismatch = 4,
+    TokenRequestFailed = 5
 }

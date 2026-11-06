@@ -7,7 +7,7 @@ namespace FinanceSystem.Domain.PspExchangeLogs;
 public class PspExchangeLog : EntityBase<long>
 {
     public PspExchangeStep Step { get; private set; }
-    public long ReferenceId { get; private set; }
+    public long PaymentId { get; private set; }
     public string? RequestBody { get; private set; }
     public string? ResponseBody { get; private set; }
     public int? HttpStatus { get; private set; }
@@ -17,18 +17,18 @@ public class PspExchangeLog : EntityBase<long>
 
     private PspExchangeLog(
         PspExchangeStep step,
-        long referenceId,
+        long paymentId,
         string? requestBody,
         string? responseBody,
         int? httpStatus,
         int? durationMs)
     {
-        Guard<InvalidReferenceIdException>.IsTrue(referenceId <= 0);
+        Guard<InvalidReferenceIdException>.IsTrue(paymentId <= 0);
         Guard<InvalidHttpStatusException>.IsTrue(httpStatus is < 100 or > 599);
         Guard<InvalidDurationException>.IsTrue(durationMs < 0);
 
         Step = step;
-        ReferenceId = referenceId;
+        PaymentId = paymentId;
         RequestBody = requestBody;
         ResponseBody = responseBody;
         HttpStatus = httpStatus;
@@ -36,7 +36,7 @@ public class PspExchangeLog : EntityBase<long>
     }
 
     public static PspExchangeLog CreateTokenLog(
-        long referenceId,
+        long paymentId,
         string? requestBody,
         string? responseBody,
         int? httpStatus,
@@ -44,7 +44,7 @@ public class PspExchangeLog : EntityBase<long>
     {
         return new PspExchangeLog(
             PspExchangeStep.Token,
-            referenceId,
+            paymentId,
             requestBody,
             responseBody,
             httpStatus,
@@ -52,12 +52,12 @@ public class PspExchangeLog : EntityBase<long>
     }
 
     public static PspExchangeLog CreateCallbackLog(
-        long referenceId,
+        long paymentId,
         string? requestBody)
     {
         return new PspExchangeLog(
             PspExchangeStep.Callback,
-            referenceId,
+            paymentId,
             requestBody,
             null,
             null,
@@ -65,7 +65,7 @@ public class PspExchangeLog : EntityBase<long>
     }
 
     public static PspExchangeLog CreateVerificationLog(
-        long referenceId,
+        long paymentId,
         string? requestBody,
         string? responseBody,
         int? httpStatus,
@@ -73,7 +73,7 @@ public class PspExchangeLog : EntityBase<long>
     {
         return new PspExchangeLog(
             PspExchangeStep.Verification,
-            referenceId,
+            paymentId,
             requestBody,
             responseBody,
             httpStatus,
@@ -81,7 +81,7 @@ public class PspExchangeLog : EntityBase<long>
     }
 
     public static PspExchangeLog CreateReverseLog(
-        long referenceId,
+        long paymentId,
         string? requestBody,
         string? responseBody,
         int? httpStatus,
@@ -89,7 +89,7 @@ public class PspExchangeLog : EntityBase<long>
     {
         return new PspExchangeLog(
             PspExchangeStep.Reverse,
-            referenceId,
+            paymentId,
             requestBody,
             responseBody,
             httpStatus,
