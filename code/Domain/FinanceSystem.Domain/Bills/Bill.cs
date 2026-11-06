@@ -13,7 +13,7 @@ public class Bill : EntityBase<long>, IAggregateRoot
     public long ServiceId { get; private set; }
     public long ReferenceId { get; private set; }
     public long UserId { get; private set; }
-    public decimal Amount { get; private set; }
+    public Money Amount { get; private set; }
 
     private Bill(){}
 
@@ -32,6 +32,6 @@ public class Bill : EntityBase<long>, IAggregateRoot
         ServiceId = serviceId;
         ReferenceId = referenceId;
         UserId = userId;
-        Amount = amount.Value;
+        Amount = amount;
     }
 }

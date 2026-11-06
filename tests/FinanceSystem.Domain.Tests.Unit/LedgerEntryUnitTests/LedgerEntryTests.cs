@@ -23,7 +23,7 @@ public class LedgerEntryTests
 
         ledgerEntry.PaymentId.Should().Be(LedgerEntryBuilder.DefaultPaymentId);
         ledgerEntry.FinanceAccountId.Should().Be(LedgerEntryBuilder.DefaultFinanceAccountId);
-        ledgerEntry.Amount.Should().Be(LedgerEntryBuilder.DefaultAmount);
+        ledgerEntry.Amount.Should().Be(new Money(LedgerEntryBuilder.DefaultAmount));
         ledgerEntry.Direction.Should().Be(EntryDirection.Inbound);
     }
 
@@ -34,7 +34,7 @@ public class LedgerEntryTests
 
         ledgerEntry.PaymentId.Should().Be(LedgerEntryBuilder.DefaultPaymentId);
         ledgerEntry.FinanceAccountId.Should().Be(LedgerEntryBuilder.DefaultFinanceAccountId);
-        ledgerEntry.Amount.Should().Be(LedgerEntryBuilder.DefaultAmount);
+        ledgerEntry.Amount.Should().Be(new Money(LedgerEntryBuilder.DefaultAmount));
         ledgerEntry.Direction.Should().Be(EntryDirection.Outbound);
     }
 

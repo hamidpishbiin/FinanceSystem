@@ -3,7 +3,6 @@ using FinanceSystem.Domain.LedgerEntries.Enums;
 using FinanceSystem.Domain.LedgerEntries.Exceptions;
 using FinanceSystem.Domain.FinanceAccounts;
 using FinanceSystem.Domain.Payments;
-using FinanceSystem.Domain.Payments.Enums;
 using Shared.Domain.Exceptions;
 
 namespace FinanceSystem.Domain.LedgerEntries;
@@ -12,13 +11,13 @@ public class LedgerEntry : EntityBase<long>
 {
     public long PaymentId { get; private set; }
     public long FinanceAccountId { get; private set; }
-    public decimal Amount { get; private set; }
+    public Money Amount { get; private set; }
     public EntryDirection Direction { get; private set; }
 
     public FinanceAccount? FinanceAccount { get; private set; }
     public Payment? Payment { get; private set; }
 
-    public decimal SignedAmount => Direction == EntryDirection.Inbound ? Amount : -Amount;
+    public decimal SignedAmount => Direction == EntryDirection.Inbound ? Amount.Value : -Amount.Value;
 
     private LedgerEntry()
     {
@@ -47,7 +46,7 @@ public class LedgerEntry : EntityBase<long>
 
         PaymentId = paymentId;
         FinanceAccountId = financeAccountId;
-        Amount = amount.Value;
+        Amount = amount;
         Direction = direction;
     }
 }

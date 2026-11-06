@@ -23,7 +23,7 @@ public class WalletPaymentCommandHandler(
 
         var financeAccount = await financeAccountEligibilityService.GetEligibleAccountForWalletPurchaseAsync(paymentCommand.UserId, paymentCommand.FinanceAccountId, cancellationToken);
 
-        var amount = new Money(bill.Amount);
+        var amount = bill.Amount;
 
         var payment = Payment.CreateWalletPurchasePayment(
             amount,

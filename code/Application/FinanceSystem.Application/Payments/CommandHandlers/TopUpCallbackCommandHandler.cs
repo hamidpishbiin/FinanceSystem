@@ -82,7 +82,7 @@ public class TopUpCallbackCommandHandler(
         {
             ReservationNumber = payment.Id,
             ReferenceNumber = payment.ReferenceNumber!,
-            Amount = payment.Amount
+            Amount = payment.Amount.Value
         };
 
         var verification = await pspGateway.VerifyPaymentAsync(transactionRequest, cancellationToken);
@@ -102,7 +102,7 @@ public class TopUpCallbackCommandHandler(
 
     private async Task CreditWalletAsync(Payment payment, FinanceAccount userAccount)
     {
-        var amount = new Money(payment.Amount);
+        var amount = payment.Amount;
         var occurredAt = DateTimeOffset.UtcNow;
 
         var userEntry = LedgerEntry.CreateInboundEntry(payment.Id, userAccount.Id, amount);

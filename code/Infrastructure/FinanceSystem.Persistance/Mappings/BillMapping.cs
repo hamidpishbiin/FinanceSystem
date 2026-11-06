@@ -24,7 +24,8 @@ public class BillMapping() : EntityBaseMap<Bill, long>("Bills")
 
         builder
             .Property(b => b.Amount)
-            .HasColumnName("Amount");
+            .HasColumnName("Amount")
+            .HasConversion<MoneyConverter>();
 
         builder
             .Property(b => b.UserId)

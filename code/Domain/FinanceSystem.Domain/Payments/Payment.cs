@@ -15,7 +15,7 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
 
     public IEventPublisher Publisher { get; set; }
 
-    public decimal Amount { get; private set; }
+    public Money Amount { get; private set; }
     public PaymentPurpose Purpose { get; private set; }
     public PaymentChannel Channel { get; private set; }
     public PaymentState State { get; private set; }
@@ -28,7 +28,7 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
     public PspCode? PspCode { get; private set; }
     public string? Token { get; private set; }
     public string? RRN { get; private set; }
-    public decimal? RedirectedAmount { get; private set; }
+    public Money? RedirectedAmount { get; private set; }
     public string? ReferenceNumber { get; private set; }
     public string? TraceNumber { get; private set; }
     public string? MaskedPan { get; private set; }
@@ -75,7 +75,7 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
         Purpose = purpose;
         Channel = channel;
         State = PaymentState.Initiated;
-        Amount = amount.Value;
+        Amount = amount;
         UserId = userId;
         Direction = direction;
         ServiceId = serviceId;
@@ -167,7 +167,7 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
 
     public void StoreCallback(
         string referenceNumber,
-        decimal redirectedAmount,
+        Money redirectedAmount,
         string maskedPan,
         string rrn,
         string traceNumber)

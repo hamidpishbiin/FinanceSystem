@@ -28,7 +28,7 @@ public class PaymentTests
         payment.Channel.Should().Be(PaymentChannel.Psp);
         payment.Direction.Should().Be(PaymentDirection.Inbound);
         payment.State.Should().Be(PaymentState.Initiated);
-        payment.Amount.Should().Be(PaymentBuilder.DefaultAmount);
+        payment.Amount.Should().Be(new Money(PaymentBuilder.DefaultAmount));
         payment.UserId.Should().Be(PaymentBuilder.DefaultUserId);
         payment.ServiceId.Should().Be(PaymentBuilder.DefaultServiceId);
         payment.ReferenceId.Should().Be(PaymentBuilder.DefaultReferenceId);
@@ -46,7 +46,7 @@ public class PaymentTests
         payment.Channel.Should().Be(PaymentChannel.Psp);
         payment.Direction.Should().Be(PaymentDirection.Inbound);
         payment.State.Should().Be(PaymentState.Initiated);
-        payment.Amount.Should().Be(PaymentBuilder.DefaultAmount);
+        payment.Amount.Should().Be(new Money(PaymentBuilder.DefaultAmount));
         payment.UserId.Should().Be(PaymentBuilder.DefaultUserId);
         payment.ServiceId.Should().Be(PaymentBuilder.DefaultServiceId);
         payment.ReferenceId.Should().Be(PaymentBuilder.DefaultReferenceId);
@@ -244,11 +244,11 @@ public class PaymentTests
     {
         var payment = await BuildPaymentWithToken();
 
-        payment.StoreCallback("ref-1", PaymentBuilder.DefaultAmount, "6037-****-1234", "rrn-1", "trace-1");
+        payment.StoreCallback("ref-1", new Money(PaymentBuilder.DefaultAmount), "6037-****-1234", "rrn-1", "trace-1");
 
         payment.State.Should().Be(PaymentState.CallbackReceived);
         payment.ReferenceNumber.Should().Be("ref-1");
-        payment.RedirectedAmount.Should().Be(PaymentBuilder.DefaultAmount);
+        payment.RedirectedAmount.Should().Be(new Money(PaymentBuilder.DefaultAmount));
         payment.MaskedPan.Should().Be("6037-****-1234");
         payment.RRN.Should().Be("rrn-1");
         payment.TraceNumber.Should().Be("trace-1");
@@ -259,7 +259,7 @@ public class PaymentTests
     {
         var payment = _builder.BuildTopUp();
 
-        Action act = () => payment.StoreCallback("ref-1", PaymentBuilder.DefaultAmount, null, null, null);
+        Action act = () => payment.StoreCallback("ref-1", new Money(PaymentBuilder.DefaultAmount), null, null, null);
 
         act.Should().Throw<InvalidPaymentStateException>();
     }
@@ -382,7 +382,7 @@ public class PaymentTests
     private async Task<Payment> BuildPaymentWithCallback()
     {
         var payment = await BuildPaymentWithToken();
-        payment.StoreCallback("ref-1", PaymentBuilder.DefaultAmount, null, null, null);
+        payment.StoreCallback("ref-1", new Money(PaymentBuilder.DefaultAmount), null, null, null);
         return payment;
     }
 

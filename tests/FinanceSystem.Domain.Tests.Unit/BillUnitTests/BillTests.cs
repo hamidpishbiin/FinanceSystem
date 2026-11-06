@@ -18,7 +18,7 @@ public class BillTests
         bill.ServiceId.Should().Be(BillBuilder.DefaultServiceId);
         bill.ReferenceId.Should().Be(BillBuilder.DefaultReferenceId);
         bill.UserId.Should().Be(BillBuilder.DefaultUserId);
-        bill.Amount.Should().Be(BillBuilder.DefaultAmount);
+        bill.Amount.Should().Be(new Money(BillBuilder.DefaultAmount));
     }
 
     [Theory]

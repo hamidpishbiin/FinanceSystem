@@ -75,7 +75,7 @@ public class PspPaymentCallbackCommandHandler(
         {
             ReservationNumber = payment.Id,
             ReferenceNumber = payment.ReferenceNumber!,
-            Amount = payment.Amount
+            Amount = payment.Amount.Value
         };
 
         var verification = await pspGateway.VerifyPaymentAsync(verificationRequest, cancellationToken);

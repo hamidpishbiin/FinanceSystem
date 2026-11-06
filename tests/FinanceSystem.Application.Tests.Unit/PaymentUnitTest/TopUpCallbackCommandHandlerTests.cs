@@ -108,7 +108,7 @@ public class TopUpCallbackCommandHandlerTests
     public async Task Handle_should_report_success_without_verifying_again_when_payment_already_succeeded()
     {
         var payment = await ArrangePaymentWithToken();
-        payment.StoreCallback(ReferenceNumber, PaymentBuilder.DefaultAmount, null, null, null);
+        payment.StoreCallback(ReferenceNumber, new Money(PaymentBuilder.DefaultAmount), null, null, null);
         payment.MarkVerifying();
         await payment.MarkSucceeded();
 
@@ -123,7 +123,7 @@ public class TopUpCallbackCommandHandlerTests
     public async Task Handle_should_throw_and_leave_payment_unchanged_when_state_is_not_token_received()
     {
         var payment = await ArrangePaymentWithToken();
-        payment.StoreCallback(ReferenceNumber, PaymentBuilder.DefaultAmount - 1, "", "", "");
+        payment.StoreCallback(ReferenceNumber, new Money(PaymentBuilder.DefaultAmount - 1), "", "", "");
         await payment.MarkFailed(PaymentFailureReason.CallbackAmountMismatch);
 
         Func<Task> act = () => _handler.Handle(MakeCommand());
@@ -151,7 +151,7 @@ public class TopUpCallbackCommandHandlerTests
     public async Task Handle_should_mark_payment_failed_when_callback_amount_does_not_match()
     {
         var payment = await ArrangePaymentWithToken();
-        _callback.Amount = PaymentBuilder.DefaultAmount - 1;
+        _callback.Amount = new Money(PaymentBuilder.DefaultAmount - 1);
 
         await _handler.Handle(MakeCommand());
 
@@ -223,7 +223,7 @@ public class TopUpCallbackCommandHandlerTests
         await _ledgerEntryRepository.Received(1).AddAsync(Arg.Is<LedgerEntry>(e =>
             e.PaymentId == PaymentId &&
             e.FinanceAccountId == UserAccountId &&
-            e.Amount == PaymentBuilder.DefaultAmount &&
+            e.Amount.Value == PaymentBuilder.DefaultAmount &&
             e.Direction == EntryDirection.Inbound));
         await AssertOutcome(TopUpOutcome.Success);
     }
@@ -285,7 +285,7 @@ public class TopUpCallbackCommandHandlerTests
             IsSuccess = true,
             Token = Token,
             ReferenceNumber = ReferenceNumber,
-            Amount = PaymentBuilder.DefaultAmount
+            Amount = new Money(PaymentBuilder.DefaultAmount)
         };
     }
 

@@ -2,6 +2,7 @@ using System.Net.Http.Json;
 using FinanceSystem.Application.Gateways;
 using FinanceSystem.Domain.PaymentServiceProviders.Enums;
 using FinanceSystem.Application.Contracts.Payments;
+using FinanceSystem.Domain.Payments;
 using FinanceSystem.Domain.Payments.Exceptions;
 using FinanceSystem.Domain.PspExchangeLogs.Enums;
 using Microsoft.Extensions.Options;
@@ -240,7 +241,7 @@ internal class SamanGateway : IPspGateway
             IsSuccess = isSuccess,
             Token = fields["Token"],
             ReferenceNumber = fields["RefNum"],
-            Amount = decimal.Parse(fields["Amount"]),
+            Amount = new Money(decimal.Parse(fields["Amount"])),
             MaskedPan = fields["SecurePan"],
             RRN = fields["RRN"],
             TraceNumber = fields["TraceNo"]

@@ -28,7 +28,7 @@ public class PspPaymentCommandHandler(
         var psp = await pspSelector.SelectAsync(command.PspCode, cancellationToken);
 
         var payment = Payment.CreatePspPurchasePayment(
-            new Money(bill.Amount),
+            bill.Amount,
             bill.UserId,
             bill.ServiceId.ToString(),
             bill.ReferenceId.ToString(),
@@ -42,7 +42,7 @@ public class PspPaymentCommandHandler(
 
         var request = new PspTokenRequest()
         {
-            Amount = bill.Amount,
+            Amount = bill.Amount.Value,
             ReservationNumber = payment.Id,
             CallbackUrl = pspOptions.Value.For(psp.Code).PaymentCallBackUrl
         };

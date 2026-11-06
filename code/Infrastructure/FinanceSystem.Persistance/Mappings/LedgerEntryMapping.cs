@@ -51,6 +51,7 @@ public class LedgerEntryMapping() : EntityBaseMap<LedgerEntry, long>("LedgerEntr
         builder
             .Property(p => p.Amount)
             .HasColumnName("Amount")
+            .HasConversion<MoneyConverter>()
             .HasPrecision(18, 0);
 
         builder

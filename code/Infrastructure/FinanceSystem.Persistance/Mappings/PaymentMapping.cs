@@ -29,7 +29,8 @@ public class PaymentMapping() : EntityBaseMap<Payment, long>("Payments")
 
         builder
             .Property(p => p.Amount)
-            .HasColumnName("Amount");
+            .HasColumnName("Amount")
+            .HasConversion<MoneyConverter>();
 
         builder
             .Property(p => p.UserId)
@@ -99,6 +100,7 @@ public class PaymentMapping() : EntityBaseMap<Payment, long>("Payments")
         builder
             .Property(p => p.RedirectedAmount)
             .HasColumnName("RedirectedAmount")
+            .HasConversion<MoneyConverter>()
             .HasPrecision(18, 0);
 
         builder

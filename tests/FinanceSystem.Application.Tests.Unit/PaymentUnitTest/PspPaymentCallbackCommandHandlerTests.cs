@@ -6,6 +6,7 @@ using FinanceSystem.Domain.Payments;
 using FinanceSystem.Domain.Payments.Enums;
 using FinanceSystem.Domain.Payments.Exceptions;
 using FinanceSystem.Domain.PaymentServiceProviders.Enums;
+using FinanceSystem.Domain.PspExchangeLogs;
 using FinanceSystem.Domain.Tests.Unit.PaymentUnitTests;
 using FluentAssertions;
 using Microsoft.Extensions.Options;
@@ -48,7 +49,8 @@ public class PspPaymentCallbackCommandHandlerTests
                 Saman = new PspSettings { PaymentResultPageUrl = ResultPageUrl },
                 BehPardakht = new PspSettings { PaymentResultPageUrl = ResultPageUrl }
             }),
-            new PaymentEligibilityService(_paymentRepository));
+            new PaymentEligibilityService(_paymentRepository),
+            Substitute.For<IPspExchangeLogRepository>());
     }
 
     [Fact]
@@ -121,7 +123,7 @@ public class PspPaymentCallbackCommandHandlerTests
     public async Task Handle_should_report_success_without_verifying_again_when_payment_already_succeeded()
     {
         var payment = await ArrangePaymentWithToken();
-        payment.StoreCallback(ReferenceNumber, PaymentBuilder.DefaultAmount, null, null, null);
+        payment.StoreCallback(ReferenceNumber, new Money(PaymentBuilder.DefaultAmount), null, null, null);
         payment.MarkVerifying();
         await payment.MarkSucceeded();
 
@@ -150,7 +152,7 @@ public class PspPaymentCallbackCommandHandlerTests
     public async Task Handle_should_mark_payment_failed_when_callback_amount_does_not_match()
     {
         var payment = await ArrangePaymentWithToken();
-        _callback.Amount = PaymentBuilder.DefaultAmount - 1;
+        _callback.Amount = new Money(PaymentBuilder.DefaultAmount - 1);
 
         await _handler.Handle(MakeCommand());
 
@@ -243,7 +245,7 @@ public class PspPaymentCallbackCommandHandlerTests
             IsSuccess = true,
             Token = Token,
             ReferenceNumber = ReferenceNumber,
-            Amount = PaymentBuilder.DefaultAmount
+            Amount = new Money(PaymentBuilder.DefaultAmount)
         };
     }
 
