@@ -4,8 +4,8 @@ namespace FinanceSystem.Application.Gateways;
 
 public static class PspExchangeContext
 {
-    public static readonly HttpRequestOptionsKey<PspExchangeStep> Step = new(nameof(PspExchangeStep));
-    public static readonly HttpRequestOptionsKey<long> PaymentId = new(nameof(PaymentId));
+    public static readonly HttpRequestOptionsKey<PspExchangeStep> Step = new("PspExchange.Step");
+    public static readonly HttpRequestOptionsKey<long> PaymentId = new("PspExchange.PaymentId");
 
     public static HttpRequestMessage WithExchangeContext(
         this HttpRequestMessage message,
