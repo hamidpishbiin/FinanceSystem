@@ -18,7 +18,7 @@ public class BillFacadeService(ICommandBus commandBus, IEventListener eventListe
     {
         long billId = 0;
 
-        await eventListener.Subscribe(new EventHandlerAction<BillCreatedEvent>(bce =>
+        await eventListener.Subscribe(new EventHandlerAction<BillCreated>(bce =>
         {
             billId = bce.BillId;
         }));
@@ -38,7 +38,7 @@ public class BillFacadeService(ICommandBus commandBus, IEventListener eventListe
     {
         PspHandoffModel? handoff = null;
 
-        await eventListener.Subscribe(new EventHandlerAction<PspHandoffReadyEvent>(e =>
+        await eventListener.Subscribe(new EventHandlerAction<PspHandoffReady>(e =>
         {
             handoff = new PspHandoffModel
             {
@@ -69,7 +69,7 @@ public class BillFacadeService(ICommandBus commandBus, IEventListener eventListe
         var paymentSucceeded = false;
         var referenceId = string.Empty;
 
-        await eventListener.Subscribe(new EventHandlerAction<PaymentSucceededEvent>(e =>
+        await eventListener.Subscribe(new EventHandlerAction<PaymentSucceeded>(e =>
         {
             paymentSucceeded = true;
             referenceId = e.ReferenceId;

@@ -52,7 +52,7 @@ public class PspPaymentCommandHandler(
         if (response.IsSuccess)
         {
             await payment.MarkTokenReceived(response.Token);
-            await Publisher.Publish(new PspHandoffReadyEvent(response.Handoff!));
+            await Publisher.Publish(new PspHandoffReady(response.Handoff!));
         }
         else
         {

@@ -120,6 +120,6 @@ public class TopUpCallbackCommandHandler(
 
     private async Task PublishOutcome(TopUpOutcome outcome, string resultPageUrl)
     {
-        await Publisher.Publish(new TopUpCallbackHandledEvent(outcome, resultPageUrl));
+        await Publisher.Publish(new TopUpCallbackHandled(outcome, resultPageUrl));
     }
 }

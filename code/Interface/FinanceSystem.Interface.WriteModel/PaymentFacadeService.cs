@@ -18,7 +18,7 @@ public class PaymentFacadeService(ICommandBus commandBus, IEventListener listene
 
         var resultPageUrl = string.Empty;
 
-        await listener.Subscribe(new EventHandlerAction<PaymentCallbackProcessedEvent>(e =>
+        await listener.Subscribe(new EventHandlerAction<PaymentCallbackProcessed>(e =>
         {
             outcome = e.Outcome;
             resultPageUrl = e.ResultPageUrl;

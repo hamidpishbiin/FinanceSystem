@@ -17,7 +17,7 @@ public class TopUpFacadeService(
     public async Task<JsonResponse<string>> Create(CreatePaymentModel model)
     {
         string referenceId = string.Empty;
-        await listener.Subscribe(new EventHandlerAction<PaymentCreatedEvent>(a =>
+        await listener.Subscribe(new EventHandlerAction<PaymentCreated>(a =>
         {
             referenceId = a.ReferenceId;
         }));
@@ -42,7 +42,7 @@ public class TopUpFacadeService(
         PspHandoffModel? handoff = null;
         var tokenRequestFailed = false;
 
-        await listener.Subscribe(new EventHandlerAction<PspHandoffReadyEvent>(a =>
+        await listener.Subscribe(new EventHandlerAction<PspHandoffReady>(a =>
         {
             handoff = new PspHandoffModel
             {
@@ -52,7 +52,7 @@ public class TopUpFacadeService(
             };
         }));
 
-        await listener.Subscribe(new EventHandlerAction<PaymentTokenRequestFailedEvent>(_ =>
+        await listener.Subscribe(new EventHandlerAction<PaymentTokenRequestFailed>(_ =>
         {
             tokenRequestFailed = true;
         }));
@@ -83,7 +83,7 @@ public class TopUpFacadeService(
 
         var resultPageUrl = string.Empty;
 
-        await listener.Subscribe(new EventHandlerAction<TopUpCallbackHandledEvent>(a =>
+        await listener.Subscribe(new EventHandlerAction<TopUpCallbackHandled>(a =>
         {
             outcome = a.Outcome;
             resultPageUrl = a.ResultPageUrl;

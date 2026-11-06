@@ -251,7 +251,7 @@ public class PspPaymentCallbackCommandHandlerTests
 
     private async Task AssertOutcome(PaymentOutcome outcome)
     {
-        await _publisher.Received(1).Publish(Arg.Is<PaymentCallbackProcessedEvent>(e => e.Outcome == outcome && e.ResultPageUrl == ResultPageUrl));
+        await _publisher.Received(1).Publish(Arg.Is<PaymentCallbackProcessed>(e => e.Outcome == outcome && e.ResultPageUrl == ResultPageUrl));
     }
 
     private static void SetId<TKey>(EntityBase<TKey> entity, TKey id)

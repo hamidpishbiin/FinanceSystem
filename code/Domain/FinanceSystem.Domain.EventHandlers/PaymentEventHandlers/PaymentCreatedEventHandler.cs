@@ -2,7 +2,7 @@ using FinanceSystem.Domain.Contract.Payments;
 
 namespace FinanceSystem.Domain.EventHandlers.PaymentEventHandlers;
 
-public class PaymentCreatedEventHandler : PaymentEventsHandlerBase<PaymentCreatedEvent>
+public class PaymentCreatedEventHandler : PaymentEventsHandlerBase<PaymentCreated>
 {
     public PaymentCreatedEventHandler(IPaymentEventRepository eventRepository) : base(eventRepository)
     {

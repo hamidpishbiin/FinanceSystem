@@ -185,7 +185,7 @@ public class PaymentTests
         payment.State.Should().Be(PaymentState.TokenReceived);
         await _builder.EventPublisher
             .Received(1)
-            .Publish(Arg.Is<PspTokenReceivedEvent>(e =>
+            .Publish(Arg.Is<PspTokenReceived>(e =>
                 e.ReferenceId == PaymentBuilder.DefaultReferenceId));
     }
 
@@ -213,7 +213,7 @@ public class PaymentTests
         payment.FailureReason.Should().Be(PaymentFailureReason.TokenRequestFailed);
         await _builder.EventPublisher
             .Received(1)
-            .Publish(Arg.Is<PaymentTokenRequestFailedEvent>(e =>
+            .Publish(Arg.Is<PaymentTokenRequestFailed>(e =>
                 e.ReferenceId == PaymentBuilder.DefaultReferenceId));
     }
 
@@ -275,7 +275,7 @@ public class PaymentTests
         payment.FailureReason.Should().Be(PaymentFailureReason.CallbackAmountMismatch);
         await _builder.EventPublisher
             .Received(1)
-            .Publish(Arg.Is<PaymentFailedEvent>(e =>
+            .Publish(Arg.Is<PaymentFailed>(e =>
                 e.ReferenceId == PaymentBuilder.DefaultReferenceId));
     }
 
@@ -333,7 +333,7 @@ public class PaymentTests
         payment.SucceededAtUtc.Should().BeCloseTo(DateTimeOffset.UtcNow, TimeSpan.FromSeconds(5));
         await _builder.EventPublisher
             .Received(1)
-            .Publish(Arg.Is<PaymentSucceededEvent>(e =>
+            .Publish(Arg.Is<PaymentSucceeded>(e =>
                 e.ReferenceId == PaymentBuilder.DefaultReferenceId));
     }
 
@@ -358,7 +358,7 @@ public class PaymentTests
         payment.State.Should().Be(PaymentState.Reversed);
         await _builder.EventPublisher
             .Received(1)
-            .Publish(Arg.Is<PaymentReversedEvent>(e =>
+            .Publish(Arg.Is<PaymentReversed>(e =>
                 e.ReferenceId == PaymentBuilder.DefaultReferenceId));
     }
 

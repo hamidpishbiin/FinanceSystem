@@ -153,7 +153,7 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
         SetState(PaymentState.Failed);
         FailureReason = failureReason;
 
-        await Publisher.Publish(new PaymentTokenRequestFailedEvent(ReferenceId));
+        await Publisher.Publish(new PaymentTokenRequestFailed(ReferenceId));
     }
 
     public async Task MarkTokenReceived(string token)
@@ -162,7 +162,7 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
 
         SetToken(token);
 
-        await Publisher.Publish(new PspTokenReceivedEvent(ReferenceId));
+        await Publisher.Publish(new PspTokenReceived(ReferenceId));
     }
 
     public void StoreCallback(
@@ -190,7 +190,7 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
             FailureReason = failureReason;
         }
 
-        await Publisher.Publish(new PaymentFailedEvent(ReferenceId));
+        await Publisher.Publish(new PaymentFailed(ReferenceId));
     }
 
     public void MarkVerifying()
@@ -203,14 +203,14 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
         SetState(PaymentState.Succeeded);
         SucceededAtUtc = DateTimeOffset.UtcNow;
 
-        await Publisher.Publish(new PaymentSucceededEvent(ReferenceId));
+        await Publisher.Publish(new PaymentSucceeded(ReferenceId));
     }
 
     public async Task MarkReversed()
     {
         SetState(PaymentState.Reversed);
 
-        await Publisher.Publish(new PaymentReversedEvent(ReferenceId));
+        await Publisher.Publish(new PaymentReversed(ReferenceId));
     }
 
     private void SetState(PaymentState newState)

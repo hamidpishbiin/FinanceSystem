@@ -17,6 +17,6 @@ public class CreateBillCommandHandler(
 
         await Repository.AddAsync(bill, cancellationToken);
 
-        await Publisher.Publish(new BillCreatedEvent(bill.Id));
+        await Publisher.Publish(new BillCreated(bill.Id));
     }
 }

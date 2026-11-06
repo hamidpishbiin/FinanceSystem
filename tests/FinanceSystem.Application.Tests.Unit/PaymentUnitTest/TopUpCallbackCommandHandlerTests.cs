@@ -291,7 +291,7 @@ public class TopUpCallbackCommandHandlerTests
 
     private async Task AssertOutcome(TopUpOutcome outcome)
     {
-        await _publisher.Received(1).Publish(Arg.Is<TopUpCallbackHandledEvent>(e => e.Outcome == outcome && e.ResultPageUrl == ResultPageUrl));
+        await _publisher.Received(1).Publish(Arg.Is<TopUpCallbackHandled>(e => e.Outcome == outcome && e.ResultPageUrl == ResultPageUrl));
     }
 
     private static void SetId<TKey>(EntityBase<TKey> entity, TKey id)

@@ -6,13 +6,13 @@ using FinanceSystem.Domain.PaymentServiceProviders.Enums;
 
 namespace FinanceSystem.Application.Payments.CommandHandlers;
 
-public class PaymentCreateCommandHandler : PaymentCommandHandler<CreatePaymentCommand, PaymentCreatedEvent>
+public class PaymentCreateCommandHandler : PaymentCommandHandler<CreatePaymentCommand, PaymentCreated>
 {
     public PaymentCreateCommandHandler(
         IPaymentRepository repository,
         IEventPublisher publisher,
         IEventListener listener,
-        IEventHandler<PaymentCreatedEvent> eventHandler)
+        IEventHandler<PaymentCreated> eventHandler)
         : base(repository, publisher, listener, eventHandler)
     {
     }

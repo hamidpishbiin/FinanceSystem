@@ -99,6 +99,6 @@ public class PspPaymentCallbackCommandHandler(
 
     private async Task PublishOutcome(PaymentOutcome outcome, string resultPageUrl)
     {
-        await Publisher.Publish(new PaymentCallbackProcessedEvent(outcome, resultPageUrl));
+        await Publisher.Publish(new PaymentCallbackProcessed(outcome, resultPageUrl));
     }
 }

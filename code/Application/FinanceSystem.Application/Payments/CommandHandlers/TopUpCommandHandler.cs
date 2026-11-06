@@ -65,7 +65,7 @@ public class TopUpCommandHandler(
         if (paymentTokenResponse.IsSuccess)
         {
             await payment.MarkTokenReceived(paymentTokenResponse.Token);
-            await Publisher.Publish(new PspHandoffReadyEvent(paymentTokenResponse.Handoff!));
+            await Publisher.Publish(new PspHandoffReady(paymentTokenResponse.Handoff!));
         }
         else
         {
