@@ -1,13 +1,10 @@
 using FinanceSystem.Domain.Bills;
 using FinanceSystem.Domain.Payments;
-using NSubstitute;
-using Shared.Core.Events;
 
 namespace FinanceSystem.Domain.Tests.Unit.BillUnitTests;
 
 public class BillBuilder
 {
-    public IEventPublisher Publisher { get; private set; } = Substitute.For<IEventPublisher>();
     public const long DefaultServiceId = 12;
     public const long DefaultReferenceId = 1234;
     public const long DefaultUserId = 78645;

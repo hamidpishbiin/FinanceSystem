@@ -12,9 +12,6 @@ namespace FinanceSystem.Domain.Payments;
 
 public sealed class Payment : EntityBase<long>, IAggregateRoot
 {
-
-    public IEventPublisher Publisher { get; set; }
-
     public Money Amount { get; private set; }
     public PaymentPurpose Purpose { get; private set; }
     public PaymentChannel Channel { get; private set; }
@@ -51,8 +48,7 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
         string serviceId,
         string referenceId,
         long? billId,
-        PspCode? pspCode,
-        IEventPublisher eventPublisher)
+        PspCode? pspCode)
     {
         Guard<InvalidPaymentPurposeException>.IsTrue(!Enum.IsDefined(purpose));
         Guard<InvalidPaymentChannelException>.IsTrue(!Enum.IsDefined(channel));
@@ -70,8 +66,6 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
         Guard<UnexpectedPspCodeException>.IsTrue(channel != PaymentChannel.Psp && pspCode != null);
         Guard<InvalidPspCodeException>.IsTrue(pspCode.HasValue && !Enum.IsDefined(pspCode.Value));
 
-        Guard<NullEntryException>.AgainstNull(eventPublisher);
-
         Purpose = purpose;
         Channel = channel;
         State = PaymentState.Initiated;
@@ -82,7 +76,6 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
         ReferenceId = referenceId;
         BillId = billId;
         PspCode = pspCode;
-        Publisher = eventPublisher;
     }
 
     public static Payment CreatePspPurchasePayment(
@@ -91,8 +84,7 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
         string serviceId,
         string referenceId,
         long billId,
-        PspCode pspCode,
-        IEventPublisher eventPublisher)
+        PspCode pspCode)
     {
         return new Payment(
             PaymentPurpose.Purchase,
@@ -103,8 +95,7 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
             serviceId,
             referenceId,
             billId,
-            pspCode,
-            eventPublisher);
+            pspCode);
     }
 
     public static Payment CreateTopUpPayment(
@@ -112,8 +103,7 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
         long userId,
         string serviceId,
         string referenceId,
-        PspCode pspCode,
-        IEventPublisher eventPublisher)
+        PspCode pspCode)
     {
         return new Payment(
             PaymentPurpose.TopUp,
@@ -124,16 +114,14 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
             serviceId,
             referenceId,
             null,
-            pspCode,
-            eventPublisher);
+            pspCode);
     }
 
     public static Payment CreateWalletPurchasePayment(
         Money amount,
         long userId,
         string serviceId,
-        string referenceId,
-        IEventPublisher eventPublisher)
+        string referenceId)
     {
         return new Payment(
             PaymentPurpose.Purchase,
@@ -144,25 +132,24 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
             serviceId,
             referenceId,
             null,
-            null,
-            eventPublisher);
+            null);
     }
 
-    public async Task MarkTokenRequestFailed(PaymentFailureReason failureReason)
+    public async Task MarkTokenRequestFailed(PaymentFailureReason failureReason, IEventPublisher publisher)
     {
         SetState(PaymentState.Failed);
         FailureReason = failureReason;
 
-        await Publisher.Publish(new PaymentTokenRequestFailed(ReferenceId));
+        await publisher.Publish(new PaymentTokenRequestFailed(ReferenceId));
     }
 
-    public async Task MarkTokenReceived(string token)
+    public async Task MarkTokenReceived(string token, IEventPublisher publisher)
     {
         SetState(PaymentState.TokenReceived);
 
         SetToken(token);
 
-        await Publisher.Publish(new PspTokenReceived(ReferenceId));
+        await publisher.Publish(new PspTokenReceived(ReferenceId));
     }
 
     public void StoreCallback(
@@ -181,7 +168,7 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
         TraceNumber = traceNumber;
     }
 
-    public async Task MarkFailed(PaymentFailureReason? failureReason = null)
+    public async Task MarkFailed(PaymentFailureReason? failureReason, IEventPublisher publisher)
     {
         SetState(PaymentState.Failed);
 
@@ -190,7 +177,7 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
             FailureReason = failureReason;
         }
 
-        await Publisher.Publish(new PaymentFailed(ReferenceId));
+        await publisher.Publish(new PaymentFailed(ReferenceId));
     }
 
     public void MarkVerifying()
@@ -198,19 +185,19 @@ public sealed class Payment : EntityBase<long>, IAggregateRoot
         SetState(PaymentState.Verifying);
     }
 
-    public async Task MarkSucceeded()
+    public async Task MarkSucceeded(IEventPublisher publisher)
     {
         SetState(PaymentState.Succeeded);
         SucceededAtUtc = DateTimeOffset.UtcNow;
 
-        await Publisher.Publish(new PaymentSucceeded(ReferenceId));
+        await publisher.Publish(new PaymentSucceeded(ReferenceId));
     }
 
-    public async Task MarkReversed()
+    public async Task MarkReversed(IEventPublisher publisher)
     {
         SetState(PaymentState.Reversed);
 
-        await Publisher.Publish(new PaymentReversed(ReferenceId));
+        await publisher.Publish(new PaymentReversed(ReferenceId));
     }
 
     public void EnsureCallbackValidity(PspCode pspCode, string token, Money redirectAmount)

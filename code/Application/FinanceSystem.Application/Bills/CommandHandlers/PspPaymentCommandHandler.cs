@@ -34,8 +34,7 @@ public class PspPaymentCommandHandler(
             bill.ServiceId.ToString(),
             bill.ReferenceId.ToString(),
             bill.Id,
-            psp.Code,
-            Publisher);
+            psp.Code);
 
         await paymentRepository.AddAsync(payment);
 
@@ -52,12 +51,12 @@ public class PspPaymentCommandHandler(
 
         if (response.IsSuccess)
         {
-            await payment.MarkTokenReceived(response.Token);
+            await payment.MarkTokenReceived(response.Token, Publisher);
             await Publisher.Publish(new PspHandoffReady(response.Handoff!));
         }
         else
         {
-            await payment.MarkTokenRequestFailed(PaymentFailureReason.TokenRequestFailed);
+            await payment.MarkTokenRequestFailed(PaymentFailureReason.TokenRequestFailed, Publisher);
         }
     }
 }

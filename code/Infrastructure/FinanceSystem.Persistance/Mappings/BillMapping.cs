@@ -38,6 +38,5 @@ public class BillMapping() : EntityBaseMap<Bill, long>("Bills")
             .OnDelete(DeleteBehavior.Restrict)
             .HasConstraintName("FK_Bills_Users_UserId");
 
-        builder.Ignore(b => b.Publisher);
     }
 }

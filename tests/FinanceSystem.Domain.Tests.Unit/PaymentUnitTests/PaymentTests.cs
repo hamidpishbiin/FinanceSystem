@@ -34,7 +34,6 @@ public class PaymentTests
         payment.ReferenceId.Should().Be(PaymentBuilder.DefaultReferenceId);
         payment.BillId.Should().BeNull();
         payment.PspCode.Should().Be(PaymentBuilder.DefaultPspCode);
-        payment.Publisher.Should().BeSameAs(_builder.EventPublisher);
     }
 
     [Fact]
@@ -52,7 +51,6 @@ public class PaymentTests
         payment.ReferenceId.Should().Be(PaymentBuilder.DefaultReferenceId);
         payment.BillId.Should().Be(PaymentBuilder.DefaultBillId);
         payment.PspCode.Should().Be(PaymentBuilder.DefaultPspCode);
-        payment.Publisher.Should().BeSameAs(_builder.EventPublisher);
     }
 
     [Theory]
@@ -125,15 +123,6 @@ public class PaymentTests
         act.Should().Throw<InvalidPspCodeException>();
     }
 
-    [Theory]
-    [InlineData(TopUp)]
-    [InlineData(PspPurchase)]
-    public void Factories_should_throw_when_eventPublisher_is_null(string factory)
-    {
-        Action act = () => Build(_builder.WithEventPublisher(null!), factory);
-
-        act.Should().Throw<NullEntryException>();
-    }
 
     [Fact]
     public void PaymentPurpose_values_are_persisted_contract_and_should_not_change()
@@ -179,7 +168,7 @@ public class PaymentTests
     {
         var payment = _builder.BuildTopUp();
 
-        await payment.MarkTokenReceived("token-123");
+        await payment.MarkTokenReceived("token-123", _builder.EventPublisher);
 
         payment.Token.Should().Be("token-123");
         payment.State.Should().Be(PaymentState.TokenReceived);
@@ -197,7 +186,7 @@ public class PaymentTests
     {
         var payment = _builder.BuildTopUp();
 
-        Func<Task> act = () => payment.MarkTokenReceived(token!);
+        Func<Task> act = () => payment.MarkTokenReceived(token!, _builder.EventPublisher);
 
         await act.Should().ThrowAsync<InvalidTokenException>();
     }
@@ -207,7 +196,7 @@ public class PaymentTests
     {
         var payment = _builder.BuildTopUp();
 
-        await payment.MarkTokenRequestFailed(PaymentFailureReason.TokenRequestFailed);
+        await payment.MarkTokenRequestFailed(PaymentFailureReason.TokenRequestFailed, _builder.EventPublisher);
 
         payment.State.Should().Be(PaymentState.Failed);
         payment.FailureReason.Should().Be(PaymentFailureReason.TokenRequestFailed);
@@ -221,9 +210,9 @@ public class PaymentTests
     public async Task MarkTokenReceived_should_throw_when_state_is_not_initiated()
     {
         var payment = _builder.BuildTopUp();
-        await payment.MarkTokenRequestFailed(PaymentFailureReason.TokenRequestFailed);
+        await payment.MarkTokenRequestFailed(PaymentFailureReason.TokenRequestFailed, _builder.EventPublisher);
 
-        Func<Task> act = () => payment.MarkTokenReceived("token-123");
+        Func<Task> act = () => payment.MarkTokenReceived("token-123", _builder.EventPublisher);
 
         await act.Should().ThrowAsync<InvalidPaymentStateException>();
     }
@@ -232,9 +221,9 @@ public class PaymentTests
     public async Task MarkTokenRequestFailed_should_throw_when_state_is_not_initiated()
     {
         var payment = _builder.BuildTopUp();
-        await payment.MarkTokenReceived("token-123");
+        await payment.MarkTokenReceived("token-123", _builder.EventPublisher);
 
-        Func<Task> act = () => payment.MarkTokenRequestFailed(PaymentFailureReason.TokenRequestFailed);
+        Func<Task> act = () => payment.MarkTokenRequestFailed(PaymentFailureReason.TokenRequestFailed, _builder.EventPublisher);
 
         await act.Should().ThrowAsync<InvalidPaymentStateException>();
     }
@@ -269,7 +258,7 @@ public class PaymentTests
     {
         var payment = await BuildPaymentWithCallback();
 
-        await payment.MarkFailed(PaymentFailureReason.CallbackAmountMismatch);
+        await payment.MarkFailed(PaymentFailureReason.CallbackAmountMismatch, _builder.EventPublisher);
 
         payment.State.Should().Be(PaymentState.Failed);
         payment.FailureReason.Should().Be(PaymentFailureReason.CallbackAmountMismatch);
@@ -285,7 +274,7 @@ public class PaymentTests
         var payment = await BuildPaymentWithCallback();
         payment.MarkVerifying();
 
-        await payment.MarkFailed(PaymentFailureReason.VerificationFailed);
+        await payment.MarkFailed(PaymentFailureReason.VerificationFailed, _builder.EventPublisher);
 
         payment.State.Should().Be(PaymentState.Failed);
         payment.FailureReason.Should().Be(PaymentFailureReason.VerificationFailed);
@@ -296,7 +285,7 @@ public class PaymentTests
     {
         var payment = await BuildPaymentWithToken();
 
-        Func<Task> act = () => payment.MarkFailed(PaymentFailureReason.CallbackAmountMismatch);
+        Func<Task> act = () => payment.MarkFailed(PaymentFailureReason.CallbackAmountMismatch, _builder.EventPublisher);
 
         await act.Should().ThrowAsync<InvalidPaymentStateException>();
     }
@@ -327,7 +316,7 @@ public class PaymentTests
         var payment = await BuildPaymentWithCallback();
         payment.MarkVerifying();
 
-        await payment.MarkSucceeded();
+        await payment.MarkSucceeded(_builder.EventPublisher);
 
         payment.State.Should().Be(PaymentState.Succeeded);
         payment.SucceededAtUtc.Should().BeCloseTo(DateTimeOffset.UtcNow, TimeSpan.FromSeconds(5));
@@ -342,7 +331,7 @@ public class PaymentTests
     {
         var payment = await BuildPaymentWithCallback();
 
-        Func<Task> act = () => payment.MarkSucceeded();
+        Func<Task> act = () => payment.MarkSucceeded(_builder.EventPublisher);
 
         await act.Should().ThrowAsync<InvalidPaymentStateException>();
     }
@@ -353,7 +342,7 @@ public class PaymentTests
         var payment = await BuildPaymentWithCallback();
         payment.MarkVerifying();
 
-        await payment.MarkReversed();
+        await payment.MarkReversed(_builder.EventPublisher);
 
         payment.State.Should().Be(PaymentState.Reversed);
         await _builder.EventPublisher
@@ -367,7 +356,7 @@ public class PaymentTests
     {
         var payment = await BuildPaymentWithCallback();
 
-        Func<Task> act = () => payment.MarkReversed();
+        Func<Task> act = () => payment.MarkReversed(_builder.EventPublisher);
 
         await act.Should().ThrowAsync<InvalidPaymentStateException>();
     }
@@ -405,7 +394,7 @@ public class PaymentTests
     private async Task<Payment> BuildPaymentWithToken()
     {
         var payment = _builder.BuildTopUp();
-        await payment.MarkTokenReceived("token-123");
+        await payment.MarkTokenReceived("token-123", _builder.EventPublisher);
         return payment;
     }
 

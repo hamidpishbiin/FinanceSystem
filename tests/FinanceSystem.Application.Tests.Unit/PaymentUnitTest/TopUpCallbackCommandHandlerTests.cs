@@ -111,7 +111,7 @@ public class TopUpCallbackCommandHandlerTests
         var payment = await ArrangePaymentWithToken();
         payment.StoreCallback(ReferenceNumber, new Money(PaymentBuilder.DefaultAmount), null, null, null);
         payment.MarkVerifying();
-        await payment.MarkSucceeded();
+        await payment.MarkSucceeded(_publisher);
 
         await _handler.Handle(MakeCommand());
 
@@ -125,7 +125,7 @@ public class TopUpCallbackCommandHandlerTests
     {
         var payment = await ArrangePaymentWithToken();
         payment.StoreCallback(ReferenceNumber, new Money(PaymentBuilder.DefaultAmount - 1), "", "", "");
-        await payment.MarkFailed(PaymentFailureReason.CallbackAmountMismatch);
+        await payment.MarkFailed(PaymentFailureReason.CallbackAmountMismatch, _publisher);
 
         Func<Task> act = () => _handler.Handle(MakeCommand());
 
@@ -244,7 +244,7 @@ public class TopUpCallbackCommandHandlerTests
     private async Task<Payment> ArrangePaymentWithToken()
     {
         var payment = ArrangePayment();
-        await payment.MarkTokenReceived(Token);
+        await payment.MarkTokenReceived(Token, _publisher);
         return payment;
     }
 

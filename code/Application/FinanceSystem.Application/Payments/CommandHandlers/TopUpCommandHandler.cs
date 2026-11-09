@@ -45,8 +45,7 @@ public class TopUpCommandHandler(
             user.Id,
             _serviceId,
             guidGenerator.New().ToString(),
-            psp.Code,
-            Publisher);
+            psp.Code);
 
         await Repository.AddAsync(payment);
 
@@ -65,12 +64,12 @@ public class TopUpCommandHandler(
 
         if (paymentTokenResponse.IsSuccess)
         {
-            await payment.MarkTokenReceived(paymentTokenResponse.Token);
+            await payment.MarkTokenReceived(paymentTokenResponse.Token, Publisher);
             await Publisher.Publish(new PspHandoffReady(paymentTokenResponse.Handoff!));
         }
         else
         {
-            await payment.MarkTokenRequestFailed(PaymentFailureReason.TokenRequestFailed);
+            await payment.MarkTokenRequestFailed(PaymentFailureReason.TokenRequestFailed, Publisher);
         }
     }
 }

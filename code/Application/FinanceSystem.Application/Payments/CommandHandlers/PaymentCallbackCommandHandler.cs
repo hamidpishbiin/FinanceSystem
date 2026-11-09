@@ -40,8 +40,6 @@ public class PaymentCallbackCommandHandler(
 
             payment.EnsureCallbackValidity(command.PspCode, callback.Token, callback.Amount);
 
-            payment.Publisher = Publisher;
-
             if (payment.State == PaymentState.Succeeded)
             {
                 await PublishOutcome(isSuccess: true, resultPageUrl);
@@ -82,7 +80,7 @@ public class PaymentCallbackCommandHandler(
                 return;
             }
 
-            await payment.MarkSucceeded();
+            await payment.MarkSucceeded(Publisher);
 
             await PublishOutcome(isSuccess: true, resultPageUrl);
         }
@@ -95,7 +93,7 @@ public class PaymentCallbackCommandHandler(
 
     private async Task FailAsync(Payment payment, string resultPageUrl, PaymentFailureReason failureReason)
     {
-        await payment.MarkFailed(failureReason);
+        await payment.MarkFailed(failureReason, Publisher);
         await PublishOutcome(isSuccess: false, resultPageUrl);
     }
 

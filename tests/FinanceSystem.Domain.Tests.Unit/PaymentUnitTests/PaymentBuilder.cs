@@ -21,7 +21,7 @@ public class PaymentBuilder
     private long BillId { get; set; } = DefaultBillId;
     private PspCode PspCode { get; set; } = DefaultPspCode;
 
-    public IEventPublisher EventPublisher { get; private set; } = Substitute.For<IEventPublisher>();
+    public IEventPublisher EventPublisher { get; } = Substitute.For<IEventPublisher>();
 
     public Payment BuildTopUp()
     {
@@ -30,8 +30,7 @@ public class PaymentBuilder
             UserId,
             ServiceId,
             ReferenceId,
-            PspCode,
-            EventPublisher);
+            PspCode);
     }
 
     public Payment BuildPspPurchase()
@@ -42,8 +41,7 @@ public class PaymentBuilder
             ServiceId,
             ReferenceId,
             BillId,
-            PspCode,
-            EventPublisher);
+            PspCode);
     }
 
     public PaymentBuilder WithAmount(Money amount)
@@ -79,12 +77,6 @@ public class PaymentBuilder
     public PaymentBuilder WithPspCode(PspCode pspCode)
     {
         PspCode = pspCode;
-        return this;
-    }
-
-    public PaymentBuilder WithEventPublisher(IEventPublisher eventPublisher)
-    {
-        EventPublisher = eventPublisher;
         return this;
     }
 }

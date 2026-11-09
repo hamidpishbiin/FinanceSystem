@@ -146,7 +146,6 @@ public class PaymentMapping() : EntityBaseMap<Payment, long>("Payments")
             .Property(p => p.SucceededAtUtc)
             .HasColumnName("SucceededAtUtc");
 
-        builder.Ignore(p => p.Publisher);
     }
 }
 

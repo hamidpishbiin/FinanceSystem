@@ -9,7 +9,6 @@ namespace FinanceSystem.Domain.Bills;
 
 public class Bill : EntityBase<long>, IAggregateRoot
 {
-    public IEventPublisher Publisher { get; set; }
     public long ServiceId { get; private set; }
     public long ReferenceId { get; private set; }
     public long UserId { get; private set; }

@@ -37,8 +37,6 @@ public class TopUpCallbackCommandHandler(
 
         PspExchangeLog.CreateCallbackLog(payment!.Id, command.Fields.ToString());
 
-        payment.Publisher = Publisher;
-
         if (payment.State == PaymentState.Succeeded)
         {
             await PublishOutcome(TopUpOutcome.Success, resultPageUrl);
@@ -94,7 +92,7 @@ public class TopUpCallbackCommandHandler(
             return;
         }
 
-        await payment.MarkSucceeded();
+        await payment.MarkSucceeded(Publisher);
 
         await CreditWalletAsync(payment, userAccount);
 
@@ -115,7 +113,7 @@ public class TopUpCallbackCommandHandler(
 
     private async Task FailAsync(Payment payment, string resultPageUrl, PaymentFailureReason? failureReason = null)
     {
-        await payment.MarkFailed(failureReason);
+        await payment.MarkFailed(failureReason, Publisher);
         await PublishOutcome(TopUpOutcome.Failure, resultPageUrl);
     }
 

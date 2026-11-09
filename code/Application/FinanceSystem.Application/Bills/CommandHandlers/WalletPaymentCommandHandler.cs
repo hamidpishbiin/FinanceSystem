@@ -29,8 +29,7 @@ public class WalletPaymentCommandHandler(
             amount,
             paymentCommand.UserId,
             bill.ServiceId.ToString(),
-            bill.ReferenceId.ToString(),
-            Publisher);
+            bill.ReferenceId.ToString());
 
         await paymentRepository.AddAsync(payment);
 
@@ -40,6 +39,6 @@ public class WalletPaymentCommandHandler(
 
         financeAccount.ApplyEntry(ledgerEntry, DateTimeOffset.UtcNow);
 
-        await payment.MarkSucceeded();
+        await payment.MarkSucceeded(Publisher);
     }
 }
