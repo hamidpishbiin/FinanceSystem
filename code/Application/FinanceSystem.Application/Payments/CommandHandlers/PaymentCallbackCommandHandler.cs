@@ -12,6 +12,7 @@ namespace FinanceSystem.Application.Payments.CommandHandlers;
 public class PaymentCallbackCommandHandler(
     IPaymentRepository repository,
     IPspGatewayFactory pspGatewayFactory,
+    IUnitOfWork unitOfWork,
     IEventPublisher publisher,
     IEventListener listener,
     IOptions<PspOptions> pspOptions,
@@ -22,8 +23,6 @@ public class PaymentCallbackCommandHandler(
     public override async Task Handle(ProcessPaymentCallbackCommand command, CancellationToken cancellationToken = default)
     {
         var resultPageUrl = string.Empty;
-        Payment payment = null;
-        var failureReason = PaymentFailureReason.CallbackFailed;
 
         try
         {
@@ -37,7 +36,7 @@ public class PaymentCallbackCommandHandler(
 
             pspExchangeLogRepository.Add(callbackLog);
 
-            payment = await paymentEligibilityService.GetPurchasePaymentAsync(callback.ReservationNumber, cancellationToken);
+            var payment = await paymentEligibilityService.GetPurchasePaymentAsync(callback.ReservationNumber, cancellationToken);
 
             payment.EnsureCallbackValidity(command.PspCode, callback.Token, callback.Amount);
 
@@ -60,11 +59,13 @@ public class PaymentCallbackCommandHandler(
 
             if (!callback.IsSuccess)
             {
-                await FailAsync(payment, resultPageUrl, failureReason);
+                await FailAsync(payment, resultPageUrl, PaymentFailureReason.CallbackFailed);
                 return;
             }
 
             payment.MarkVerifying();
+
+            await unitOfWork.SaveChangesAsync();
 
             var verificationRequest = new PaymentVerificationRequest()
             {
@@ -77,9 +78,7 @@ public class PaymentCallbackCommandHandler(
 
             if (!verification.IsSuccess)
             {
-                failureReason = PaymentFailureReason.VerificationFailed;
-
-                await FailAsync(payment, resultPageUrl, failureReason);
+                await FailAsync(payment, resultPageUrl, PaymentFailureReason.VerificationFailed);
                 return;
             }
 
@@ -87,9 +86,9 @@ public class PaymentCallbackCommandHandler(
 
             await PublishOutcome(isSuccess: true, resultPageUrl);
         }
-        catch
+        catch (BusinessException)
         {
-            await FailAsync(payment!, resultPageUrl, failureReason);
+            await PublishOutcome(isSuccess: false, resultPageUrl);
             throw;
         }
     }

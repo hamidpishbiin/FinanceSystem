@@ -372,6 +372,36 @@ public class PaymentTests
         await act.Should().ThrowAsync<InvalidPaymentStateException>();
     }
 
+    [Fact]
+    public async Task EnsureCallbackValidity_should_throw_when_psp_code_does_not_match()
+    {
+        var payment = await BuildPaymentWithToken();
+
+        Action act = () => payment.EnsureCallbackValidity(PspCode.BehPardakht, "token-123", new Money(PaymentBuilder.DefaultAmount));
+
+        act.Should().Throw<PspCodeMismatchException>();
+    }
+
+    [Fact]
+    public async Task EnsureCallbackValidity_should_throw_when_token_does_not_match()
+    {
+        var payment = await BuildPaymentWithToken();
+
+        Action act = () => payment.EnsureCallbackValidity(PaymentBuilder.DefaultPspCode, "forged-token", new Money(PaymentBuilder.DefaultAmount));
+
+        act.Should().Throw<CallbackTokenMismatchException>();
+    }
+
+    [Fact]
+    public async Task EnsureCallbackValidity_should_throw_when_redirect_amount_does_not_match()
+    {
+        var payment = await BuildPaymentWithToken();
+
+        Action act = () => payment.EnsureCallbackValidity(PaymentBuilder.DefaultPspCode, "token-123", new Money(PaymentBuilder.DefaultAmount - 1));
+
+        act.Should().Throw<InconsistentRedirectAmountException>();
+    }
+
     private async Task<Payment> BuildPaymentWithToken()
     {
         var payment = _builder.BuildTopUp();

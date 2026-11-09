@@ -33,7 +33,7 @@ public class PaymentFacadeService(
                 },
                 cancellationToken);
         }
-        catch
+        catch (BusinessException)
         {
             // ignored
         }

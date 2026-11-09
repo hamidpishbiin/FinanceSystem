@@ -60,6 +60,7 @@ public class PaymentCallbackCommandHandlerTests
         Func<Task> act = () => _handler.Handle(MakeCommand());
 
         await act.Should().ThrowAsync<PaymentNotFoundException>();
+        await AssertOutcome(isSuccess: false);
         await _unitOfWork.DidNotReceive().SaveChangesAsync();
     }
 
@@ -74,6 +75,7 @@ public class PaymentCallbackCommandHandlerTests
         Func<Task> act = () => _handler.Handle(MakeCommand());
 
         await act.Should().ThrowAsync<InvalidPaymentPurposeException>();
+        await AssertOutcome(isSuccess: false);
         payment.State.Should().Be(PaymentState.TokenReceived);
     }
 
@@ -91,6 +93,7 @@ public class PaymentCallbackCommandHandlerTests
         Func<Task> act = () => _handler.Handle(command);
 
         await act.Should().ThrowAsync<PspCodeMismatchException>();
+        await AssertOutcome(isSuccess: false);
         payment.State.Should().Be(PaymentState.TokenReceived);
     }
 
@@ -103,6 +106,7 @@ public class PaymentCallbackCommandHandlerTests
         Func<Task> act = () => _handler.Handle(MakeCommand());
 
         await act.Should().ThrowAsync<CallbackTokenMismatchException>();
+        await AssertOutcome(isSuccess: false);
         payment.State.Should().Be(PaymentState.TokenReceived);
     }
 
@@ -116,6 +120,7 @@ public class PaymentCallbackCommandHandlerTests
         Func<Task> act = () => _handler.Handle(MakeCommand());
 
         await act.Should().ThrowAsync<DuplicateReferenceNumberException>();
+        await AssertOutcome(isSuccess: false);
         payment.State.Should().Be(PaymentState.TokenReceived);
         payment.ReferenceNumber.Should().BeNull();
     }
@@ -132,7 +137,7 @@ public class PaymentCallbackCommandHandlerTests
 
         payment.State.Should().Be(PaymentState.Succeeded);
         await _pspGateway.DidNotReceiveWithAnyArgs().VerifyPaymentAsync(default!, default);
-        await AssertOutcome(PaymentOutcome.Success);
+        await AssertOutcome(isSuccess: true);
     }
 
     [Fact]
@@ -146,21 +151,21 @@ public class PaymentCallbackCommandHandlerTests
 
         payment.State.Should().Be(PaymentState.Failed);
         await _pspGateway.DidNotReceiveWithAnyArgs().VerifyPaymentAsync(default!, default);
-        await AssertOutcome(PaymentOutcome.Failure);
+        await AssertOutcome(isSuccess: false);
     }
 
     [Fact]
-    public async Task Handle_should_mark_payment_failed_when_callback_amount_does_not_match()
+    public async Task Handle_should_throw_and_leave_payment_unchanged_when_callback_amount_does_not_match()
     {
         var payment = await ArrangePaymentWithToken();
         _callback.Amount = new Money(PaymentBuilder.DefaultAmount - 1);
 
-        await _handler.Handle(MakeCommand());
+        Func<Task> act = () => _handler.Handle(MakeCommand());
 
-        payment.State.Should().Be(PaymentState.Failed);
-        payment.FailureReason.Should().Be(PaymentFailureReason.CallbackAmountMismatch);
+        await act.Should().ThrowAsync<InconsistentRedirectAmountException>();
+        payment.State.Should().Be(PaymentState.TokenReceived);
         await _pspGateway.DidNotReceiveWithAnyArgs().VerifyPaymentAsync(default!, default);
-        await AssertOutcome(PaymentOutcome.Failure);
+        await AssertOutcome(isSuccess: false);
     }
 
     [Fact]
@@ -191,7 +196,7 @@ public class PaymentCallbackCommandHandlerTests
 
         payment.State.Should().Be(PaymentState.Failed);
         payment.FailureReason.Should().Be(PaymentFailureReason.VerificationFailed);
-        await AssertOutcome(PaymentOutcome.Failure);
+        await AssertOutcome(isSuccess: false);
     }
 
     [Fact]
@@ -211,7 +216,7 @@ public class PaymentCallbackCommandHandlerTests
                 r.ReferenceNumber == ReferenceNumber &&
                 r.Amount == PaymentBuilder.DefaultAmount),
             Arg.Any<CancellationToken>());
-        await AssertOutcome(PaymentOutcome.Success);
+        await AssertOutcome(isSuccess: true);
     }
 
     private async Task<Payment> ArrangePaymentWithToken()
@@ -250,9 +255,11 @@ public class PaymentCallbackCommandHandlerTests
         };
     }
 
-    private async Task AssertOutcome(PaymentOutcome outcome)
+    private async Task AssertOutcome(bool isSuccess)
     {
-        await _publisher.Received(1).Publish(Arg.Is<PaymentCallbackProcessed>(e => e.Outcome == outcome && e.ResultPageUrl == ResultPageUrl));
+        var expectedUrl = $"{ResultPageUrl}?status={(isSuccess ? "Success" : "Failure")}";
+
+        await _publisher.Received(1).Publish(Arg.Is<PaymentCallbackProcessed>(e => e.IsSuccess == isSuccess && e.ResultPageUrl == expectedUrl));
     }
 
     private static void SetId<TKey>(EntityBase<TKey> entity, TKey id)
