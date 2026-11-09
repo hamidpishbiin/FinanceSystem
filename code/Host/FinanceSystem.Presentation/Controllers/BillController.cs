@@ -1,4 +1,3 @@
-using FinanceSystem.Interface.Contracts.Bills;
 using FinanceSystem.Interface.Contracts.Bills.Models;
 using FinanceSystem.Interface.Contracts.Bills.Services;
 using Microsoft.Extensions.Options;
@@ -10,7 +9,6 @@ namespace FinanceSystem.Presentation.Controllers;
 [ApiController]
 public class BillController(
     IBillFacadeService facadeService,
-    IBillFacadeQuery facadeQuery,
     IUserResolver userResolver,
     IOptions<PaymentResultPageConfig> paymentResultPageConfig) : ControllerBase
 {
@@ -18,14 +16,6 @@ public class BillController(
     public async Task<IActionResult> CreateBill([FromBody] CreateBillRequest request, CancellationToken cancellationToken)
     {
         var response = await facadeService.CreateBill(request, cancellationToken);
-
-        return Ok(response);
-    }
-
-    [HttpGet("{billId}/payment-options")]
-    public async Task<IActionResult> GetPaymentOptions([FromRoute] GetPaymentOptionsRequest request, CancellationToken cancellationToken)
-    {
-        var response = await facadeQuery.GetPaymentOptionsAsync(long.Parse(request.BillId), long.Parse(userResolver.GetUserId()), cancellationToken);
 
         return Ok(response);
     }
