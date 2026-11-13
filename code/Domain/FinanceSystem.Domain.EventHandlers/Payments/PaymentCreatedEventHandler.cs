@@ -1,9 +1,9 @@
 using FinanceSystem.Domain.Contract;
 using FinanceSystem.Domain.Contract.Payments;
 
-namespace FinanceSystem.Domain.EventHandlers.PaymentEventHandlers;
+namespace FinanceSystem.Domain.EventHandlers.Payments;
 
 public class PaymentCreatedEventHandler(IDomainEventRepository domainEventRepository)
-    : EventHandlerBase<PaymentCreated>(EventEntityNames.Payment, domainEventRepository)
+    : PaymentEventHandlerBase<PaymentCreated>(domainEventRepository)
 {
 }

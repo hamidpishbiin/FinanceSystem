@@ -4,7 +4,7 @@ using FinanceSystem.Application.Gateways;
 using FinanceSystem.Application.Product.CommandHandlers;
 using FinanceSystem.BehPardakht;
 using FinanceSystem.Core;
-using FinanceSystem.Domain.EventHandlers.ProductEventHandlers;
+using FinanceSystem.Domain.EventHandlers.Products;
 using FinanceSystem.Domain.Products.DomainServices;
 using FinanceSystem.Interface.ReadModel.Products;
 using FinanceSystem.Interface.WriteModel;

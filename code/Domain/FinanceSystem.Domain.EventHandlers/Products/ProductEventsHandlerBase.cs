@@ -1,7 +1,7 @@
 ﻿using FinanceSystem.Domain.Contract.Products;
 using Shared.Core.EventHandlers;
 
-namespace FinanceSystem.Domain.EventHandlers.ProductEventHandlers
+namespace FinanceSystem.Domain.EventHandlers.Products
 {
     public abstract class ProductEventsHandlerBase<T> : IEventHandler<T> where T : ProductEventBase
     {
