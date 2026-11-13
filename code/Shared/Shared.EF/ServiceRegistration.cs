@@ -10,7 +10,7 @@ namespace Shared.EF
         public static void RegisterDbContext(this ContainerBuilder builder,
             string connectionString,
             string readonlyConnectionString,
-            Assembly mappingAssembly)
+            params Assembly[] mappingAssemblies)
         {
             builder.RegisterType<UnitOfWork>().As<IUnitOfWork>()
                 .InstancePerLifetimeScope();
@@ -27,7 +27,7 @@ namespace Shared.EF
                     .UseNpgsql(connectionString);
                 options.AddEFLoggingOptions();
 
-                return new EFContext(options.Options, mappingAssembly);
+                return new EFContext(options.Options, mappingAssemblies);
             }).As<EFContext>().InstancePerLifetimeScope();
 
             builder.Register(s =>
@@ -38,7 +38,7 @@ namespace Shared.EF
                 
                 options.AddEFLoggingOptions();
 
-                return new ReadOnlyContext(options.Options, mappingAssembly);
+                return new ReadOnlyContext(options.Options, mappingAssemblies);
             }).As<ReadOnlyContext>().InstancePerLifetimeScope();
         }
 

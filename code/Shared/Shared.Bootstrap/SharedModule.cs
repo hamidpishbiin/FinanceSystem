@@ -8,7 +8,7 @@ using Shared.Autofac;
 
 namespace Shared.Bootstrap
 {
-    public class SharedModule(string connectionString,string readonlyConnectionString, System.Reflection.Assembly mappingAssembly) : Module
+    public class SharedModule(string connectionString,string readonlyConnectionString, System.Reflection.Assembly[] mappingAssemblies) : Module
     {
         protected override void Load(ContainerBuilder builder)
         {
@@ -48,7 +48,7 @@ namespace Shared.Bootstrap
 
             builder.RegisterServiceLocator();
 
-            builder.RegisterDbContext(connectionString, readonlyConnectionString, mappingAssembly);
+            builder.RegisterDbContext(connectionString, readonlyConnectionString, mappingAssemblies);
 
         }
     }

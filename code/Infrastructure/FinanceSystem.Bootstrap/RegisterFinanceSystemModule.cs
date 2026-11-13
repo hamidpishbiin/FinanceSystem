@@ -10,9 +10,9 @@ namespace FinanceSystem.Bootstrap
         public static void AddModule(this ContainerBuilder builder,
             string connectionString,
             string readonlyConnectionString,
-            Assembly mappingAssembly)
+            params Assembly[] mappingAssemblies)
         {
-            builder.AddFramework(connectionString, readonlyConnectionString, mappingAssembly);
+            builder.AddFramework(connectionString, readonlyConnectionString, mappingAssemblies);
             builder.RegisterModule(new FinanceSystemModule());
         }
     }

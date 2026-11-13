@@ -1,4 +1,5 @@
 using System.Net.Http.Json;
+using Autofac.Features.OwnedInstances;
 using FinanceSystem.Application.Contracts.Gateways;
 using FinanceSystem.Application.Gateways;
 using FinanceSystem.Domain.PaymentServiceProviders.Enums;
@@ -10,29 +11,23 @@ using Shared.Core;
 
 namespace FinanceSystem.Saman;
 
-internal class SamanGateway : IPspGateway
+internal class SamanGateway(
+    IOptions<PspOptions> pspOptions,
+    IHttpClientFactory httpClientFactory,
+    ILoggerService loggerService,
+    Func<Owned<SamanTokenExchangeLogWriter>> exchangeLogWriterFactory) : IPspGateway
 {
     private const int _samanCallbackOkStatus = 2;
     private const int _tokenResponseSuccessStatus = 1;
 
-    private readonly IHttpClientFactory _httpClientFactory;
-    private readonly ILoggerService _loggerService;
-    private readonly PspSettings _settings;
-
-    public SamanGateway(
-        IOptions<PspOptions> pspOptions,
-        IHttpClientFactory httpClientFactory,
-        ILoggerService loggerService)
-    {
-        _settings = pspOptions.Value.Saman;
-        _httpClientFactory = httpClientFactory;
-        _loggerService = loggerService;
-    }
+    private readonly PspSettings _settings = pspOptions.Value.Saman;
 
     public PspCode Code => PspCode.Saman;
 
     public async Task<PspTokenResponse> RequestPaymentTokenAsync(PspTokenRequest request, CancellationToken cancellationToken)
     {
+        var exchangeLog = new SamanTokenExchangeLogModel();
+
         try
         {
             var payload = new
@@ -44,7 +39,10 @@ internal class SamanGateway : IPspGateway
                 resNum = request.ReservationNumber
             };
 
-            var httpClient = _httpClientFactory.CreateClient(nameof(PspCode.Saman));
+            exchangeLog.RequestAmount = payload.amount;
+            exchangeLog.RequestReservationNumber = payload.resNum;
+
+            var httpClient = httpClientFactory.CreateClient(nameof(PspCode.Saman));
 
             using var message = new HttpRequestMessage(HttpMethod.Post, "/OnlinePG/OnlinePG");
 
@@ -52,14 +50,24 @@ internal class SamanGateway : IPspGateway
 
             var serializedResponse = await httpClient.SendAsync(message, cancellationToken);
 
-            serializedResponse.EnsureSuccessStatusCode();
+            if (!serializedResponse.IsSuccessStatusCode)
+            {
+                exchangeLog.RawResponseBody = await serializedResponse.Content.ReadAsStringAsync(cancellationToken);
+                exchangeLog.Response = null;
+                throw new HttpRequestException("Saman token request did not return with success status code.");
+            }
+
+            exchangeLog.RawResponseBody = await serializedResponse.Content.ReadAsStringAsync(cancellationToken);
 
             var response = await serializedResponse.Content.ReadFromJsonAsync<SamanTokenResponse>(cancellationToken);
 
             if (response is null)
             {
+                exchangeLog.Response = null;
                 throw new InvalidOperationException("Saman token response was null.");
             }
+
+            exchangeLog.Response = response;
 
             var isSuccess = response.Status == _tokenResponseSuccessStatus;
 
@@ -67,7 +75,9 @@ internal class SamanGateway : IPspGateway
             {
                 IsSuccess = isSuccess,
                 Token = response.Token,
-                Handoff = isSuccess ? MakeHandoff(response.Token) : null
+                Handoff = isSuccess
+                    ? MakeHandoff(response.Token)
+                    : null
             };
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
@@ -76,21 +86,41 @@ internal class SamanGateway : IPspGateway
         }
         catch (OperationCanceledException ex)
         {
-            _loggerService.Error(ex, $"{Code} token request timed out after {_settings.TimeoutInSeconds} seconds");
+            loggerService.Error(ex, $"{Code} token request timed out after {_settings.TimeoutInSeconds} seconds");
 
             return MakeFailedTokenResponse();
         }
         catch (HttpRequestException ex)
         {
-            _loggerService.Error(ex, $"{Code} token request failed.");
+            loggerService.Error(ex, $"{Code} token request failed.");
 
             return MakeFailedTokenResponse();
         }
         catch (Exception ex)
         {
-            _loggerService.Error(ex, $"{Code} token request failed unexpectedly");
+            loggerService.Error(ex, $"{Code} token request failed unexpectedly");
 
             return MakeFailedTokenResponse();
+        }
+        finally
+        {
+            loggerService.Information($"TokenExchangeLog {exchangeLog}");
+            // Find out what's wrong with serilog templates
+            await WriteExchangeLogAsync(exchangeLog);
+        }
+    }
+
+    private async Task WriteExchangeLogAsync(SamanTokenExchangeLogModel exchangeLog)
+    {
+        try
+        {
+            using var exchangeLogWriter = exchangeLogWriterFactory();
+
+            await exchangeLogWriter.Value.WriteAsync(exchangeLog, CancellationToken.None);
+        }
+        catch (Exception ex)
+        {
+            loggerService.Error(ex, "{PspGateway} token exchange log could not be saved", Code);
         }
     }
 
@@ -110,7 +140,7 @@ internal class SamanGateway : IPspGateway
                 terminalNumber = _settings.TerminalId
             };
 
-            var httpClient = _httpClientFactory.CreateClient(nameof(PspCode.Saman));
+            var httpClient = httpClientFactory.CreateClient(nameof(PspCode.Saman));
 
             using var message = new HttpRequestMessage(HttpMethod.Post, "/verifyTxnRandomSessionKey/ipg/VerifyTransaction");
 
@@ -148,19 +178,19 @@ internal class SamanGateway : IPspGateway
         }
         catch (OperationCanceledException ex)
         {
-            _loggerService.Error(ex, "{PspGateway} {TransactionType} request timed out after {Timeout} seconds", Code, result.TransactionType, _settings.TimeoutInSeconds);
+            loggerService.Error(ex, "{PspGateway} {TransactionType} request timed out after {Timeout} seconds", Code, result.TransactionType, _settings.TimeoutInSeconds);
 
             return MakeFailedVerificationResponse(result.TransactionType);
         }
         catch (HttpRequestException ex)
         {
-            _loggerService.Error(ex, "{PspGateway} {TransactionType} request failed.", Code, result.TransactionType);
+            loggerService.Error(ex, "{PspGateway} {TransactionType} request failed.", Code, result.TransactionType);
 
             return MakeFailedVerificationResponse(result.TransactionType);
         }
         catch (Exception ex)
         {
-            _loggerService.Error(ex, "{PspGateway} {TransactionType} request failed unexpectedly", Code, result.TransactionType);
+            loggerService.Error(ex, "{PspGateway} {TransactionType} request failed unexpectedly", Code, result.TransactionType);
 
             return MakeFailedVerificationResponse(result.TransactionType);
         }
@@ -181,7 +211,7 @@ internal class SamanGateway : IPspGateway
                 terminalNumber = _settings.TerminalId
             };
 
-            var httpClient = _httpClientFactory.CreateClient(nameof(PspCode.Saman));
+            var httpClient = httpClientFactory.CreateClient(nameof(PspCode.Saman));
 
             using var message = new HttpRequestMessage(HttpMethod.Post, "/verifyTxnRandomSessionKey/ipg/ReverseTransaction");
 
@@ -208,19 +238,19 @@ internal class SamanGateway : IPspGateway
         }
         catch (OperationCanceledException ex)
         {
-            _loggerService.Error(ex, "{TransactionType} request timed out after {Timeout} seconds", result.TransactionType, _settings.TimeoutInSeconds);
+            loggerService.Error(ex, "{TransactionType} request timed out after {Timeout} seconds", result.TransactionType, _settings.TimeoutInSeconds);
 
             return MakeFailedVerificationResponse(result.TransactionType);
         }
         catch (HttpRequestException ex)
         {
-            _loggerService.Error(ex, "{TransactionType} request failed.", result.TransactionType);
+            loggerService.Error(ex, "{TransactionType} request failed.", result.TransactionType);
 
             return MakeFailedVerificationResponse(result.TransactionType);
         }
         catch (Exception ex)
         {
-            _loggerService.Error(ex, "{TransactionType} request failed unexpectedly", result.TransactionType);
+            loggerService.Error(ex, "{TransactionType} request failed unexpectedly", result.TransactionType);
 
             return MakeFailedVerificationResponse(result.TransactionType);
         }

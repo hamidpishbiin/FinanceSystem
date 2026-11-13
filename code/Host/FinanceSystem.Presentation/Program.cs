@@ -7,6 +7,7 @@ using Microsoft.Extensions.Options;
 using FinanceSystem.Bootstrap;
 using FinanceSystem.Persistance.Mappings;
 using FinanceSystem.Psp;
+using FinanceSystem.Saman;
 using FinanceSystem.Presentation;
 using FinanceSystem.Security;
 using Serilog;
@@ -74,7 +75,11 @@ try
         throw new InvalidOperationException($"{ConnectionStrings.SectionName}:ReadOnlyConnection is required.");
 
     builder.Host.ConfigureContainer<ContainerBuilder>(builder =>
-        builder.AddModule(connectionStrings.DefaultConnection, connectionStrings.ReadOnlyConnection, typeof(ProductMapping).Assembly));
+        builder.AddModule(
+            connectionStrings.DefaultConnection,
+            connectionStrings.ReadOnlyConnection,
+            typeof(ProductMapping).Assembly,
+            SamanAssemblyReference.Assembly));
 
     builder.Host.UseSerilog();
 

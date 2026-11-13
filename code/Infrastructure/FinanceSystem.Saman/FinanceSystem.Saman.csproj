@@ -10,6 +10,7 @@
       <ProjectReference Include="..\..\application\FinanceSystem.Application\FinanceSystem.Application.csproj" />
       <ProjectReference Include="..\..\domain\FinanceSystem.Domain\FinanceSystem.Domain.csproj" />
       <ProjectReference Include="..\..\shared\Shared.Autofac\Shared.Autofac.csproj" />
+      <ProjectReference Include="..\..\shared\Shared.EF\Shared.EF.csproj" />
     </ItemGroup>
 
     <ItemGroup>

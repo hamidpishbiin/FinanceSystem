@@ -5,17 +5,21 @@ namespace Shared.EF
 {
     internal class EFContext : DbContext
     {
-        private readonly Assembly _mappingAssembly;
+        private readonly Assembly[] _mappingAssemblies;
 
-        public EFContext(DbContextOptions options, Assembly mappingAssembly) : base(options)
+        public EFContext(DbContextOptions options, Assembly[] mappingAssemblies) : base(options)
         {
-            _mappingAssembly = mappingAssembly;
+            _mappingAssemblies = mappingAssemblies;
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-            modelBuilder.ApplyConfigurationsFromAssembly(_mappingAssembly);
+
+            foreach (var mappingAssembly in _mappingAssemblies)
+            {
+                modelBuilder.ApplyConfigurationsFromAssembly(mappingAssembly);
+            }
         }
     }
 }

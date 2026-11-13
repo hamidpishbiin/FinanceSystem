@@ -72,6 +72,10 @@ namespace FinanceSystem.Bootstrap
                 .InstancePerLifetimeScope();
 
             builder
+                .RegisterType<SamanTokenExchangeLogWriter>()
+                .InstancePerLifetimeScope();
+
+            builder
                 .RegisterAssemblyTypes(BehPardakhtAssemblyReference.Assembly)
                 .AssignableTo<IPspGateway>()
                 .As<IPspGateway>()
