@@ -7,7 +7,6 @@ using FinanceSystem.Domain.Payments;
 using FinanceSystem.Domain.Payments.Enums;
 using FinanceSystem.Domain.Payments.Exceptions;
 using FinanceSystem.Domain.PaymentServiceProviders.Enums;
-using FinanceSystem.Domain.PspExchangeLogs;
 using FinanceSystem.Domain.Tests.Unit.PaymentUnitTests;
 using FluentAssertions;
 using Microsoft.Extensions.Options;
@@ -50,8 +49,7 @@ public class PaymentCallbackCommandHandlerTests
                 Saman = new PspSettings { PaymentResultPageUrl = ResultPageUrl },
                 BehPardakht = new PspSettings { PaymentResultPageUrl = ResultPageUrl }
             }),
-            new PaymentEligibilityService(_paymentRepository),
-            Substitute.For<IPspExchangeLogRepository>());
+            new PaymentEligibilityService(_paymentRepository));
     }
 
     [Fact]

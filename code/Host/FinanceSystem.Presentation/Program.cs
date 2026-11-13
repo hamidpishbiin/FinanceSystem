@@ -27,7 +27,6 @@ try
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddAuthorization();
     builder.Services.AddHttpClient();
-    builder.Services.AddPspHttpClients();
     builder.Services.AddSerilog();
 
     if (builder.Environment.IsProduction())

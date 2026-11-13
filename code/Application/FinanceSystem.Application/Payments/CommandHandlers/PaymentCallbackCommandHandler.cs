@@ -4,7 +4,6 @@ using FinanceSystem.Application.Contracts.Payments.Events;
 using FinanceSystem.Application.Gateways;
 using FinanceSystem.Domain.Payments;
 using FinanceSystem.Domain.Payments.Enums;
-using FinanceSystem.Domain.PspExchangeLogs;
 using Microsoft.Extensions.Options;
 
 namespace FinanceSystem.Application.Payments.CommandHandlers;
@@ -16,8 +15,7 @@ public class PaymentCallbackCommandHandler(
     IEventPublisher publisher,
     IEventListener listener,
     IOptions<PspOptions> pspOptions,
-    PaymentEligibilityService paymentEligibilityService,
-    IPspExchangeLogRepository pspExchangeLogRepository)
+    PaymentEligibilityService paymentEligibilityService)
     : PaymentCommandHandler<ProcessPaymentCallbackCommand>(repository, publisher, listener)
 {
     public override async Task Handle(ProcessPaymentCallbackCommand command, CancellationToken cancellationToken = default)
@@ -31,10 +29,6 @@ public class PaymentCallbackCommandHandler(
             resultPageUrl = pspOptions.Value.For(pspGateway.Code).PaymentResultPageUrl;
 
             var callback = pspGateway.ParseCallback(command.Fields);
-
-            var callbackLog = PspExchangeLog.CreateCallbackLog(callback.ReservationNumber, command.Fields.ToString());
-
-            pspExchangeLogRepository.Add(callbackLog);
 
             var payment = await paymentEligibilityService.GetPurchasePaymentAsync(callback.ReservationNumber, cancellationToken);
 

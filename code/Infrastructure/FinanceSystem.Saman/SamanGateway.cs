@@ -5,7 +5,6 @@ using FinanceSystem.Domain.PaymentServiceProviders.Enums;
 using FinanceSystem.Application.Contracts.Payments;
 using FinanceSystem.Domain.Payments;
 using FinanceSystem.Domain.Payments.Exceptions;
-using FinanceSystem.Domain.PspExchangeLogs.Enums;
 using Microsoft.Extensions.Options;
 using Shared.Core;
 
@@ -47,10 +46,9 @@ internal class SamanGateway : IPspGateway
 
             var httpClient = _httpClientFactory.CreateClient(nameof(PspCode.Saman));
 
-            using var message = new HttpRequestMessage(HttpMethod.Post, "/OnlinePG/OnlinePG")
-            {
-                Content = JsonContent.Create(payload)
-            }.WithExchangeContext(PspExchangeStep.Token, request.ReservationNumber);
+            using var message = new HttpRequestMessage(HttpMethod.Post, "/OnlinePG/OnlinePG");
+
+            message.Content = JsonContent.Create(payload);
 
             var serializedResponse = await httpClient.SendAsync(message, cancellationToken);
 
@@ -114,10 +112,9 @@ internal class SamanGateway : IPspGateway
 
             var httpClient = _httpClientFactory.CreateClient(nameof(PspCode.Saman));
 
-            using var message = new HttpRequestMessage(HttpMethod.Post, "/verifyTxnRandomSessionKey/ipg/VerifyTransaction")
-            {
-                Content = JsonContent.Create(payload)
-            }.WithExchangeContext(PspExchangeStep.Verification, request.ReservationNumber);
+            using var message = new HttpRequestMessage(HttpMethod.Post, "/verifyTxnRandomSessionKey/ipg/VerifyTransaction");
+
+            message.Content = JsonContent.Create(payload);
 
             var response = await httpClient.SendAsync(message, cancellationToken);
 
@@ -186,10 +183,9 @@ internal class SamanGateway : IPspGateway
 
             var httpClient = _httpClientFactory.CreateClient(nameof(PspCode.Saman));
 
-            using var message = new HttpRequestMessage(HttpMethod.Post, "/verifyTxnRandomSessionKey/ipg/ReverseTransaction")
-            {
-                Content = JsonContent.Create(payload)
-            }.WithExchangeContext(PspExchangeStep.Reverse, request.ReservationNumber);
+            using var message = new HttpRequestMessage(HttpMethod.Post, "/verifyTxnRandomSessionKey/ipg/ReverseTransaction");
+
+            message.Content = JsonContent.Create(payload);
 
             var response = await httpClient.SendAsync(message, cancellationToken);
 

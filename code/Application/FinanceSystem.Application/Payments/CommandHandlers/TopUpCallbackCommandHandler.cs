@@ -8,7 +8,6 @@ using FinanceSystem.Domain.FinanceAccounts.DomainServices;
 using FinanceSystem.Domain.Payments;
 using FinanceSystem.Domain.Payments.Enums;
 using FinanceSystem.Domain.Payments.Exceptions;
-using FinanceSystem.Domain.PspExchangeLogs;
 using Microsoft.Extensions.Options;
 
 namespace FinanceSystem.Application.Payments.CommandHandlers;
@@ -35,9 +34,7 @@ public class TopUpCallbackCommandHandler(
 
         Guard<PaymentNotFoundException>.AgainstNull(payment);
 
-        PspExchangeLog.CreateCallbackLog(payment!.Id, command.Fields.ToString());
-
-        if (payment.State == PaymentState.Succeeded)
+        if (payment!.State == PaymentState.Succeeded)
         {
             await PublishOutcome(TopUpOutcome.Success, resultPageUrl);
             return;
@@ -65,7 +62,7 @@ public class TopUpCallbackCommandHandler(
             return;
         }
 
-        if (callback.Amount != payment.Amount)
+        if (!Equals(callback.Amount, payment.Amount))
         {
             await FailAsync(payment, resultPageUrl, PaymentFailureReason.CallbackAmountMismatch);
             return;
