@@ -35,7 +35,7 @@ public class PaymentCallbackCommandHandlerTests
     public PaymentCallbackCommandHandlerTests()
     {
         _pspGateway.Code.Returns(PspCode.Saman);
-        _pspGateway.ParseCallback(Arg.Any<IReadOnlyDictionary<string, string>>()).Returns(_ => _callback);
+        _pspGateway.ParseCallbackAsync(Arg.Any<IReadOnlyDictionary<string, string>>(), Arg.Any<CancellationToken>()).Returns(_ => _callback);
         _pspGatewayFactory.Get(PspCode.Saman).Returns(_pspGateway);
 
         _handler = new PaymentCallbackCommandHandler(
@@ -83,7 +83,7 @@ public class PaymentCallbackCommandHandlerTests
         var payment = await ArrangePaymentWithToken();
         var otherGateway = Substitute.For<IPspGateway>();
         otherGateway.Code.Returns(PspCode.BehPardakht);
-        otherGateway.ParseCallback(Arg.Any<IReadOnlyDictionary<string, string>>()).Returns(_callback);
+        otherGateway.ParseCallbackAsync(Arg.Any<IReadOnlyDictionary<string, string>>(), Arg.Any<CancellationToken>()).Returns(_callback);
         _pspGatewayFactory.Get(PspCode.BehPardakht).Returns(otherGateway);
         var command = MakeCommand();
         command.PspCode = PspCode.BehPardakht;

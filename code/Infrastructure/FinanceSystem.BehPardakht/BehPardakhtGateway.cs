@@ -31,7 +31,7 @@ internal class BehPardakhtGateway(
         throw new NotImplementedException();
     }
 
-    public PspCallback ParseCallback(IReadOnlyDictionary<string, string> fields)
+    public Task<PspCallback> ParseCallbackAsync(IReadOnlyDictionary<string, string> fields, CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
     }

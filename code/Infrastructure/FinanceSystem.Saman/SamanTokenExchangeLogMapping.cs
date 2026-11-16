@@ -9,12 +9,7 @@ internal class SamanTokenExchangeLogMapping : IEntityTypeConfiguration<SamanToke
     {
         builder.ToTable("SamanTokenExchangeLogs");
 
-        builder.HasKey(l => l.Id);
-
-        builder
-            .Property(l => l.Id)
-            .HasColumnName("Id")
-            .ValueGeneratedOnAdd();
+        SamanLogMapping.ConfigureExchange(builder);
 
         builder
             .Property(l => l.RequestAmount)

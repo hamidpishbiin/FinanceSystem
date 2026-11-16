@@ -2,7 +2,7 @@ using FinanceSystem.Application.Gateways;
 
 namespace FinanceSystem.Saman;
 
-internal class SamanPaymentVerificationResponse
+public class SamanPaymentVerificationResponse
 {
     public TransactionDetail? TransactionDetail { get; set; }
     public int? ResultCode { get; set; }
@@ -11,7 +11,7 @@ internal class SamanPaymentVerificationResponse
     public PspTransactionType PspTransactionType { get; set; } = PspTransactionType.Verification;
 }
 
-internal class TransactionDetail
+public class TransactionDetail
 {
     public string? RRN { get; set; }
     public string? RefNum { get; set; }

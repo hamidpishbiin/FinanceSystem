@@ -72,7 +72,7 @@ namespace FinanceSystem.Bootstrap
                 .InstancePerLifetimeScope();
 
             builder
-                .RegisterType<SamanTokenExchangeLogWriter>()
+                .RegisterType<SamanExchangeLogWriter>()
                 .InstancePerLifetimeScope();
 
             builder

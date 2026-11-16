@@ -28,7 +28,7 @@ public class PaymentCallbackCommandHandler(
 
             resultPageUrl = pspOptions.Value.For(pspGateway.Code).PaymentResultPageUrl;
 
-            var callback = pspGateway.ParseCallback(command.Fields);
+            var callback = await pspGateway.ParseCallbackAsync(command.Fields, cancellationToken);
 
             var payment = await paymentEligibilityService.GetPurchasePaymentAsync(callback.ReservationNumber, cancellationToken);
 

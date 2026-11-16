@@ -1,4 +1,5 @@
 using System.Net.Http.Json;
+using System.Text.Json;
 using Autofac.Features.OwnedInstances;
 using FinanceSystem.Application.Contracts.Gateways;
 using FinanceSystem.Application.Gateways;
@@ -15,7 +16,8 @@ internal class SamanGateway(
     IOptions<PspOptions> pspOptions,
     IHttpClientFactory httpClientFactory,
     ILoggerService loggerService,
-    Func<Owned<SamanTokenExchangeLogWriter>> exchangeLogWriterFactory) : IPspGateway
+    ISystemClock systemClock,
+    Func<Owned<SamanExchangeLogWriter>> exchangeLogWriterFactory) : IPspGateway
 {
     private const int _samanCallbackOkStatus = 2;
     private const int _tokenResponseSuccessStatus = 1;
@@ -26,7 +28,10 @@ internal class SamanGateway(
 
     public async Task<PspTokenResponse> RequestPaymentTokenAsync(PspTokenRequest request, CancellationToken cancellationToken)
     {
-        var exchangeLog = new SamanTokenExchangeLogModel();
+        var exchangeLog = new SamanTokenExchangeLogModel
+        {
+            CreatedAt = systemClock.GetNow()
+        };
 
         try
         {
@@ -50,14 +55,18 @@ internal class SamanGateway(
 
             var serializedResponse = await httpClient.SendAsync(message, cancellationToken);
 
+            exchangeLog.HttpStatusCode = (int)serializedResponse.StatusCode;
+
+            var rawResponseBody = await serializedResponse.Content.ReadAsStringAsync(cancellationToken);
+
             if (!serializedResponse.IsSuccessStatusCode)
             {
-                exchangeLog.RawResponseBody = await serializedResponse.Content.ReadAsStringAsync(cancellationToken);
+                exchangeLog.RawResponseBody = rawResponseBody;
                 exchangeLog.Response = null;
                 throw new HttpRequestException("Saman token request did not return with success status code.");
             }
 
-            exchangeLog.RawResponseBody = await serializedResponse.Content.ReadAsStringAsync(cancellationToken);
+            exchangeLog.RawResponseBody = rawResponseBody;
 
             var response = await serializedResponse.Content.ReadFromJsonAsync<SamanTokenResponse>(cancellationToken);
 
@@ -80,24 +89,32 @@ internal class SamanGateway(
                     : null
             };
         }
-        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        catch (OperationCanceledException ex) when (cancellationToken.IsCancellationRequested)
         {
+            exchangeLog.RecordError(ex);
+
             throw;
         }
         catch (OperationCanceledException ex)
         {
+            exchangeLog.RecordError(ex);
+
             loggerService.Error(ex, $"{Code} token request timed out after {_settings.TimeoutInSeconds} seconds");
 
             return MakeFailedTokenResponse();
         }
         catch (HttpRequestException ex)
         {
+            exchangeLog.RecordError(ex);
+
             loggerService.Error(ex, $"{Code} token request failed.");
 
             return MakeFailedTokenResponse();
         }
         catch (Exception ex)
         {
+            exchangeLog.RecordError(ex);
+
             loggerService.Error(ex, $"{Code} token request failed unexpectedly");
 
             return MakeFailedTokenResponse();
@@ -105,12 +122,11 @@ internal class SamanGateway(
         finally
         {
             loggerService.Information($"TokenExchangeLog {exchangeLog}");
-            // Find out what's wrong with serilog templates
             await WriteExchangeLogAsync(exchangeLog);
         }
     }
 
-    private async Task WriteExchangeLogAsync(SamanTokenExchangeLogModel exchangeLog)
+    private async Task WriteExchangeLogAsync<TLog>(TLog exchangeLog) where TLog : class
     {
         try
         {
@@ -120,7 +136,7 @@ internal class SamanGateway(
         }
         catch (Exception ex)
         {
-            loggerService.Error(ex, "{PspGateway} token exchange log could not be saved", Code);
+            loggerService.Error(ex, "{PspGateway} {ExchangeLog} could not be saved", Code, typeof(TLog).Name);
         }
     }
 
@@ -129,6 +145,11 @@ internal class SamanGateway(
         var result = new PaymentVerificationResponse()
         {
             TransactionType = PspTransactionType.Verification
+        };
+
+        var exchangeLog = new SamanVerifyExchangeLogModel
+        {
+            CreatedAt = systemClock.GetNow()
         };
 
         try
@@ -140,6 +161,8 @@ internal class SamanGateway(
                 terminalNumber = _settings.TerminalId
             };
 
+            exchangeLog.RequestReferenceNumber = payload.refNum;
+
             var httpClient = httpClientFactory.CreateClient(nameof(PspCode.Saman));
 
             using var message = new HttpRequestMessage(HttpMethod.Post, "/verifyTxnRandomSessionKey/ipg/VerifyTransaction");
@@ -148,9 +171,18 @@ internal class SamanGateway(
 
             var response = await httpClient.SendAsync(message, cancellationToken);
 
-            response.EnsureSuccessStatusCode();
+            exchangeLog.HttpStatusCode = (int)response.StatusCode;
+
+            exchangeLog.RawResponseBody = await response.Content.ReadAsStringAsync(cancellationToken);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new HttpRequestException("Saman verify request did not return with success status code.");
+            }
 
             var responseBody = await response.Content.ReadFromJsonAsync<SamanPaymentVerificationResponse>(cancellationToken);
+
+            exchangeLog.Response = responseBody;
 
             if (responseBody?.Success is null || responseBody.TransactionDetail is null)
             {
@@ -172,27 +204,39 @@ internal class SamanGateway(
 
             return result;
         }
-        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        catch (OperationCanceledException ex) when (cancellationToken.IsCancellationRequested)
         {
+            exchangeLog.RecordError(ex);
+
             throw;
         }
         catch (OperationCanceledException ex)
         {
+            exchangeLog.RecordError(ex);
+
             loggerService.Error(ex, "{PspGateway} {TransactionType} request timed out after {Timeout} seconds", Code, result.TransactionType, _settings.TimeoutInSeconds);
 
             return MakeFailedVerificationResponse(result.TransactionType);
         }
         catch (HttpRequestException ex)
         {
+            exchangeLog.RecordError(ex);
+
             loggerService.Error(ex, "{PspGateway} {TransactionType} request failed.", Code, result.TransactionType);
 
             return MakeFailedVerificationResponse(result.TransactionType);
         }
         catch (Exception ex)
         {
+            exchangeLog.RecordError(ex);
+
             loggerService.Error(ex, "{PspGateway} {TransactionType} request failed unexpectedly", Code, result.TransactionType);
 
             return MakeFailedVerificationResponse(result.TransactionType);
+        }
+        finally
+        {
+            await WriteExchangeLogAsync(exchangeLog);
         }
     }
 
@@ -203,6 +247,11 @@ internal class SamanGateway(
             TransactionType = PspTransactionType.Reverse
         };
 
+        var exchangeLog = new SamanReverseExchangeLogModel
+        {
+            CreatedAt = systemClock.GetNow()
+        };
+
         try
         {
             var payload = new
@@ -210,6 +259,8 @@ internal class SamanGateway(
                 refNum = request.ReferenceNumber,
                 terminalNumber = _settings.TerminalId
             };
+
+            exchangeLog.RequestReferenceNumber = payload.refNum;
 
             var httpClient = httpClientFactory.CreateClient(nameof(PspCode.Saman));
 
@@ -219,9 +270,18 @@ internal class SamanGateway(
 
             var response = await httpClient.SendAsync(message, cancellationToken);
 
-            response.EnsureSuccessStatusCode();
+            exchangeLog.HttpStatusCode = (int)response.StatusCode;
+
+            exchangeLog.RawResponseBody = await response.Content.ReadAsStringAsync(cancellationToken);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new HttpRequestException("Saman reverse request did not return with success status code.");
+            }
 
             var responseBody = await response.Content.ReadFromJsonAsync<SamanPaymentVerificationResponse>(cancellationToken);
+
+            exchangeLog.Response = responseBody;
 
             if (responseBody?.Success is not true)
             {
@@ -232,47 +292,89 @@ internal class SamanGateway(
 
             return result;
         }
-        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        catch (OperationCanceledException ex) when (cancellationToken.IsCancellationRequested)
         {
+            exchangeLog.RecordError(ex);
+
             throw;
         }
         catch (OperationCanceledException ex)
         {
+            exchangeLog.RecordError(ex);
+
             loggerService.Error(ex, "{TransactionType} request timed out after {Timeout} seconds", result.TransactionType, _settings.TimeoutInSeconds);
 
             return MakeFailedVerificationResponse(result.TransactionType);
         }
         catch (HttpRequestException ex)
         {
+            exchangeLog.RecordError(ex);
+
             loggerService.Error(ex, "{TransactionType} request failed.", result.TransactionType);
 
             return MakeFailedVerificationResponse(result.TransactionType);
         }
         catch (Exception ex)
         {
+            exchangeLog.RecordError(ex);
+
             loggerService.Error(ex, "{TransactionType} request failed unexpectedly", result.TransactionType);
 
             return MakeFailedVerificationResponse(result.TransactionType);
         }
+        finally
+        {
+            await WriteExchangeLogAsync(exchangeLog);
+        }
     }
 
-    public PspCallback ParseCallback(IReadOnlyDictionary<string, string> fields)
+    public async Task<PspCallback> ParseCallbackAsync(IReadOnlyDictionary<string, string> fields, CancellationToken cancellationToken)
     {
-        var status = int.Parse(fields["Status"]);
-
-        var isSuccess = status == _samanCallbackOkStatus;
-
-        return new PspCallback
+        var callbackLog = new SamanCallbackLogModel
         {
-            ReservationNumber = long.Parse(fields["ResNum"]),
-            IsSuccess = isSuccess,
-            Token = fields["Token"],
-            ReferenceNumber = fields["RefNum"],
-            Amount = new Money(decimal.Parse(fields["Amount"])),
-            MaskedPan = fields["SecurePan"],
-            RRN = fields["RRN"],
-            TraceNumber = fields["TraceNo"]
+            CreatedAt = systemClock.GetNow(),
+            RawFields = JsonSerializer.Serialize(fields)
         };
+
+        try
+        {
+            var status = int.Parse(fields["Status"]);
+
+            var isSuccess = status == _samanCallbackOkStatus;
+
+            var callback = new PspCallback
+            {
+                ReservationNumber = long.Parse(fields["ResNum"]),
+                IsSuccess = isSuccess,
+                Token = fields["Token"],
+                ReferenceNumber = fields["RefNum"],
+                Amount = new Money(decimal.Parse(fields["Amount"])),
+                MaskedPan = fields["SecurePan"],
+                RRN = fields["RRN"],
+                TraceNumber = fields["TraceNo"]
+            };
+
+            callbackLog.Status = status;
+            callbackLog.ResNum = callback.ReservationNumber;
+            callbackLog.Token = callback.Token;
+            callbackLog.RefNum = callback.ReferenceNumber;
+            callbackLog.Amount = callback.Amount.Value;
+            callbackLog.SecurePan = callback.MaskedPan;
+            callbackLog.RRN = callback.RRN;
+            callbackLog.TraceNo = callback.TraceNumber;
+
+            return callback;
+        }
+        catch (Exception ex)
+        {
+            callbackLog.RecordError(ex);
+
+            throw;
+        }
+        finally
+        {
+            await WriteExchangeLogAsync(callbackLog);
+        }
     }
 
     private PspTokenResponse MakeFailedTokenResponse()

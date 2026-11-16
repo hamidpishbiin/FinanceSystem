@@ -1,8 +1,7 @@
 namespace FinanceSystem.Saman;
 
-public class SamanTokenExchangeLogModel
+public class SamanTokenExchangeLogModel : SamanExchangeLogModel
 {
-    public long Id { get; private set; }
     public decimal RequestAmount { get; set; }
     public long RequestReservationNumber { get; set; }
     public SamanTokenResponse? Response { get; set; }

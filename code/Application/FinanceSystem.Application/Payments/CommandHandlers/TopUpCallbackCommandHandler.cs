@@ -28,7 +28,7 @@ public class TopUpCallbackCommandHandler(
 
         var resultPageUrl = pspOptions.Value.For(pspGateway.Code).TopUpResultPageUrl;
 
-        var callback = pspGateway.ParseCallback(command.Fields);
+        var callback = await pspGateway.ParseCallbackAsync(command.Fields, cancellationToken);
 
         var payment = await Repository.GetByIdAsync(callback.ReservationNumber, cancellationToken);
 
