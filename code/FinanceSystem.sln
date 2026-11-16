@@ -73,6 +73,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FinanceSystem.Saman", "Infr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FinanceSystem.BehPardakht", "Infrastructure\FinanceSystem.BehPardakht\FinanceSystem.BehPardakht.csproj", "{71B9C637-50B3-4731-891A-DD1EEB74A7F1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FinanceSystem.BackgroundService", "Host\FinanceSystem.BackgroundService\FinanceSystem.BackgroundService.csproj", "{03C3B799-78E6-44C3-B6D9-99B93CE54B0E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -187,6 +189,10 @@ Global
 		{71B9C637-50B3-4731-891A-DD1EEB74A7F1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{71B9C637-50B3-4731-891A-DD1EEB74A7F1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{71B9C637-50B3-4731-891A-DD1EEB74A7F1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{03C3B799-78E6-44C3-B6D9-99B93CE54B0E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{03C3B799-78E6-44C3-B6D9-99B93CE54B0E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{03C3B799-78E6-44C3-B6D9-99B93CE54B0E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{03C3B799-78E6-44C3-B6D9-99B93CE54B0E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -224,6 +230,7 @@ Global
 		{6D64294B-7D42-44A1-BD4B-4BF7A20DA566} = {553C157A-987F-4CD8-97C8-CB2D5DC0660E}
 		{1D41FD6F-05CE-4378-A947-67344669FE4D} = {553C157A-987F-4CD8-97C8-CB2D5DC0660E}
 		{71B9C637-50B3-4731-891A-DD1EEB74A7F1} = {553C157A-987F-4CD8-97C8-CB2D5DC0660E}
+		{03C3B799-78E6-44C3-B6D9-99B93CE54B0E} = {7AF64805-1DB4-49F1-A7DF-1CA08987BFD2}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {CA5DB187-D26B-4EF2-8F12-D7A8D09EC2E7}
