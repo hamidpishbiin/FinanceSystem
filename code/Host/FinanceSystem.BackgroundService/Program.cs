@@ -1,6 +1,8 @@
 using Autofac;
+using Autofac.Extensions.DependencyInjection;
 using FinanceSystem.BackgroundService;
 using FinanceSystem.Bootstrap;
+using FinanceSystem.Persistance;
 using Serilog;
 using Shared.Serilog;
 
@@ -8,41 +10,52 @@ const string appName = "FinanceSystem.BackgroundService";
 
 Log.Logger = SerilogFactory.CreateLogger(appName);
 
-var builder = WebApplication.CreateBuilder(args);
-
-builder.Services.AddHostedService<HeartbeatWorker>();
-
-var connectionStrings = builder.Configuration.GetSection(ConnectionStrings.SectionName).Get<ConnectionStrings>();
-
-if (connectionStrings == null)
+try
 {
-    throw new InvalidOperationException($"Configuration section '{ConnectionStrings.SectionName}' is missing.");
-}
+    var builder = WebApplication.CreateBuilder(args);
 
-if (string.IsNullOrWhiteSpace(connectionStrings.DefaultConnection))
-{
-    throw new InvalidOperationException($"{ConnectionStrings.SectionName}:DefaultConnection is required.");
-}
+    builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory());
 
-if (string.IsNullOrWhiteSpace(connectionStrings.ReadOnlyConnection))
-{
-    throw new InvalidOperationException($"{ConnectionStrings.SectionName}:ReadOnlyConnection is required.");
-}
+    builder.Services.AddHostedService<HeartbeatWorker>();
 
-builder.Services
-    .AddOptions<ConnectionStrings>()
-    .Bind(builder.Configuration.GetSection(ConnectionStrings.SectionName));
+    var connectionStrings = builder.Configuration.GetSection(ConnectionStrings.SectionName).Get<ConnectionStrings>();
 
-builder.Host
-    .ConfigureContainer<ContainerBuilder>(builder =>
+    if (connectionStrings == null)
     {
-        builder.AddBackgroundServiceModule(
-            connectionStrings.DefaultConnection,
-            connectionStrings.ReadOnlyConnection,
-            BackgroundServiceAssemblyReference.Assembly);
-    });
+        throw new InvalidOperationException($"Configuration section '{ConnectionStrings.SectionName}' is missing.");
+    }
 
-var app = builder.Build();
+    if (string.IsNullOrWhiteSpace(connectionStrings.DefaultConnection))
+    {
+        throw new InvalidOperationException($"{ConnectionStrings.SectionName}:DefaultConnection is required.");
+    }
 
-app.Run();
+    if (string.IsNullOrWhiteSpace(connectionStrings.ReadOnlyConnection))
+    {
+        throw new InvalidOperationException($"{ConnectionStrings.SectionName}:ReadOnlyConnection is required.");
+    }
+
+    builder.Host
+        .ConfigureContainer<ContainerBuilder>(builder =>
+        {
+            builder.AddBackgroundServiceModule(
+                connectionStrings.DefaultConnection,
+                connectionStrings.ReadOnlyConnection,
+                PersistenceAssemblyReference.Assembly);
+        });
+
+    var app = builder.Build();
+
+    app.Run();
+}
+catch (Exception ex)
+{
+    Log.Fatal(ex, "Host of {App} terminated unexpectedly", appName);
+    throw;
+}
+finally
+{
+    Log.Information("Shutting down web host for {App}", appName);
+    Log.CloseAndFlush();
+}
 
