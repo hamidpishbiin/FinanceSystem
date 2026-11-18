@@ -1,11 +1,10 @@
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using FinanceSystem.Application.Contracts.Gateways;
-using FinanceSystem.Application.Gateways;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Options;
 using FinanceSystem.Bootstrap;
-using FinanceSystem.Persistance.Mappings;
+using FinanceSystem.Persistence;
 using FinanceSystem.Psp;
 using FinanceSystem.Saman;
 using FinanceSystem.Presentation;
@@ -79,7 +78,7 @@ try
         builder.AddModule(
             connectionStrings.DefaultConnection,
             connectionStrings.ReadOnlyConnection,
-            typeof(ProductMapping).Assembly,
+            PersistenceAssemblyReference.Assembly,
             SamanAssemblyReference.Assembly));
 
     builder.Host.UseSerilog();

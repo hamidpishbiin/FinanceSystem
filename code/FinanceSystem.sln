@@ -23,7 +23,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Interfaces", "Interfaces", 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "infrastructures", "infrastructures", "{553C157A-987F-4CD8-97C8-CB2D5DC0660E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FinanceSystem.Persistance", "Infrastructure\FinanceSystem.Persistance\FinanceSystem.Persistance.csproj", "{E0E701C9-86A4-4E6D-9666-5B55B2F17F21}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FinanceSystem.Persistence", "Infrastructure\FinanceSystem.Persistence\FinanceSystem.Persistence.csproj", "{E0E701C9-86A4-4E6D-9666-5B55B2F17F21}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Hosting", "Hosting", "{7AF64805-1DB4-49F1-A7DF-1CA08987BFD2}"
 EndProject

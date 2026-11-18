@@ -46,7 +46,7 @@ namespace FinanceSystem.Architecture.Tests.Unit
         {
             var result = GetWriteModelAssembly()
                 .ShouldNot()
-                .HaveDependencyOn("FinanceSystem.Persistance")
+                .HaveDependencyOn("FinanceSystem.Persistence")
                 .GetResult();
 
             result.IsSuccessful.Should().Be(true, $"{because} Persistance.");

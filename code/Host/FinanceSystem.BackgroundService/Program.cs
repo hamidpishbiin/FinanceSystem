@@ -2,7 +2,7 @@ using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using FinanceSystem.BackgroundService;
 using FinanceSystem.Bootstrap;
-using FinanceSystem.Persistance;
+using FinanceSystem.Persistence;
 using Serilog;
 using Shared.Serilog;
 
